@@ -9,7 +9,7 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Quick-Start Guide - Anxgang</title>
+<!-- begin _includes/seo.html --><title>Quick-Start Guide - ANxGANG</title>
 <meta name="description" content="How to quickly install and setup Minimal Mistakes for use with GitHub Pages.">
 
 
@@ -21,9 +21,9 @@
 
 <meta property="og:type" content="article">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:site_name" content="Anxgang">
+<meta property="og:site_name" content="ANxGANG">
 <meta property="og:title" content="Quick-Start Guide">
-<meta property="og:url" content="https://blog.anxgang.com/docs2/quick-start-guide/">
+<meta property="og:url" content="https://blog.anxgang.com/docs/rails-compact-guide/1">
 
 
   <meta property="og:description" content="How to quickly install and setup Minimal Mistakes for use with GitHub Pages.">
@@ -37,7 +37,7 @@
   <meta name="twitter:site" content="@anxgang1">
   <meta name="twitter:title" content="Quick-Start Guide">
   <meta name="twitter:description" content="How to quickly install and setup Minimal Mistakes for use with GitHub Pages.">
-  <meta name="twitter:url" content="https://blog.anxgang.com/docs2/quick-start-guide/">
+  <meta name="twitter:url" content="https://blog.anxgang.com/docs/rails-compact-guide/1">
 
   
     <meta name="twitter:card" content="summary">
@@ -50,7 +50,7 @@
 
 
 
-  <meta property="article:published_time" content="2022-12-31T20:29:17+08:00">
+  <meta property="article:published_time" content="2023-01-04T06:28:01+08:00">
 
 
 
@@ -63,7 +63,7 @@
   
 
 
-<link rel="canonical" href="https://blog.anxgang.com/docs2/quick-start-guide/">
+<link rel="canonical" href="https://blog.anxgang.com/docs/rails-compact-guide/1">
 
 
 
@@ -89,7 +89,7 @@
 
 
 
-  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Anxgang Feed">
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
 
 
 <!-- https://t.co/dKP3o1e -->
@@ -104,6 +104,10 @@
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
 
+
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js"></script>
+  
 
 
     <!-- start custom head snippets -->
@@ -125,13 +129,13 @@
 
     
 
-<div class="masthead">
+<div class="masthead sticky">
   <div class="masthead__inner-wrap">
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
         <a class="site-title" href="/">
-          Anxgang
+          ANxGANG
           <span class="site-subtitle"></span>
         </a>
         <ul class="visible-links">
@@ -147,11 +151,7 @@
                 <ul class="dropdown-content">
                   
                   <li>
-                    <a href="/docs/quick-start-guide/"> Quick-Start Guide 1</a>
-                  </li>
-                  
-                  <li>
-                    <a href="/docs2/quick-start-guide/"> Quick-Start Guide 2</a>
+                    <a href="/docs/rails-compact-guide/1"> Rails Compact Guide</a>
                   </li>
                   
                 </ul>
@@ -185,13 +185,6 @@
               </li>
             
           
-            
-            
-              <li class="masthead__menu-item">
-                <a href="/about/">About</a>
-              </li>
-            
-          
         </ul>
         
         <button class="search__toggle" type="button">
@@ -222,7 +215,7 @@
 
 
 <div id="main" role="main">
-  
+    
   <div class="sidebar sticky">
   
   
@@ -284,36 +277,47 @@
 
 
 
-  <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Quick-Start Guide">
-    <meta itemprop="description" content="How to quickly install and setup Minimal Mistakes for use with GitHub Pages.">
-    <meta itemprop="datePublished" content="2022-12-31T20:29:17+08:00">
-    <meta itemprop="dateModified" content="2021-06-07T20:48:05+08:00">
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="Quick-Start Guide">
+        
+        
+        <meta itemprop="description"
+            content="How to quickly install and setup Minimal Mistakes for use with GitHub Pages.">
+        
+        <meta itemprop="datePublished" content="2023-01-04T06:28:01+08:00">
+        
+        <meta itemprop="dateModified" content="2021-06-07T20:48:05+08:00">
 
-    <div class="page__inner-wrap">
-      
-        <header>
-          <h1 id="page-title" class="page__title p-name" itemprop="headline">
-            <a href="https://blog.anxgang.com/docs2/quick-start-guide/" class="u-url" itemprop="url">Quick-Start Guide
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/docs/rails-compact-guide/1" class="u-url"
+                        itemprop="url">Quick-Start Guide
 </a>
-          </h1>
-          
+                </h1>
+                
 
 
-        </header>
-      
+            </header>
+            
 
-      <section class="page__content e-content" itemprop="text">
-        
-          <aside class="sidebar__right sticky">
-            <nav class="toc">
-              <header><h4 class="nav__title"><i class="fas fa-file-alt"></i> &nbsp;本頁目錄</h4></header>
-              <ul class="toc__menu"><li><a href="#installing-the-theme">Installing the theme</a><ul><li><a href="#gem-based-method">Gem-based method</a></li><li><a href="#remote-theme-method">Remote theme method</a></li><li><a href="#remove-the-unnecessary">Remove the Unnecessary</a></li></ul></li><li><a href="#setup-your-site">Setup Your Site</a><ul><li><a href="#starting-fresh">Starting Fresh</a></li><li><a href="#starting-from-jekyll-new">Starting from jekyll new</a></li><li><a href="#migrating-to-gem-version">Migrating to Gem Version</a><ul><li><a href="#update-gemfile">Update Gemfile</a></li></ul></li></ul></li></ul>
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-file-alt"></i>
+                                &nbsp;本頁目錄
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#installing-the-theme">Installing the theme</a><ul><li><a href="#gem-based-method">Gem-based method</a></li><li><a href="#remote-theme-method">Remote theme method</a></li><li><a href="#remove-the-unnecessary">Remove the Unnecessary</a></li></ul></li><li><a href="#setup-your-site">Setup Your Site</a><ul><li><a href="#starting-fresh">Starting Fresh</a></li><li><a href="#starting-from-jekyll-new">Starting from jekyll new</a></li><li><a href="#migrating-to-gem-version">Migrating to Gem Version</a><ul><li><a href="#update-gemfile">Update Gemfile</a></li></ul></li></ul></li></ul>
 
-            </nav>
-          </aside>
-        
-        <p>Minimal Mistakes has been developed as a <a href="http://jekyllrb.com/docs2/themes/">Gem-based theme</a> for easier use, and 100% compatible with GitHub Pages when used as a remote theme.</p>
+                    </nav>
+                </aside>
+                
+                <p>Minimal Mistakes has been developed as a <a href="http://jekyllrb.com/docs2/themes/">Gem-based theme</a> for easier use, and 100% compatible with GitHub Pages when used as a remote theme.</p>
 
 <p><strong>If you enjoy this theme, please consider <a href="https://github.com/sponsors/mmistakes">sponsoring me</a> to continue developing and maintaining it.</strong></p>
 
@@ -525,23 +529,23 @@ If you’re hosting on GitHub Pages, you can copy the <a href="https://github.co
   </ol>
 </div>
 
-        
-      </section>
+                
+            </section>
 
-      <footer class="page__meta">
-        
-        
+            <footer class="page__meta">
+                
+                
 
 
-        
+                
 
   <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間：</strong> <time class="dt-published" datetime="2021-06-07">June 7, 2021</time></p>
 
-      </footer>
+            </footer>
 
-      
+            
 
-      
+            
   <nav class="pagination">
     
       <a href="#" class="pagination--pager disabled">前一頁</a>
@@ -552,13 +556,13 @@ If you’re hosting on GitHub Pages, you can copy the <a href="https://github.co
     
   </nav>
 
-    </div>
+        </div>
+
+        
+    </article>
 
     
-  </article>
-
-  
-  
+    
 </div>
 
     </div>
@@ -597,10 +601,6 @@ If you’re hosting on GitHub Pages, you can copy the <a href="https://github.co
           <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
         
       
-        
-          <li><a href="https://instagram.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-instagram" aria-hidden="true"></i> Instagram</a></li>
-        
-      
     
 
     
@@ -609,7 +609,7 @@ If you’re hosting on GitHub Pages, you can copy the <a href="https://github.co
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2022 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2023 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
@@ -627,6 +627,10 @@ If you’re hosting on GitHub Pages, you can copy the <a href="https://github.co
 
 
 
+
+  
+    <script src="/assets/js/custom-mermaid.js"></script>
+  
 
 
 

@@ -1,4 +1,82 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2022-12-31T20:29:17+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">Anxgang</title><subtitle>A Simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Post: Gallery</title><link href="https://blog.anxgang.com/post%20formats/post-gallery/" rel="alternate" type="text/html" title="Post: Gallery" /><published>2010-09-09T00:00:00+08:00</published><updated>2010-09-09T00:00:00+08:00</updated><id>https://blog.anxgang.com/post%20formats/post-gallery</id><content type="html" xml:base="https://blog.anxgang.com/post%20formats/post-gallery/"><![CDATA[<p>These are gallery tests for image wrapped in <code class="language-plaintext highlighter-rouge">&lt;figure&gt;</code> elements.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-01-04T06:28:01+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">使用 private repository 建立 gh-pages</title><link href="https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/" rel="alternate" type="text/html" title="使用 private repository 建立 gh-pages" /><published>2023-01-04T00:00:00+08:00</published><updated>2023-01-04T00:00:00+08:00</updated><id>https://blog.anxgang.com/jekyll/private-repo-with-gh-pages</id><content type="html" xml:base="https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/"><![CDATA[<p>免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？</p>
+
+<p>本文使用 jekyll ，
+透過一個 private repository (原始碼)，
+搭配一個 public repository (產出的 html)，
+來達到目標。</p>
+
+<h2 id="目標">目標</h2>
+
+<pre><code class="language-mermaid">graph TD
+    A[source code] --&gt;|git push| B(private repo)
+    B --&gt;|github action auto deploy| D[public repo]
+</code></pre>
+
+<h2 id="步驟">步驟</h2>
+
+<ol>
+  <li>先到 github 上建立好兩個 repo 。例如：myblog_private, myblog_public,</li>
+  <li>加入 github action，並 push 到 myblog_private
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1"># .github/workflows/jekyll.yml</span>
+ <span class="na">name</span><span class="pi">:</span> <span class="s">Deploy Jekyll site to Pages</span>
+ <span class="na">on</span><span class="pi">:</span>
+   <span class="na">push</span><span class="pi">:</span>
+     <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">main"</span><span class="pi">]</span>
+   <span class="na">workflow_dispatch</span><span class="pi">:</span>
+ <span class="na">permissions</span><span class="pi">:</span>
+   <span class="na">contents</span><span class="pi">:</span> <span class="s">read</span>
+   <span class="na">pages</span><span class="pi">:</span> <span class="s">write</span>
+   <span class="na">id-token</span><span class="pi">:</span> <span class="s">write</span>
+ <span class="na">concurrency</span><span class="pi">:</span>
+   <span class="na">group</span><span class="pi">:</span> <span class="s2">"</span><span class="s">pages"</span>
+   <span class="na">cancel-in-progress</span><span class="pi">:</span> <span class="no">true</span>
+ <span class="na">jobs</span><span class="pi">:</span>
+   <span class="na">deploy</span><span class="pi">:</span>
+     <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+     <span class="na">steps</span><span class="pi">:</span>
+       <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout</span>
+         <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v3</span>
+       <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Setup Ruby</span>
+         <span class="na">uses</span><span class="pi">:</span> <span class="s">ruby/setup-ruby@v1</span>
+         <span class="na">with</span><span class="pi">:</span>
+           <span class="na">ruby-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.0'</span>
+           <span class="na">bundler-cache</span><span class="pi">:</span> <span class="no">true</span>
+           <span class="na">cache-version</span><span class="pi">:</span> <span class="m">0</span> <span class="c1"># Increment this number if you need to re-download cached gems</span>
+       <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Build with Jekyll</span>
+         <span class="na">run</span><span class="pi">:</span> <span class="s">bundle exec jekyll build</span>
+         <span class="na">env</span><span class="pi">:</span>
+           <span class="na">JEKYLL_ENV</span><span class="pi">:</span> <span class="s">production</span>
+       <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Upload artifact</span>
+         <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/upload-pages-artifact@v1</span>
+       <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Deploy to GitHub Pages 🚀</span>
+         <span class="na">uses</span><span class="pi">:</span> <span class="s">peaceiris/actions-gh-pages@v3</span>
+         <span class="na">with</span><span class="pi">:</span>
+           <span class="na">deploy_key</span><span class="pi">:</span> <span class="s">${{ secrets.ACTIONS_DEPLOY_KEY }}</span>
+           <span class="na">external_repository</span><span class="pi">:</span> <span class="s">mygithub/myblog_public</span>
+           <span class="na">publish_branch</span><span class="pi">:</span> <span class="s">main</span>
+           <span class="na">publish_dir</span><span class="pi">:</span> <span class="s">./_site</span>
+</code></pre></div>    </div>
+  </li>
+  <li>產生一組 gh-pages 專用的 public key 和 private key
+    <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  ssh-keygen <span class="nt">-t</span> rsa <span class="nt">-b</span> 4096 <span class="nt">-C</span> <span class="s2">"</span><span class="si">$(</span>git config user.email<span class="si">)</span><span class="s2">"</span> <span class="nt">-f</span> gh-pages <span class="nt">-N</span> <span class="s2">""</span>
+</code></pre></div>    </div>
+    <ul>
+      <li>public key: gh-pages.pub</li>
+      <li>private key: gh-pages</li>
+    </ul>
+  </li>
+  <li>把 private key 加到 private repo 的 secerts 中，並取名為 <code class="language-plaintext highlighter-rouge">ACTIONS_DEPLOY_KEY</code></li>
+  <li>把 public key 加到 public repo 的 deploy keys 中</li>
+</ol>
+
+<blockquote>
+  <p>Reference</p>
+  <ol>
+    <li><a href="https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-deploy-to-external-repository-external_repository" target="_blank">deploy-to-external-repository</a></li>
+    <li><a href="https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-create-ssh-deploy-key" target="_blank">create-ssh-deploy-key</a></li>
+  </ol>
+</blockquote>]]></content><author><name>anxgang</name></author><category term="Jekyll" /><category term="jekyll" /><category term="github" /><category term="gh-pages" /><summary type="html"><![CDATA[免費版的 github 建立 gh-pages 必須公開 repository。 如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？]]></summary></entry><entry><title type="html">Post: Gallery</title><link href="https://blog.anxgang.com/post%20formats/post-gallery/" rel="alternate" type="text/html" title="Post: Gallery" /><published>2022-12-31T00:00:00+08:00</published><updated>2022-12-31T00:00:00+08:00</updated><id>https://blog.anxgang.com/post%20formats/post-gallery</id><content type="html" xml:base="https://blog.anxgang.com/post%20formats/post-gallery/"><![CDATA[<p>hey These are gallery tests for image wrapped in <code class="language-plaintext highlighter-rouge">&lt;figure&gt;</code> elements.</p>
 
 <p>To place a gallery add the necessary YAML Front Matter:</p>
 
@@ -254,4 +332,4 @@
     <figcaption>This is a half gallery layout example.
 </figcaption>
   
-</figure>]]></content><author><name>anxgang</name></author><category term="Post Formats" /><category term="gallery" /><category term="Post Formats" /><category term="tiled" /><summary type="html"><![CDATA[These are gallery tests for image wrapped in &lt;figure&gt; elements.]]></summary></entry></feed>
+</figure>]]></content><author><name>anxgang</name></author><category term="Post Formats" /><category term="gallery" /><category term="Post Formats" /><category term="tiled" /><summary type="html"><![CDATA[hey These are gallery tests for image wrapped in &lt;figure&gt; elements.]]></summary></entry></feed>

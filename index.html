@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Anxgang</title>
-<meta name="description" content="A flexible two-column Jekyll theme. Perfect for building personal sites, blogs, and portfolios. Latest release v4.24.0">
+<!-- begin _includes/seo.html --><title>  ANxGANG</title>
+<meta name="description" content="A simple Blog">
 
 
   <meta name="author" content="anxgang">
@@ -19,27 +19,29 @@
 
 <meta property="og:type" content="website">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:site_name" content="Anxgang">
-<meta property="og:title" content="Anxgang">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="ANxGANG">
 <meta property="og:url" content="https://blog.anxgang.com/">
 
 
-  <meta property="og:description" content="A flexible two-column Jekyll theme. Perfect for building personal sites, blogs, and portfolios. Latest release v4.24.0">
+  <meta property="og:description" content="A simple Blog">
 
 
 
-  <meta property="og:image" content="https://blog.anxgang.com/assets/images/mm-home-page-feature.jpg">
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
 
 
 
   <meta name="twitter:site" content="@anxgang1">
-  <meta name="twitter:title" content="Anxgang">
-  <meta name="twitter:description" content="A flexible two-column Jekyll theme. Perfect for building personal sites, blogs, and portfolios. Latest release v4.24.0">
+  <meta name="twitter:title" content="ANxGANG">
+  <meta name="twitter:description" content="A simple Blog">
   <meta name="twitter:url" content="https://blog.anxgang.com/">
 
   
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/mm-home-page-feature.jpg">
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
   
 
   
@@ -81,7 +83,7 @@
 
 
 
-  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Anxgang Feed">
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
 
 
 <!-- https://t.co/dKP3o1e -->
@@ -97,6 +99,10 @@
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
 
 
+  
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js"></script>
+  
+
 
     <!-- start custom head snippets -->
 
@@ -106,7 +112,7 @@
 
   </head>
 
-  <body class="layout--splash">
+  <body class="layout--posts">
     <nav class="skip-links">
   <ul>
     <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
@@ -117,13 +123,13 @@
 
     
 
-<div class="masthead">
+<div class="masthead sticky">
   <div class="masthead__inner-wrap">
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
         <a class="site-title" href="/">
-          Anxgang
+          ANxGANG
           <span class="site-subtitle"></span>
         </a>
         <ul class="visible-links">
@@ -139,11 +145,7 @@
                 <ul class="dropdown-content">
                   
                   <li>
-                    <a href="/docs/quick-start-guide/"> Quick-Start Guide 1</a>
-                  </li>
-                  
-                  <li>
-                    <a href="/docs2/quick-start-guide/"> Quick-Start Guide 2</a>
+                    <a href="/docs/rails-compact-guide/1"> Rails Compact Guide</a>
                   </li>
                   
                 </ul>
@@ -177,13 +179,6 @@
               </li>
             
           
-            
-            
-              <li class="masthead__menu-item">
-                <a href="/about/">About</a>
-              </li>
-            
-          
         </ul>
         
         <button class="search__toggle" type="button">
@@ -208,150 +203,265 @@
 
     <div class="initial-content">
       
-  
-
-
-
-
-
-
-
-<div class="page__hero--overlay"
-  style="background-color: #5e616c; background-image: url('/assets/images/mm-home-page-feature.jpg');"
->
-  
-    <div class="wrapper">
-      <h1 id="page-title" class="page__title" itemprop="headline">
-        
-          Anxgang
-
-        
-      </h1>
-      
-        <p class="page__lead">A flexible two-column Jekyll theme. Perfect for building personal sites, blogs, and portfolios.<br /> <small><a href="https://github.com/mmistakes/minimal-mistakes/releases/tag/4.24.0">Latest release v4.24.0</a></small>
-</p>
-      
-      
-
-
-      
-      
-        <p>
-        
-          <a href="/docs/quick-start-guide/" class="btn btn--light-outline btn--large"><i class='fas fa-download'></i> Install now</a>
-        
-      
-    </div>
-  
-  
-</div>
 
 
 
 <div id="main" role="main">
-  <article class="splash" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <meta itemprop="description" content="A flexible two-column Jekyll theme. Perfect for building personal sites, blogs, and portfolios. Latest release v4.24.0">
-    
-    
+  
+  <div class="sidebar sticky">
+  
 
-    <section class="page__content" itemprop="text">
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤：</button>
+    <ul class="author__urls social-icons">
       
-<div class="feature__wrapper">
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
 
-  
-    <div class="feature__item">
-      <div class="archive__item">
+      
         
-          <div class="archive__item-teaser">
-            <img src="/assets/images/mm-customizable-feature.png" alt="customizable" />
-            
-          </div>
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
         
-
-        <div class="archive__item-body">
           
-            <h2 class="archive__item-title">Super customizable</h2>
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
           
-
-          
-            <div class="archive__item-excerpt">
-              <p>Everything from the menus, sidebars, comments, and more can be configured or set with YAML Front Matter.</p>
-
-            </div>
-          
-
-          
-            <p><a href="/docs/configuration/" class="btn btn--primary">Learn more</a></p>
-          
-        </div>
-      </div>
-    </div>
-  
-    <div class="feature__item">
-      <div class="archive__item">
         
-          <div class="archive__item-teaser">
-            <img src="/assets/images/mm-responsive-feature.png" alt="fully responsive" />
-            
-          </div>
-        
+      
 
-        <div class="archive__item-body">
-          
-            <h2 class="archive__item-title">Responsive layouts</h2>
-          
+      
 
-          
-            <div class="archive__item-excerpt">
-              <p>Built with HTML5 + CSS3. All layouts are fully responsive with helpers to augment your content.</p>
+      
 
-            </div>
-          
+      
 
-          
-            <p><a href="/docs/layouts/" class="btn btn--primary">Learn more</a></p>
-          
-        </div>
-      </div>
-    </div>
-  
-    <div class="feature__item">
-      <div class="archive__item">
-        
-          <div class="archive__item-teaser">
-            <img src="/assets/images/mm-free-feature.png" alt="100% free" />
-            
-          </div>
-        
+      
 
-        <div class="archive__item-body">
-          
-            <h2 class="archive__item-title">100% free</h2>
-          
+      
 
-          
-            <div class="archive__item-excerpt">
-              <p>Free to use however you want under the MIT License. Clone it, fork it, customize it… whatever!</p>
+      
 
-            </div>
-          
+      
 
-          
-            <p><a href="/docs/license/" class="btn btn--primary">Learn more</a></p>
-          
-        </div>
-      </div>
-    </div>
-  
+      
 
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
 </div>
 
+  
+  </div>
 
-    </section>
+
+
+  <div class="archive">
+    
+      <h1 id="page-title" class="page__title"></h1>
+    
+    
+
+
+<ul class="taxonomy__index">
+  
+  
+    <li>
+      <a href="#2023">
+        <strong>2023</strong> <span class="taxonomy__count">1</span>
+      </a>
+    </li>
+  
+    <li>
+      <a href="#2022">
+        <strong>2022</strong> <span class="taxonomy__count">1</span>
+      </a>
+    </li>
+  
+</ul>
+
+
+
+
+  <section id="2023" class="taxonomy__section">
+    <h2 class="archive__subtitle">2023</h2>
+    <div class="entries-list">
+      
+        
+
+
+
+<div class="list__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">使用 private repository 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
   </article>
 </div>
 
+      
+    </div>
+    <a href="#page-title" class="back-to-top">回到頂部 &uarr;</a>
+  </section>
+
+  <section id="2022" class="taxonomy__section">
+    <h2 class="archive__subtitle">2022</h2>
+    <div class="entries-list">
+      
+        
+
+
+
+<div class="list__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/post%20formats/post-gallery/" rel="permalink">Post: Gallery
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2022-12-31T00:00:00+08:00">2022-12-31</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">hey These are gallery tests for image wrapped in &lt;figure&gt; elements.
+</p>
+  </article>
+</div>
+
+      
+    </div>
+    <a href="#page-title" class="back-to-top">回到頂部 &uarr;</a>
+  </section>
+
+
+  </div>
+</div>
     </div>
 
     
@@ -388,10 +498,6 @@
           <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
         
       
-        
-          <li><a href="https://instagram.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-instagram" aria-hidden="true"></i> Instagram</a></li>
-        
-      
     
 
     
@@ -400,7 +506,7 @@
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2022 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2023 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
@@ -418,6 +524,10 @@
 
 
 
+
+  
+    <script src="/assets/js/custom-mermaid.js"></script>
+  
 
 
 

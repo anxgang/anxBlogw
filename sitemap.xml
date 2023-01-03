@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>https://blog.anxgang.com/docs/quick-start-guide/</loc>
+<loc>https://blog.anxgang.com/docs/ruby-compact-guide/1</loc>
 <lastmod>2021-06-07T20:48:05+08:00</lastmod>
 </url>
 <url>
@@ -85,7 +85,7 @@
 <lastmod>2018-01-11T00:22:01+08:00</lastmod>
 </url>
 <url>
-<loc>https://blog.anxgang.com/docs2/quick-start-guide/</loc>
+<loc>https://blog.anxgang.com/docs/rails-compact-guide/1</loc>
 <lastmod>2021-06-07T20:48:05+08:00</lastmod>
 </url>
 <url>
@@ -170,10 +170,14 @@
 </url>
 <url>
 <loc>https://blog.anxgang.com/post%20formats/post-gallery/</loc>
-<lastmod>2010-09-09T00:00:00+08:00</lastmod>
+<lastmod>2022-12-31T00:00:00+08:00</lastmod>
 </url>
 <url>
-<loc>https://blog.anxgang.com/portolio/1/</loc>
+<loc>https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/</loc>
+<lastmod>2023-01-04T00:00:00+08:00</lastmod>
+</url>
+<url>
+<loc>https://blog.anxgang.com/about/</loc>
 </url>
 <url>
 <loc>https://blog.anxgang.com/categories/</loc>
