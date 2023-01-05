@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-01-04T17:47:18+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Jekyll 使用 private repo 建立 gh-pages</title><link href="https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/" rel="alternate" type="text/html" title="Jekyll 使用 private repo 建立 gh-pages" /><published>2023-01-04T00:00:00+08:00</published><updated>2023-01-04T00:00:00+08:00</updated><id>https://blog.anxgang.com/jekyll/private-repo-with-gh-pages</id><content type="html" xml:base="https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/"><![CDATA[<p>免費版的 github 建立 gh-pages 必須公開 repository。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-01-05T08:03:07+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Jekyll 使用 private repo 建立 gh-pages</title><link href="https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/" rel="alternate" type="text/html" title="Jekyll 使用 private repo 建立 gh-pages" /><published>2023-01-04T00:00:00+08:00</published><updated>2023-01-04T00:00:00+08:00</updated><id>https://blog.anxgang.com/jekyll/private-repo-with-gh-pages</id><content type="html" xml:base="https://blog.anxgang.com/jekyll/private-repo-with-gh-pages/"><![CDATA[<p>免費版的 github 建立 gh-pages 必須公開 repository。
 如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？</p>
 
 <h2 id="目標">目標</h2>
@@ -8,9 +8,14 @@
 搭配一個 public repository (產出的 html)，
 來達到目標。</p>
 
-<pre><code class="language-mermaid">graph TD
-    A[source code] --&gt;|git push| B(private repo)
-    B --&gt;|github action auto deploy| D[public repo]
+<pre><code class="language-mermaid">graph LR
+  subgraph client
+    A[source code]
+  end
+  A[source code] --&gt;|git push| B(private repo)
+  subgraph github
+    B --&gt;|"deploy(by action)"| D[public repo]
+  end
 </code></pre>
 
 <h2 id="步驟">步驟</h2>

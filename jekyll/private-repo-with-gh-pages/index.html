@@ -181,10 +181,6 @@
                     <a href="/year-archive/"> By Year</a>
                   </li>
                   
-                  <li>
-                    <a href="/collection-archive/"> By Collection</a>
-                  </li>
-                  
                 </ul>
               </li>
             
@@ -379,7 +375,7 @@
       <span class="page__meta-readtime">
         <i class="far fa-clock" aria-hidden="true"></i>
         
-          少於 1 分鐘閱讀
+          1 分鐘閱讀
         
       </span>
     
@@ -413,9 +409,14 @@
 搭配一個 public repository (產出的 html)，
 來達到目標。</p>
 
-<pre><code class="language-mermaid">graph TD
-    A[source code] --&gt;|git push| B(private repo)
-    B --&gt;|github action auto deploy| D[public repo]
+<pre><code class="language-mermaid">graph LR
+  subgraph client
+    A[source code]
+  end
+  A[source code] --&gt;|git push| B(private repo)
+  subgraph github
+    B --&gt;|"deploy(by action)"| D[public repo]
+  end
 </code></pre>
 
 <h2 id="步驟">步驟</h2>
@@ -526,6 +527,31 @@
                 
 
   <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2023-01-04T00:00:00+08:00">January 4, 2023</time></p>
+
+                
+  <p class="page__history" style="padding-top: 10px">
+  <strong>
+    <i class="fas fa-fw fa-history" aria-hidden="true"></i>
+    <span class="collapse-button" style="cursor: pointer"
+      onclick="hidecurrentpagehistory.style.display=hidecurrentpagehistory.style.display=='none'?'block':'none';">
+      歷史紀錄 ▿
+    </span>
+  </strong>
+  <div id="hidecurrentpagehistory" class="collapse-wrapper" style="display: none">
+    <ul>
+  <li>2023-01-01 初稿</li>
+  <li>2023-01-04 調整 flowchart</li>
+</ul>
+
+  </div>
+</p>
+
+<style>
+.collapse-wrapper ul, .collapse-wrapper li{
+  margin: 0px;
+}
+</style>
+
 
             </footer>
 
