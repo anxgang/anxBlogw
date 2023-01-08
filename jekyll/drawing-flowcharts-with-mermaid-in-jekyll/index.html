@@ -1,0 +1,906 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Jekyll 使用 mermaid 繪製流程圖 - ANxGANG</title>
+<meta name="description" content="mermaid 是使用 JavaScript 開發的圖表工具。 他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。 本文介紹如何將其嵌入 Jekyll 之中。">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="Jekyll 使用 mermaid 繪製流程圖">
+<meta property="og:url" content="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/">
+
+
+  <meta property="og:description" content="mermaid 是使用 JavaScript 開發的圖表工具。 他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。 本文介紹如何將其嵌入 Jekyll 之中。">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/unsplash-gallery-image-2-th.jpg">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="Jekyll 使用 mermaid 繪製流程圖">
+  <meta name="twitter:description" content="mermaid 是使用 JavaScript 開發的圖表工具。 他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。 本文介紹如何將其嵌入 Jekyll 之中。">
+  <meta name="twitter:url" content="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/unsplash-gallery-image-2-th.jpg">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2023-01-08T00:00:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="Jekyll 使用 mermaid 繪製流程圖">
+        
+        
+        <meta itemprop="description"
+            content="mermaid 是使用 JavaScript 開發的圖表工具。他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。本文介紹如何將其嵌入 Jekyll 之中。">
+        
+        <meta itemprop="datePublished" content="2023-01-08T00:00:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" class="u-url"
+                        itemprop="url">Jekyll 使用 mermaid 繪製流程圖
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#目標">目標</a></li><li><a href="#安裝">安裝</a></li><li><a href="#使用方式">使用方式</a><ul><li><a href="#流程圖">流程圖</a></li><li><a href="#序列圖">序列圖</a></li><li><a href="#實體關係圖erd">實體關係圖(ERD)</a></li><li><a href="#甘特圖">甘特圖</a></li><li><a href="#圓餅圖">圓餅圖</a></li><li><a href="#git-圖">Git 圖</a></li></ul></li><li><a href="#參考">參考</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <p>mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。</p>
+
+<h2 id="目標">目標</h2>
+
+<p>將 mermaid 套件加入 jekyll，使用 Markdown 的程式區塊，快速的撰寫並建立圖表</p>
+
+<h2 id="安裝">安裝</h2>
+
+<p>在頁面上插入</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"module"</span><span class="nt">&gt;</span>
+  <span class="k">import</span> <span class="nx">mermaid</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs</span><span class="dl">'</span>
+  <span class="nx">mermaid</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span><span class="na">noteMargin</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="dl">"</span><span class="s2">.language-mermaid</span><span class="dl">"</span><span class="p">)</span>
+<span class="nt">&lt;/script&gt;</span>
+</code></pre></div></div>
+<!---->
+
+<h2 id="使用方式">使用方式</h2>
+
+<p>這邊舉出一些範例，詳細用法可至 <a href="https://mermaid.js.org/syntax/flowchart.html">mermaid 官網</a>查詢</p>
+
+<p>另外也有 <a href="https://mermaid.live/edit">mermaid live edit</a> 可以線上預覽產生的圖</p>
+
+<div class="notice--warning">
+  
+<p><strong>範例：</strong> 使用 <code class="language-plaintext highlighter-rouge">mermaid</code> 將語法寫在程式區塊中</p>
+
+<p style="margin: 0px"><span>```mermaid</span></p>
+
+<p style="margin: 0px">flowchart LR
+<br />    A –&gt; B</p>
+
+<p><span>```</span></p>
+
+<pre><code class="language-mermaid">flowchart LR
+  A --&gt; B
+</code></pre>
+
+</div>
+
+<h3 id="流程圖">流程圖</h3>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">flowchart</span> <span class="no">LR</span>
+  <span class="nc">A</span><span class="p">[</span><span class="nc">Start</span><span class="p">]</span> <span class="o">--&gt;</span> <span class="nc">B</span><span class="p">{</span><span class="nc">Is</span> <span class="n">it</span><span class="o">?</span><span class="p">}</span>
+  <span class="nc">B</span> <span class="o">--</span> <span class="nc">Yes</span> <span class="o">--&gt;</span> <span class="nc">C</span><span class="p">[</span><span class="no">OK</span><span class="p">]</span>
+  <span class="nc">C</span> <span class="o">--&gt;</span> <span class="nc">D</span><span class="p">[</span><span class="nc">Rethink</span><span class="p">]</span>
+  <span class="nc">D</span> <span class="o">-.-&gt;</span> <span class="nc">B</span>
+  <span class="nc">B</span> <span class="o">--</span> <span class="nc">No</span> <span class="o">----&gt;</span> <span class="nc">E</span><span class="p">[</span><span class="nc">End</span><span class="p">]</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">flowchart LR
+  A[Start] --&gt; B{Is it?}
+  B -- Yes --&gt; C[OK]
+  C --&gt; D[Rethink]
+  D -.-&gt; B
+  B -- No ----&gt; E[End]
+</code></pre>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">flowchart</span> <span class="no">TD</span>
+    <span class="n">c1</span><span class="o">--&gt;</span><span class="n">a2</span>
+    <span class="n">subgraph</span> <span class="n">one</span>
+    <span class="n">a1</span><span class="o">--&gt;</span><span class="n">a2</span>
+    <span class="n">end</span>
+    <span class="n">subgraph</span> <span class="n">two</span>
+    <span class="n">b1</span><span class="o">--&gt;</span><span class="n">b2</span>
+    <span class="n">end</span>
+    <span class="n">subgraph</span> <span class="n">three</span>
+    <span class="n">c1</span><span class="o">--&gt;</span><span class="n">c2</span>
+    <span class="n">end</span>
+</code></pre></div></div>
+
+<pre><code class="language-mermaid">flowchart TD
+    c1--&gt;a2
+    subgraph one
+    a1--&gt;a2
+    end
+    subgraph two
+    b1--&gt;b2
+    end
+    subgraph three
+    c1--&gt;c2
+    end
+</code></pre>
+
+<h3 id="序列圖">序列圖</h3>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sequenceDiagram</span>
+    <span class="nc">Alice</span><span class="o">-&gt;&gt;</span><span class="nc">John</span><span class="o">:</span> <span class="nc">Hello</span> <span class="nc">John</span><span class="p">,</span> <span class="n">how</span> <span class="n">are</span> <span class="n">you</span><span class="o">?</span>
+    <span class="nc">John</span><span class="o">--&gt;&gt;</span><span class="nc">Alice</span><span class="o">:</span> <span class="nc">Great</span><span class="o">!</span>
+    <span class="nc">Alice</span><span class="o">-</span><span class="p">)</span><span class="nc">John</span><span class="o">:</span> <span class="nc">See</span> <span class="n">you</span> <span class="n">later</span><span class="o">!</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">sequenceDiagram
+    Alice-&gt;&gt;John: Hello John, how are you?
+    John--&gt;&gt;Alice: Great!
+    Alice-)John: See you later!
+</code></pre>
+
+<h3 id="實體關係圖erd">實體關係圖(ERD)</h3>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">---</span>
+<span class="n">title</span><span class="o">:</span> <span class="nc">Order</span> <span class="n">example</span>
+<span class="o">---</span>
+<span class="n">erDiagram</span>
+    <span class="no">CUSTOMER</span> <span class="o">||--</span><span class="n">o</span><span class="p">{</span> <span class="no">ORDER</span> <span class="o">:</span> <span class="n">places</span>
+    <span class="no">ORDER</span> <span class="o">||--|</span><span class="p">{</span> <span class="no">LINE</span><span class="o">-</span><span class="no">ITEM</span> <span class="o">:</span> <span class="n">contains</span>
+    <span class="no">CUSTOMER</span> <span class="p">}</span><span class="o">|..|</span><span class="p">{</span> <span class="no">DELIVERY</span><span class="o">-</span><span class="no">ADDRESS</span> <span class="o">:</span> <span class="n">uses</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">---
+title: Order example
+---
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : contains
+    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
+</code></pre>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">erDiagram</span>
+    <span class="no">CUSTOMER</span> <span class="o">||--</span><span class="n">o</span><span class="p">{</span> <span class="no">ORDER</span> <span class="o">:</span> <span class="n">places</span>
+    <span class="no">CUSTOMER</span> <span class="p">{</span>
+        <span class="n">string</span> <span class="n">name</span>
+        <span class="n">string</span> <span class="n">custNumber</span>
+        <span class="n">string</span> <span class="n">sector</span>
+    <span class="p">}</span>
+    <span class="no">ORDER</span> <span class="o">||--|</span><span class="p">{</span> <span class="no">LINE</span><span class="o">-</span><span class="no">ITEM</span> <span class="o">:</span> <span class="n">contains</span>
+    <span class="no">ORDER</span> <span class="p">{</span>
+        <span class="n">int</span> <span class="n">orderNumber</span>
+        <span class="n">string</span> <span class="n">deliveryAddress</span>
+    <span class="p">}</span>
+    <span class="no">LINE</span><span class="o">-</span><span class="no">ITEM</span> <span class="p">{</span>
+        <span class="n">string</span> <span class="n">productCode</span>
+        <span class="n">int</span> <span class="n">quantity</span>
+        <span class="n">float</span> <span class="n">pricePerUnit</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    CUSTOMER {
+        string name
+        string custNumber
+        string sector
+    }
+    ORDER ||--|{ LINE-ITEM : contains
+    ORDER {
+        int orderNumber
+        string deliveryAddress
+    }
+    LINE-ITEM {
+        string productCode
+        int quantity
+        float pricePerUnit
+    }
+</code></pre>
+
+<h3 id="甘特圖">甘特圖</h3>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gantt</span>
+    <span class="n">title</span> <span class="nc">A</span> <span class="nc">Gantt</span> <span class="nc">Diagram</span>
+    <span class="n">dateFormat</span>  <span class="no">YYYY</span><span class="o">-</span><span class="no">MM</span><span class="o">-</span><span class="no">DD</span>
+    <span class="n">section</span> <span class="nc">Section</span>
+    <span class="nc">A</span> <span class="n">task</span>           <span class="o">:</span><span class="n">a1</span><span class="p">,</span> <span class="mi">2023</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span><span class="p">,</span> <span class="mi">30</span><span class="n">d</span>
+    <span class="nc">Another</span> <span class="n">task</span>     <span class="o">:</span><span class="n">after</span> <span class="n">a1</span>  <span class="p">,</span> <span class="mi">20</span><span class="n">d</span>
+    <span class="n">section</span> <span class="nc">Another</span>
+    <span class="nc">Task</span> <span class="n">in</span> <span class="n">sec</span>      <span class="o">:</span><span class="mi">2023</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mi">12</span>  <span class="p">,</span> <span class="mi">12</span><span class="n">d</span>
+    <span class="n">another</span> <span class="n">task</span>      <span class="o">:</span> <span class="mi">24</span><span class="n">d</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">gantt
+    title A Gantt Diagram
+    dateFormat  YYYY-MM-DD
+    section Section
+    A task           :a1, 2023-01-01, 30d
+    Another task     :after a1  , 20d
+    section Another
+    Task in sec      :2023-01-12  , 12d
+    another task      : 24d
+</code></pre>
+<h3 id="圓餅圖">圓餅圖</h3>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pie</span> <span class="n">showData</span>
+    <span class="n">title</span> <span class="nc">Key</span> <span class="n">elements</span> <span class="n">in</span> <span class="nc">Product</span> <span class="nc">X</span>
+    <span class="s2">"Calcium"</span> <span class="o">:</span> <span class="mf">42.96</span>
+    <span class="s2">"Potassium"</span> <span class="o">:</span> <span class="mf">50.05</span>
+    <span class="s2">"Magnesium"</span> <span class="o">:</span> <span class="mf">10.01</span>
+    <span class="s2">"Iron"</span> <span class="o">:</span>  <span class="mi">5</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">pie showData
+    title Key elements in Product X
+    "Calcium" : 42.96
+    "Potassium" : 50.05
+    "Magnesium" : 10.01
+    "Iron" :  5
+</code></pre>
+
+<h3 id="git-圖">Git 圖</h3>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">---</span>
+<span class="n">title</span><span class="o">:</span> <span class="nc">Example</span> <span class="nc">Git</span> <span class="n">diagram</span>
+<span class="o">---</span>
+<span class="n">gitGraph</span>
+   <span class="n">commit</span>
+   <span class="n">commit</span>
+   <span class="n">branch</span> <span class="n">develop</span>
+   <span class="n">checkout</span> <span class="n">develop</span>
+   <span class="n">commit</span>
+   <span class="n">commit</span>
+   <span class="n">checkout</span> <span class="n">main</span>
+   <span class="n">merge</span> <span class="n">develop</span>
+   <span class="n">commit</span> <span class="n">id</span><span class="o">:</span> <span class="s2">"Normal"</span> <span class="n">tag</span><span class="o">:</span> <span class="s2">"v1.0.0"</span>
+   <span class="n">commit</span> <span class="n">id</span><span class="o">:</span> <span class="s2">"Reverse"</span> <span class="n">type</span><span class="o">:</span> <span class="no">REVERSE</span> <span class="n">tag</span><span class="o">:</span> <span class="s2">"RC_1"</span>
+   <span class="n">commit</span> <span class="n">id</span><span class="o">:</span> <span class="s2">"Highlight"</span> <span class="n">type</span><span class="o">:</span> <span class="no">HIGHLIGHT</span> <span class="n">tag</span><span class="o">:</span> <span class="s2">"8.8.4"</span>
+</code></pre></div></div>
+<pre><code class="language-mermaid">---
+title: Example Git diagram
+---
+gitGraph
+   commit
+   commit
+   branch develop
+   checkout develop
+   commit
+   commit
+   checkout main
+   merge develop
+   commit id: "Normal" tag: "v1.0.0"
+   commit id: "Reverse" type: REVERSE tag: "RC_1"
+   commit id: "Highlight" type: HIGHLIGHT tag: "8.8.4"
+</code></pre>
+
+<h2 id="參考">參考</h2>
+
+<ol>
+  <li><a href="https://mermaid.js.org/syntax/flowchart.html" target="_blank">mermaid</a></li>
+  <li><a href="https://mermaid.live/" target="_blank">mermaid online playground</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 標籤: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#jekyll" class="page__taxonomy-item p-category" rel="tag">jekyll</a><span class="sep">, </span>
+    
+      <a href="/tags/#mermaid" class="page__taxonomy-item p-category" rel="tag">mermaid</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 分類: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#jekyll" class="page__taxonomy-item p-category" rel="tag">Jekyll</a>
+    
+    </span>
+  </p>
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2023-01-08T00:00:00+08:00">January 8, 2023</time></p>
+
+                
+  <p class="page__history" style="padding-top: 10px">
+  <strong>
+    <i class="fas fa-fw fa-history" aria-hidden="true"></i>
+    <span class="collapse-button" style="cursor: pointer"
+      onclick="hidecurrentpagehistory.style.display=hidecurrentpagehistory.style.display=='none'?'block':'none';">
+      歷史紀錄 ▿
+    </span>
+  </strong>
+  <div id="hidecurrentpagehistory" class="collapse-wrapper" style="display: none">
+    <ul>
+  <li>2023-01-04 add: 初稿</li>
+  <li>2023-01-08 add: 增加使用方式</li>
+</ul>
+
+  </div>
+</p>
+
+<style>
+.collapse-wrapper ul, .collapse-wrapper li{
+  margin: 0px;
+}
+</style>
+
+
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=Jekyll+%E4%BD%BF%E7%94%A8+mermaid+%E7%B9%AA%E8%A3%BD%E6%B5%81%E7%A8%8B%E5%9C%96%20https%3A%2F%2Fblog.anxgang.com%2Fjekyll%2Fdrawing-flowcharts-with-mermaid-in-jekyll%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fjekyll%2Fdrawing-flowcharts-with-mermaid-in-jekyll%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fjekyll%2Fdrawing-flowcharts-with-mermaid-in-jekyll%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/jekyll/private-repo-with-gh-pages/" class="pagination--pager" title="Jekyll 使用 private repo 建立 gh-pages
+">上一篇</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/unsplash-gallery-image-2-th.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2023 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/jekyll/drawing-flowcharts-with-mermaid-in-jekyll"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>
