@@ -1,4 +1,57 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-01-09T00:15:43+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Jekyll 使用 mermaid 繪製流程圖</title><link href="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="alternate" type="text/html" title="Jekyll 使用 mermaid 繪製流程圖" /><published>2023-01-08T00:00:00+08:00</published><updated>2023-01-08T00:00:00+08:00</updated><id>https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll</id><content type="html" xml:base="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/"><![CDATA[<p>mermaid 是使用 JavaScript 開發的圖表工具。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-01-13T15:44:52+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">ubuntu 如何使用排程 crontab</title><link href="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu/" rel="alternate" type="text/html" title="ubuntu 如何使用排程 crontab" /><published>2023-01-13T00:00:00+08:00</published><updated>2023-01-13T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu/"><![CDATA[<p>ubuntu 如何使用排程 crontab</p>
+
+<h2 id="目標">目標</h2>
+
+<p>介紹 crontab 基本用法</p>
+
+<h2 id="安裝">安裝</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>apt update
+<span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>cron
+</code></pre></div></div>
+
+<h2 id="服務">服務</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo service cron status
+$ sudo service cron start
+$ sudo service cron restart
+$ sudo service cron stop
+</code></pre></div></div>
+
+<p class="notice--warning"><strong>提示:</strong> 安裝完服務會自動啟動，文件設定完也不用重啟，所以這幾行其實很少用。</p>
+
+<h2 id="使用方式">使用方式</h2>
+
+<p>以下兩種方式:</p>
+
+<h3 id="user">user</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>crontab <span class="nt">-l</span> <span class="c">#列出</span>
+crontab <span class="nt">-r</span> <span class="c">#刪除</span>
+crontab <span class="nt">-e</span> <span class="c">#編輯</span>
+</code></pre></div></div>
+
+<h3 id="root">root</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vim /etc/crontab
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 分 時 日 月 星期 指令</span>
+<span class="mi">0</span> <span class="mi">0</span><span class="p">,</span><span class="mi">12</span> <span class="mi">1</span> <span class="o">*</span> <span class="o">*</span> <span class="sr">/usr/</span><span class="n">bin</span><span class="o">/</span><span class="n">certbot</span> <span class="n">renew</span> <span class="c1"># 每個月1號的0點和12點執行 certbot renew</span>
+</code></pre></div></div>
+
+<div class="notice--warning">
+  
+<p><strong>提示:</strong><br /> 
+個人是習慣直接編輯<code class="language-plaintext highlighter-rouge">/etc/crontab</code>，如不熟悉可至工具網頁 <a href="https://crontab.guru" target="_blank">crontab.guru</a> 試試是否正確</p>
+
+</div>
+
+<h2 id="參考">參考</h2>
+<ol>
+  <li><a href="https://medium.com/@dkxmonster/%E6%8A%80%E8%A1%93%E7%A0%94%E7%A9%B6-ubuntu-crontab-6f780b88ed6b" target="_blank">技術研究 Ubuntu CronTab - DavidKross</a></li>
+  <li><a href="https://crontab.guru" target="_blank">crontab.guru</a></li>
+</ol>]]></content><author><name>anxgang</name></author><category term="Ubuntu" /><category term="crontab" /><category term="ubuntu" /><summary type="html"><![CDATA[ubuntu 如何使用排程 crontab]]></summary></entry><entry><title type="html">Jekyll 使用 mermaid 繪製流程圖</title><link href="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="alternate" type="text/html" title="Jekyll 使用 mermaid 繪製流程圖" /><published>2023-01-08T00:00:00+08:00</published><updated>2023-01-08T00:00:00+08:00</updated><id>https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll</id><content type="html" xml:base="https://blog.anxgang.com/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/"><![CDATA[<p>mermaid 是使用 JavaScript 開發的圖表工具。
 他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
 本文介紹如何將其嵌入 Jekyll 之中。</p>
 

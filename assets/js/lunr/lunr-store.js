@@ -280,4 +280,10 @@ var store = [{
         "tags": ["jekyll","mermaid"],
         "url": "/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/",
         "teaser": "/assets/images/unsplash-gallery-image-2-th.jpg"
+      },{
+        "title": "ubuntu 如何使用排程 crontab",
+        "excerpt":"ubuntu 如何使用排程 crontab   目標   介紹 crontab 基本用法   安裝   $ sudo apt update $ sudo apt install cron   服務   $ sudo service cron status $ sudo service cron start $ sudo service cron restart $ sudo service cron stop   提示: 安裝完服務會自動啟動，文件設定完也不用重啟，所以這幾行其實很少用。   使用方式   以下兩種方式:   user   crontab -l #列出 crontab -r #刪除 crontab -e #編輯   root   sudo vim /etc/crontab   # 分 時 日 月 星期 指令 0 0,12 1 * * /usr/bin/certbot renew # 每個月1號的0點和12點執行 certbot renew       提示:   個人是習慣直接編輯/etc/crontab，如不熟悉可至工具網頁 crontab.guru 試試是否正確     參考     技術研究 Ubuntu CronTab - DavidKross   crontab.guru  ","categories": ["Ubuntu"],
+        "tags": ["crontab","ubuntu"],
+        "url": "/ubuntu/how-to-use-crontab-in-ubuntu/",
+        "teaser": "/assets/images/unsplash-gallery-image-2-th.jpg"
       }]
