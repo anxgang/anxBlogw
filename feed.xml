@@ -1,8 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-02-02T13:41:22+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Ubuntu 如何 mount windows 的分享資料夾</title><link href="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/" rel="alternate" type="text/html" title="Ubuntu 如何 mount windows 的分享資料夾" /><published>2023-02-02T00:00:00+08:00</published><updated>2023-02-02T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/"><![CDATA[<p>ubuntu 如何連接 windows 的分享資料夾</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-02-02T17:27:41+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Ubuntu 如何 mount windows 的分享資料夾</title><link href="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/" rel="alternate" type="text/html" title="Ubuntu 如何 mount windows 的分享資料夾" /><published>2023-02-02T00:00:00+08:00</published><updated>2023-02-02T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/"><![CDATA[<p>ubuntu 如何連接 windows 的分享資料夾</p>
 
 <h2 id="目標">目標</h2>
 
 <p>ubuntu 連接 windows 的分享資料夾</p>
+
+<h2 id="安裝">安裝</h2>
+
+<p>安裝 CIFS</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>apt-get <span class="nb">install </span>cifs-utils
+</code></pre></div></div>
+
+<p>On older systems:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>apt-get <span class="nb">install </span>smbfs
+</code></pre></div></div>
 
 <h2 id="步驟">步驟</h2>
 
