@@ -281,9 +281,15 @@ var store = [{
         "url": "/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/",
         "teaser": "/assets/images/unsplash-gallery-image-2-th.jpg"
       },{
-        "title": "ubuntu 如何使用排程 crontab",
+        "title": "Ubuntu 如何使用排程 crontab",
         "excerpt":"ubuntu 如何使用排程 crontab   目標   介紹 crontab 基本用法   安裝   $ sudo apt update $ sudo apt install cron   服務   $ sudo service cron status $ sudo service cron start $ sudo service cron restart $ sudo service cron stop   提示: 安裝完服務會自動啟動，文件設定完也不用重啟，所以這幾行其實很少用。   使用方式   以下兩種方式:   user   crontab -l #列出 crontab -r #刪除 crontab -e #編輯   root   sudo vim /etc/crontab   # 分 時 日 月 星期 指令 0 0,12 1 * * /usr/bin/certbot renew # 每個月1號的0點和12點執行 certbot renew       提示:   個人是習慣直接編輯/etc/crontab，如不熟悉可至工具網頁 crontab.guru 試試是否正確     參考     技術研究 Ubuntu CronTab - DavidKross   crontab.guru  ","categories": ["Ubuntu"],
         "tags": ["crontab","ubuntu"],
-        "url": "/ubuntu/how-to-use-crontab-in-ubuntu/",
+        "url": "/ubuntu/how-to-use-crontab-in-ubuntu-copy/",
+        "teaser": "/assets/images/unsplash-gallery-image-2-th.jpg"
+      },{
+        "title": "Ubuntu 如何連接 windows 的分享資料夾",
+        "excerpt":"ubuntu 如何連接 windows 的分享資料夾   目標   ubuntu 連接 windows 的分享資料夾   步驟      確保您有以下訊息：            用於分享資料夾的 Windows 名稱和密碼       分享資料夾連結（例如 //server/share）或 IP 位置       Linux 上的 root 權限           以 root 登錄 Linux（或使用 su 或 sudo）   建立所需的掛載點：       $ mkdir -p /mnt/YOUR_PATH           開始掛載       $ mount -t cifs //YOUR_SERVER/SHARE_FORDER -o username=YOUR_NAME,password=YOUR_PASSWORD /mnt/YOUR_PATH           範例      先把要 mount 位置的資料夾建好       $ mkdir -p /mnt/my-server           將 //192.168.1.100/d$/download 這個分享資料夾 mount 到 /mnt/my-server (帳密是administrator/pwd123)       $ sudo mount -t cifs //192.168.1.100/d$/download -o username=administrator,password=pwd123 /mnt/my-server           可以查看 monut 是否正確       $ ls /mnt/my-server           參考     stackexchange.com - Copy file from Windows shared folder to Unix   cyberciti.biz - How to mount remote windows partition (windows share) under Linux  ","categories": ["Ubuntu"],
+        "tags": ["mount","ubuntu"],
+        "url": "/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/",
         "teaser": "/assets/images/unsplash-gallery-image-2-th.jpg"
       }]
