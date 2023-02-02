@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-02-02T10:41:18+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Ubuntu 如何連接 windows 的分享資料夾</title><link href="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/" rel="alternate" type="text/html" title="Ubuntu 如何連接 windows 的分享資料夾" /><published>2023-02-02T00:00:00+08:00</published><updated>2023-02-02T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/"><![CDATA[<p>ubuntu 如何連接 windows 的分享資料夾</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-02-02T13:41:22+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Ubuntu 如何 mount windows 的分享資料夾</title><link href="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/" rel="alternate" type="text/html" title="Ubuntu 如何 mount windows 的分享資料夾" /><published>2023-02-02T00:00:00+08:00</published><updated>2023-02-02T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/"><![CDATA[<p>ubuntu 如何連接 windows 的分享資料夾</p>
 
 <h2 id="目標">目標</h2>
 
@@ -42,10 +42,46 @@
   </li>
 </ol>
 
+<h2 id="開機自動掛載">開機自動掛載</h2>
+
+<p>設定開機自動掛載</p>
+
+<p>需以 root 權限編輯 <code class="language-plaintext highlighter-rouge">/etc/fstab</code></p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># device   MountPoint  filesystem  parameters   dump   fsck</span>
+<span class="c"># 範例1. 無帳密登入/可寫入:</span>
+//192.168.1.200/storage /mnt/share-server cifs guest,iocharset<span class="o">=</span>utf8,file_mode<span class="o">=</span>0777,dir_mode<span class="o">=</span>0777
+<span class="c"># 範例2. 帳密登入/只讀:</span>
+//192.168.1.100/d<span class="nv">$/</span>download /mnt/my-server cifs <span class="nv">username</span><span class="o">=</span>administrator,password<span class="o">=</span>pwd123,iocharset<span class="o">=</span>utf8
+<span class="c"># 範例3. 密碼需要隱藏:</span>
+<span class="c"># 另外建立 /home/ivan/.smbcredentials 並且使用 chmod 600</span>
+<span class="c">#  第一行 username=administrator </span>
+<span class="c">#  第二行 password=pwd123</span>
+//192.168.1.100/d<span class="nv">$/</span>download /mnt/my-server cifs <span class="nv">credentials</span><span class="o">=</span>/home/ivan/.smbcredentials,iocharset<span class="o">=</span>utf8
+</code></pre></div></div>
+
+<p>驗證可使用以下指令全部掛載</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mount -a
+</code></pre></div></div>
+
+<h2 id="取消掛載">取消掛載</h2>
+
+<p>指定某個</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>umount /mnt/my-server
+</code></pre></div></div>
+
+<p>全部</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>umount -a
+</code></pre></div></div>
+
 <h2 id="參考">參考</h2>
 <ol>
   <li><a href="https://unix.stackexchange.com/questions/61790/copy-file-from-windows-shared-folder-to-unix" target="_blank">stackexchange.com - Copy file from Windows shared folder to Unix</a></li>
   <li><a href="https://www.cyberciti.biz/tips/how-to-mount-remote-windows-partition-windows-share-under-linux.html" target="_blank">cyberciti.biz - How to mount remote windows partition (windows share) under Linux</a></li>
+  <li><a href="https://wiki.ubuntu.com/MountWindowsSharesPermanently" target="_blank">wiki.ubuntu.com - Mount Windows Shares Permanently</a></li>
 </ol>]]></content><author><name>anxgang</name></author><category term="Ubuntu" /><category term="mount" /><category term="ubuntu" /><summary type="html"><![CDATA[ubuntu 如何連接 windows 的分享資料夾]]></summary></entry><entry><title type="html">Ubuntu 如何使用排程 crontab</title><link href="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/" rel="alternate" type="text/html" title="Ubuntu 如何使用排程 crontab" /><published>2023-01-13T00:00:00+08:00</published><updated>2023-01-13T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu%20copy</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/"><![CDATA[<p>ubuntu 如何使用排程 crontab</p>
 
 <h2 id="目標">目標</h2>
