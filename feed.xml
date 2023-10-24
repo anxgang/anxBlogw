@@ -1,4 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-02-02T17:27:41+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">Ubuntu 如何 mount windows 的分享資料夾</title><link href="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/" rel="alternate" type="text/html" title="Ubuntu 如何 mount windows 的分享資料夾" /><published>2023-02-02T00:00:00+08:00</published><updated>2023-02-02T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu/"><![CDATA[<p>ubuntu 如何連接 windows 的分享資料夾</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-10-24T14:05:23+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">如何使用自定義的 iso 建立 Linode</title><link href="https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso/" rel="alternate" type="text/html" title="如何使用自定義的 iso 建立 Linode" /><published>2023-02-04T00:00:00+08:00</published><updated>2023-02-04T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso/"><![CDATA[<p>如何使用自定義的 iso 建立 Linode</p>
+
+<h2 id="目標">目標</h2>
+
+<p>使用 proxmox iso 來舉例，建立一個 Linode</p>
+
+<h2 id="步驟">步驟</h2>
+
+<ol>
+  <li>建立 linode 時，把 images 先按 x 掉</li>
+  <li>接下來進入 linode 設定，進到 storage 頁面，手動建立一個(label:Installer/type:raw/size:3000mb)</li>
+  <li>按右上角的…，選擇 rescue 使用安全模式開啟(/dev/sda 選擇剛剛建立的 Installer)</li>
+  <li>開啟 LISH Console 執行以下指令將 ISO 直接寫入到 Installer 中
+    <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nv">$ </span>wget https://enterprise.proxmox.com/iso/proxmox-ve_7.3-1.iso
+  <span class="nv">$ </span><span class="nb">dd </span><span class="k">if</span><span class="o">=</span>proxmox-ve_7.3-1.iso <span class="nv">of</span><span class="o">=</span>/dev/sda
+</code></pre></div>    </div>
+    <p>or</p>
+    <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nv">$ </span>curl https://enterprise.proxmox.com/iso/proxmox-ve_7.3-1.iso | <span class="nb">dd </span><span class="nv">of</span><span class="o">=</span>/dev/sda
+</code></pre></div>    </div>
+  </li>
+  <li>安裝完成後，切到 storage 頁面，再另外建一個硬碟(label:System/type:ext4/size:20000mb)</li>
+  <li>在 storage 使用 Installer 開機</li>
+  <li>開啟  LISH Console 切到 GLISH 即可看到安裝畫面</li>
+  <li>接下來就照正常安裝方式安裝</li>
+  <li>安裝完後就可以把 installer 刪除了</li>
+</ol>
+
+<h2 id="參考">參考</h2>
+<ol>
+  <li><a href="https://www.linode.com/docs/products/compute/compute-instances/guides/install-a-custom-distribution/#save-the-system-as-a-custom-image" target="_blank">linode.com docs - Install a Custom Linux Distribution on a Compute Instance</a></li>
+  <li><a href="https://www.cyberciti.biz/faq/add-configure-set-up-static-ip-address-on-debianlinux/" target="_blank">cyberciti.biz - Configuring Static IP on Debian 10 or 11</a></li>
+  <li><a href="https://www.haiyun.me/archives/1416.html" target="_blank">haiyun.me - Proxmox网桥通过SLAAC配置公网ipv6地址</a></li>
+  <li><a href="https://sakurabakiyoka.com/post/28.html" target="_blank">sakurabakiyoka.com - Proxmox 开IPV4 NAT+IPV6 SLAAC机</a></li>
+  <li><a href="https://www.wnark.com/archives/32.html" target="_blank">wnark.com - 单IPv4独服利用ProxmoxVE建立IPv4-NAT和IPv6虚拟机（小鸡</a></li>
+  <li><a href="https://www.jkg.tw/p2531/" target="_blank">jkgtw’s blog - 虛擬機跑起來！RouterOS CHR 軟路由效能輕鬆突破 1000M！</a></li>
+</ol>]]></content><author><name>anxgang</name></author><category term="Ubuntu" /><category term="ubuntu" /><category term="linode" /><category term="pve" /><summary type="html"><![CDATA[如何使用自定義的 iso 建立 Linode]]></summary></entry><entry><title type="html">Ubuntu 如何 mount windows 的分享資料夾</title><link href="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="alternate" type="text/html" title="Ubuntu 如何 mount windows 的分享資料夾" /><published>2023-02-02T00:00:00+08:00</published><updated>2023-02-02T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu%20copy</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/"><![CDATA[<p>ubuntu 如何連接 windows 的分享資料夾</p>
 
 <h2 id="目標">目標</h2>
 
