@@ -1,0 +1,1123 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Rails] google map使用方式 - ANxGANG</title>
+<meta name="description" content="本文使用 Ruby 2.3.1 / Rails 5.0.0   前言  此專案簡易介紹google map座標及網頁顯示的產生。主要功能如下：     可以只打地址(address欄位)，存檔時會自動產生經緯度   清單上的地址，分別以marker列在地圖上   點選marker可以顯示地址   相關gem     Google-Maps-for-Rails - 快速建立gmap及產生對應json的工具   geocoder - 快速轉換地址和位置座標的工具   bootstrap-generators - 簡易美化畫面(不使用也可以)   步驟  １）把gem全部加入並bundle  gem &#39;bootstrap-generators&#39;, &#39;~&gt; 3.3.4&#39; gem &#39;gmaps4rails&#39; gem &#39;geocoder&#39;   ２）安裝bootstrap-generators（需要再重開rails s或執行spring stop，頁面才會生效)  rails generate bootstrap:install   ３）建立一個名為gmap的scaffold，並去route把首頁指過去  rails g scaffold gmap latitude:float longitude:float address   root &#39;gmap#index&#39;   ４）安裝Google-Maps-for-Rails  gmap (注意[your API key]要到google api申請一組map用的並填上自己的API key)  &lt;!-- [path] application.html.erb --&gt; &lt;script src=&quot;//maps.google.com/maps/api/js?v=3.23&amp;key=[your API key]&quot;&gt;&lt;/script&gt; &lt;script src=&quot;//cdn.rawgit.com/mahnunchik/markerclustererplus/master/dist/markerclusterer.min.js&quot;&gt;&lt;/script&gt; &lt;script src=&#39;//cdn.rawgit.com/printercu/google-maps-utility-library-v3-read-only/master/infobox/src/infobox_packed.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt; &lt;!-- only if you need custom infoboxes --&gt;   須使用 undersore.js (可至http://underscorejs.org/ 下載) 把undersore-min放在 vendor/assets/javascripts/underscore-min.js  javascript  // [path] application.js //= require underscore //= require gmaps/google   在要顯示的網頁最下方加入  &lt;!-- [path] /app/views/gmaps/index.html.erb --&gt; &lt;div id=&quot;map&quot; style=&quot;width:100%;height:400px&quot;&gt;地圖預留&lt;/div&gt; &lt;script type=&quot;text/javascript&quot;&gt;   handler = Gmaps.build(&#39;Google&#39;);   handler.buildMap({ provider: {}, internal: {id: &#39;map&#39;}}, function(){     markers = handler.addMarkers(&lt;%= raw @hash.to_json %&gt;);     handler.bounds.extendWith(markers);     handler.fitMapToBounds();   }); &lt;/script&gt;   ５）安裝geocoder  # [path] gmap.rb geocoded_by :address        #從address欄位取出地址 after_validation :geocode   #將取出的地址自動轉為經緯度分別存在 latitude、longitude 欄位   ６）設定產生的json  # [path] gmaps_controller.rb def index    @gmaps = Gmap.all    @hash = Gmaps4rails.build_markers(@gmaps) do |gmap, marker|      marker.lat gmap.latitude      marker.lng gmap.longitude      marker.infowindow gmap.address   end end   ７）打完收工，成品如下    參考     https://www.youtube.com/watch?v=oi3yxYs8Y4Q   Google MAP API   Gmap4rails">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Rails] google map使用方式">
+<meta property="og:url" content="https://blog.anxgang.com/rails-google-map-usage/">
+
+
+  <meta property="og:description" content="本文使用 Ruby 2.3.1 / Rails 5.0.0   前言  此專案簡易介紹google map座標及網頁顯示的產生。主要功能如下：     可以只打地址(address欄位)，存檔時會自動產生經緯度   清單上的地址，分別以marker列在地圖上   點選marker可以顯示地址   相關gem     Google-Maps-for-Rails - 快速建立gmap及產生對應json的工具   geocoder - 快速轉換地址和位置座標的工具   bootstrap-generators - 簡易美化畫面(不使用也可以)   步驟  １）把gem全部加入並bundle  gem &#39;bootstrap-generators&#39;, &#39;~&gt; 3.3.4&#39; gem &#39;gmaps4rails&#39; gem &#39;geocoder&#39;   ２）安裝bootstrap-generators（需要再重開rails s或執行spring stop，頁面才會生效)  rails generate bootstrap:install   ３）建立一個名為gmap的scaffold，並去route把首頁指過去  rails g scaffold gmap latitude:float longitude:float address   root &#39;gmap#index&#39;   ４）安裝Google-Maps-for-Rails  gmap (注意[your API key]要到google api申請一組map用的並填上自己的API key)  &lt;!-- [path] application.html.erb --&gt; &lt;script src=&quot;//maps.google.com/maps/api/js?v=3.23&amp;key=[your API key]&quot;&gt;&lt;/script&gt; &lt;script src=&quot;//cdn.rawgit.com/mahnunchik/markerclustererplus/master/dist/markerclusterer.min.js&quot;&gt;&lt;/script&gt; &lt;script src=&#39;//cdn.rawgit.com/printercu/google-maps-utility-library-v3-read-only/master/infobox/src/infobox_packed.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt; &lt;!-- only if you need custom infoboxes --&gt;   須使用 undersore.js (可至http://underscorejs.org/ 下載) 把undersore-min放在 vendor/assets/javascripts/underscore-min.js  javascript  // [path] application.js //= require underscore //= require gmaps/google   在要顯示的網頁最下方加入  &lt;!-- [path] /app/views/gmaps/index.html.erb --&gt; &lt;div id=&quot;map&quot; style=&quot;width:100%;height:400px&quot;&gt;地圖預留&lt;/div&gt; &lt;script type=&quot;text/javascript&quot;&gt;   handler = Gmaps.build(&#39;Google&#39;);   handler.buildMap({ provider: {}, internal: {id: &#39;map&#39;}}, function(){     markers = handler.addMarkers(&lt;%= raw @hash.to_json %&gt;);     handler.bounds.extendWith(markers);     handler.fitMapToBounds();   }); &lt;/script&gt;   ５）安裝geocoder  # [path] gmap.rb geocoded_by :address        #從address欄位取出地址 after_validation :geocode   #將取出的地址自動轉為經緯度分別存在 latitude、longitude 欄位   ６）設定產生的json  # [path] gmaps_controller.rb def index    @gmaps = Gmap.all    @hash = Gmaps4rails.build_markers(@gmaps) do |gmap, marker|      marker.lat gmap.latitude      marker.lng gmap.longitude      marker.infowindow gmap.address   end end   ７）打完收工，成品如下    參考     https://www.youtube.com/watch?v=oi3yxYs8Y4Q   Google MAP API   Gmap4rails">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Rails] google map使用方式">
+  <meta name="twitter:description" content="本文使用 Ruby 2.3.1 / Rails 5.0.0   前言  此專案簡易介紹google map座標及網頁顯示的產生。主要功能如下：     可以只打地址(address欄位)，存檔時會自動產生經緯度   清單上的地址，分別以marker列在地圖上   點選marker可以顯示地址   相關gem     Google-Maps-for-Rails - 快速建立gmap及產生對應json的工具   geocoder - 快速轉換地址和位置座標的工具   bootstrap-generators - 簡易美化畫面(不使用也可以)   步驟  １）把gem全部加入並bundle  gem &#39;bootstrap-generators&#39;, &#39;~&gt; 3.3.4&#39; gem &#39;gmaps4rails&#39; gem &#39;geocoder&#39;   ２）安裝bootstrap-generators（需要再重開rails s或執行spring stop，頁面才會生效)  rails generate bootstrap:install   ３）建立一個名為gmap的scaffold，並去route把首頁指過去  rails g scaffold gmap latitude:float longitude:float address   root &#39;gmap#index&#39;   ４）安裝Google-Maps-for-Rails  gmap (注意[your API key]要到google api申請一組map用的並填上自己的API key)  &lt;!-- [path] application.html.erb --&gt; &lt;script src=&quot;//maps.google.com/maps/api/js?v=3.23&amp;key=[your API key]&quot;&gt;&lt;/script&gt; &lt;script src=&quot;//cdn.rawgit.com/mahnunchik/markerclustererplus/master/dist/markerclusterer.min.js&quot;&gt;&lt;/script&gt; &lt;script src=&#39;//cdn.rawgit.com/printercu/google-maps-utility-library-v3-read-only/master/infobox/src/infobox_packed.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt; &lt;!-- only if you need custom infoboxes --&gt;   須使用 undersore.js (可至http://underscorejs.org/ 下載) 把undersore-min放在 vendor/assets/javascripts/underscore-min.js  javascript  // [path] application.js //= require underscore //= require gmaps/google   在要顯示的網頁最下方加入  &lt;!-- [path] /app/views/gmaps/index.html.erb --&gt; &lt;div id=&quot;map&quot; style=&quot;width:100%;height:400px&quot;&gt;地圖預留&lt;/div&gt; &lt;script type=&quot;text/javascript&quot;&gt;   handler = Gmaps.build(&#39;Google&#39;);   handler.buildMap({ provider: {}, internal: {id: &#39;map&#39;}}, function(){     markers = handler.addMarkers(&lt;%= raw @hash.to_json %&gt;);     handler.bounds.extendWith(markers);     handler.fitMapToBounds();   }); &lt;/script&gt;   ５）安裝geocoder  # [path] gmap.rb geocoded_by :address        #從address欄位取出地址 after_validation :geocode   #將取出的地址自動轉為經緯度分別存在 latitude、longitude 欄位   ６）設定產生的json  # [path] gmaps_controller.rb def index    @gmaps = Gmap.all    @hash = Gmaps4rails.build_markers(@gmaps) do |gmap, marker|      marker.lat gmap.latitude      marker.lng gmap.longitude      marker.infowindow gmap.address   end end   ７）打完收工，成品如下    參考     https://www.youtube.com/watch?v=oi3yxYs8Y4Q   Google MAP API   Gmap4rails">
+  <meta name="twitter:url" content="https://blog.anxgang.com/rails-google-map-usage/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-07-17T07:32:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/rails-google-map-usage/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Rails] google map使用方式">
+        
+        
+        <meta itemprop="description"
+            content="  本文使用 Ruby 2.3.1 / Rails 5.0.0前言此專案簡易介紹google map座標及網頁顯示的產生。主要功能如下：  可以只打地址(address欄位)，存檔時會自動產生經緯度  清單上的地址，分別以marker列在地圖上  點選marker可以顯示地址相關gem  Google-Maps-for-Rails - 快速建立gmap及產生對應json的工具  geocoder - 快速轉換地址和位置座標的工具  bootstrap-generators - 簡易美化畫面(不使用也可以)步驟１）把gem全部加入並bundlegem &#39;bootstrap-generators&#39;, &#39;~&gt; 3.3.4&#39;gem &#39;gmaps4rails&#39;gem &#39;geocoder&#39;２）安裝bootstrap-generators（需要再重開rails s或執行spring stop，頁面才會生效)rails generate bootstrap:install３）建立一個名為gmap的scaffold，並去route把首頁指過去rails g scaffold gmap latitude:float longitude:float addressroot &#39;gmap#index&#39;４）安裝Google-Maps-for-Railsgmap (注意[your API key]要到google api申請一組map用的並填上自己的API key)&lt;!-- [path] application.html.erb --&gt;&lt;script src=&quot;//maps.google.com/maps/api/js?v=3.23&amp;key=[your API key]&quot;&gt;&lt;/script&gt;&lt;script src=&quot;//cdn.rawgit.com/mahnunchik/markerclustererplus/master/dist/markerclusterer.min.js&quot;&gt;&lt;/script&gt;&lt;script src=&#39;//cdn.rawgit.com/printercu/google-maps-utility-library-v3-read-only/master/infobox/src/infobox_packed.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt; &lt;!-- only if you need custom infoboxes --&gt;須使用 undersore.js (可至http://underscorejs.org/ 下載)把undersore-min放在 vendor/assets/javascripts/underscore-min.jsjavascript// [path] application.js//= require underscore//= require gmaps/google在要顯示的網頁最下方加入&lt;!-- [path] /app/views/gmaps/index.html.erb --&gt;&lt;div id=&quot;map&quot; style=&quot;width:100%;height:400px&quot;&gt;地圖預留&lt;/div&gt;&lt;script type=&quot;text/javascript&quot;&gt;  handler = Gmaps.build(&#39;Google&#39;);  handler.buildMap({ provider: {}, internal: {id: &#39;map&#39;}}, function(){    markers = handler.addMarkers(&lt;%= raw @hash.to_json %&gt;);    handler.bounds.extendWith(markers);    handler.fitMapToBounds();  });&lt;/script&gt;５）安裝geocoder# [path] gmap.rbgeocoded_by :address        #從address欄位取出地址after_validation :geocode   #將取出的地址自動轉為經緯度分別存在 latitude、longitude 欄位６）設定產生的json# [path] gmaps_controller.rbdef index   @gmaps = Gmap.all   @hash = Gmaps4rails.build_markers(@gmaps) do |gmap, marker|     marker.lat gmap.latitude     marker.lng gmap.longitude     marker.infowindow gmap.address  endend７）打完收工，成品如下參考  https://www.youtube.com/watch?v=oi3yxYs8Y4Q  Google MAP API  Gmap4rails">
+        
+        <meta itemprop="datePublished" content="2016-07-17T07:32:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/rails-google-map-usage/" class="u-url"
+                        itemprop="url">[Rails] google map使用方式
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-07-17T07:32:00+08:00">2016-07-17</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#前言">前言</a></li><li><a href="#相關gem">相關gem</a></li><li><a href="#步驟">步驟</a><ul><li><a href="#１把gem全部加入並bundle">１）把gem全部加入並bundle</a></li><li><a href="#２安裝bootstrap-generators需要再重開rails-s或執行spring-stop頁面才會生效">２）安裝bootstrap-generators（需要再重開rails s或執行spring stop，頁面才會生效)</a></li><li><a href="#３建立一個名為gmap的scaffold並去route把首頁指過去">３）建立一個名為gmap的scaffold，並去route把首頁指過去</a></li><li><a href="#４安裝google-maps-for-rails">４）安裝Google-Maps-for-Rails</a></li><li><a href="#５安裝geocoder">５）安裝geocoder</a></li><li><a href="#６設定產生的json">６）設定產生的json</a></li><li><a href="#７打完收工成品如下">７）打完收工，成品如下</a></li></ul></li><li><a href="#參考">參考</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <blockquote>
+  <p>本文使用 Ruby 2.3.1 / Rails 5.0.0</p>
+</blockquote>
+
+<h2 id="前言">前言</h2>
+
+<p>此專案簡易介紹google map座標及網頁顯示的產生。主要功能如下：</p>
+
+<ol>
+  <li>可以只打地址(address欄位)，存檔時會自動產生經緯度</li>
+  <li>清單上的地址，分別以marker列在地圖上</li>
+  <li>點選marker可以顯示地址</li>
+</ol>
+
+<h2 id="相關gem">相關gem</h2>
+
+<ul>
+  <li><a href="https://github.com/apneadiving/Google-Maps-for-Rails">Google-Maps-for-Rails</a> - 快速建立gmap及產生對應json的工具</li>
+  <li><a href="https://github.com/alexreisner/geocoder">geocoder</a> - 快速轉換地址和位置座標的工具</li>
+  <li><a href="https://github.com/decioferreira/bootstrap-generators">bootstrap-generators</a> - 簡易美化畫面(不使用也可以)</li>
+</ul>
+
+<h2 id="步驟">步驟</h2>
+
+<h3 id="１把gem全部加入並bundle">１）把gem全部加入並bundle</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gem</span> <span class="s1">'bootstrap-generators'</span><span class="p">,</span> <span class="s1">'~&gt; 3.3.4'</span>
+<span class="n">gem</span> <span class="s1">'gmaps4rails'</span>
+<span class="n">gem</span> <span class="s1">'geocoder'</span>
+</code></pre></div></div>
+
+<h3 id="２安裝bootstrap-generators需要再重開rails-s或執行spring-stop頁面才會生效">２）安裝bootstrap-generators（需要再重開rails s或執行spring stop，頁面才會生效)</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate bootstrap:install
+</code></pre></div></div>
+
+<h3 id="３建立一個名為gmap的scaffold並去route把首頁指過去">３）建立一個名為gmap的scaffold，並去route把首頁指過去</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g scaffold gmap latitude:float longitude:float address
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">root</span> <span class="s1">'gmap#index'</span>
+</code></pre></div></div>
+
+<h3 id="４安裝google-maps-for-rails">４）安裝Google-Maps-for-Rails</h3>
+
+<p>gmap (注意[your API key]要到google api申請一組map用的並填上自己的API key)</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] application.html.erb --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"//maps.google.com/maps/api/js?v=3.23&amp;key=[your API key]"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"//cdn.rawgit.com/mahnunchik/markerclustererplus/master/dist/markerclusterer.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">'//cdn.rawgit.com/printercu/google-maps-utility-library-v3-read-only/master/infobox/src/infobox_packed.js'</span> <span class="na">type=</span><span class="s">'text/javascript'</span><span class="nt">&gt;&lt;/script&gt;</span> <span class="c">&lt;!-- only if you need custom infoboxes --&gt;</span>
+</code></pre></div></div>
+
+<p>須使用 undersore.js (可至<a href="http://underscorejs.org/">http://underscorejs.org/</a> 下載)
+把<a href="http://underscorejs.org/underscore-min.js">undersore-min</a>放在 vendor/assets/javascripts/underscore-min.js</p>
+
+<p>javascript</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// [path] application.js</span>
+<span class="c1">//= require underscore</span>
+<span class="c1">//= require gmaps/google</span>
+</code></pre></div></div>
+
+<p>在要顯示的網頁最下方加入</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] /app/views/gmaps/index.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"map"</span> <span class="na">style=</span><span class="s">"width:100%;height:400px"</span><span class="nt">&gt;</span>地圖預留<span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span><span class="nt">&gt;</span>
+  <span class="nx">handler</span> <span class="o">=</span> <span class="nx">Gmaps</span><span class="p">.</span><span class="nf">build</span><span class="p">(</span><span class="dl">'</span><span class="s1">Google</span><span class="dl">'</span><span class="p">);</span>
+  <span class="nx">handler</span><span class="p">.</span><span class="nf">buildMap</span><span class="p">({</span> <span class="na">provider</span><span class="p">:</span> <span class="p">{},</span> <span class="na">internal</span><span class="p">:</span> <span class="p">{</span><span class="na">id</span><span class="p">:</span> <span class="dl">'</span><span class="s1">map</span><span class="dl">'</span><span class="p">}},</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">markers</span> <span class="o">=</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">addMarkers</span><span class="p">(</span><span class="cp">&lt;%=</span> <span class="n">raw</span> <span class="vi">@hash</span><span class="p">.</span><span class="nf">to_json</span> <span class="cp">%&gt;</span><span class="p">);</span>
+    <span class="nx">handler</span><span class="p">.</span><span class="nx">bounds</span><span class="p">.</span><span class="nf">extendWith</span><span class="p">(</span><span class="nx">markers</span><span class="p">);</span>
+    <span class="nx">handler</span><span class="p">.</span><span class="nf">fitMapToBounds</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="nt">&lt;/script&gt;</span>
+</code></pre></div></div>
+
+<h3 id="５安裝geocoder">５）安裝geocoder</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gmap.rb</span>
+<span class="n">geocoded_by</span> <span class="ss">:address</span>        <span class="c1">#從address欄位取出地址</span>
+<span class="n">after_validation</span> <span class="ss">:geocode</span>   <span class="c1">#將取出的地址自動轉為經緯度分別存在 latitude、longitude 欄位</span>
+</code></pre></div></div>
+
+<h3 id="６設定產生的json">６）設定產生的json</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gmaps_controller.rb</span>
+<span class="k">def</span> <span class="nf">index</span>
+   <span class="vi">@gmaps</span> <span class="o">=</span> <span class="no">Gmap</span><span class="p">.</span><span class="nf">all</span>
+   <span class="vi">@hash</span> <span class="o">=</span> <span class="no">Gmaps4rails</span><span class="p">.</span><span class="nf">build_markers</span><span class="p">(</span><span class="vi">@gmaps</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">gmap</span><span class="p">,</span> <span class="n">marker</span><span class="o">|</span>
+     <span class="n">marker</span><span class="p">.</span><span class="nf">lat</span> <span class="n">gmap</span><span class="p">.</span><span class="nf">latitude</span>
+     <span class="n">marker</span><span class="p">.</span><span class="nf">lng</span> <span class="n">gmap</span><span class="p">.</span><span class="nf">longitude</span>
+     <span class="n">marker</span><span class="p">.</span><span class="nf">infowindow</span> <span class="n">gmap</span><span class="p">.</span><span class="nf">address</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="７打完收工成品如下">７）打完收工，成品如下</h3>
+
+<p><img src="http://user-image.logdown.io/user/16703/blog/16012/post/773771/TTsjW3DpSAy8pJtiPWGv_%E8%9E%A2%E5%B9%95%E5%BF%AB%E7%85%A7%202016-07-17%20%E4%B8%8B%E5%8D%884.30.20.png" alt="螢幕快照 2016-07-17 下午4.30.20.png" /></p>
+
+<h2 id="參考">參考</h2>
+
+<ol>
+  <li><a href="https://www.youtube.com/watch?v=oi3yxYs8Y4Q">https://www.youtube.com/watch?v=oi3yxYs8Y4Q</a></li>
+  <li><a href="https://developers.google.com/maps/?hl=zh-tw">Google MAP API</a></li>
+  <li><a href="http://apneadiving.github.io/">Gmap4rails</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-07-17T07:32:00+08:00">July 17, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BRails%5D+google+map%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F%20https%3A%2F%2Fblog.anxgang.com%2Frails-google-map-usage%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Frails-google-map-usage%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Frails-google-map-usage%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/ubuntu-1604-installation-problems/" class="pagination--pager" title="[Ubuntu] 16.04 安裝問題
+">上一篇</a>
+    
+    
+      <a href="/rails-amazon-mws-api-usage/" class="pagination--pager" title="[Rails] Amazon MWS API 使用方式
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/rails-google-map-usage/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/rails-google-map-usage"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

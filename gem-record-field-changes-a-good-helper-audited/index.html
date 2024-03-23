@@ -1,0 +1,1207 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Gem] 紀錄欄位異動的好幫手 audited - ANxGANG</title>
+<meta name="description" content="非常棒的gem  audited https://github.com/collectiveidea/audited  安裝方式  gem &quot;audited&quot;, &quot;~&gt; 4.3&quot;   rails 5.0 要加上  gem &quot;rails-observers&quot;, github: &#39;rails/rails-observers&#39;   產生table  $ rails generate audited:install $ rake db:migrate   更新方式  如果官方有出新版本，有異動欄位，你想更新的話  $ rails generate audited:upgrade $ rake db:migrate   使用方式  只需在您的model上 audited ：  class User &lt; ActiveRecord::Base   audited end   預設情況下，無論何時創建，更新或刪除用戶，都會建立新的紀錄。  user = User.create!(name: &quot;Steve&quot;) user.audits.count # =&gt; 1 user.update_attributes!(name: &quot;Ryan&quot;) user.audits.count # =&gt; 2 user.destroy user.audits.count # =&gt; 3   紀錄包含對model採取了什麼行動，以及做出了哪些修改。  user.update_attributes!(name: &quot;Ryan&quot;) audit = user.audits.last audit.action # =&gt; &quot;update&quot; audit.audited_changes # =&gt; {&quot;name&quot;=&gt;[&quot;Steve&quot;, &quot;Ryan&quot;]}   可以通過索引或日期取得該次版本紀錄，或列出所有修訂版本。  user.revisions user.revision(1) user.revision_at(Date.parse(&quot;2016-01-01&quot;))   限制記錄欄位 預設情況下，任何屬性更改都會建立新的紀錄。但仍可以手動指定需要紀錄的欄位。  class User &lt; ActiveRecord::Base   # 預設，全部欄位皆紀錄   audited    # 單一欄位   audited only: :name    # 複數欄位   audited only: [:name, :address]    # 排除欄位   audited except: :password end   特殊callback 預設情況下，可以進行新增、更新或刪除紀錄。但仍可以限定操作。  class User &lt; ActiveRecord::Base   # 預設，全部動作皆可   audited    # 限制name只紀錄更新和刪除   audited only: :name, on: [:update, :destroy] end   加入備註 可以在model上使用 audit_comment 屬性為每筆紀錄加入註解  user.update_attributes!(name: &quot;Ryan&quot;, audit_comment: &quot;Changing name, just because&quot;) user.audits.last.comment # =&gt; &quot;Changing name, just because&quot;   可以選擇加入：comment_required選項，以便對所有紀錄都要求註解。  class User &lt; ActiveRecord::Base   audited :comment_required =&gt; true end   追蹤使用者  如果您在Rails中，則請求中進行的所有紀錄更改將自動被列為目前使用者。預設情況下，Audited使用controller中的current_user方法。  class PostsController &lt; ApplicationController   def create     current_user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;     @post = Post.create(params[:post])     @post.audits.last.user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;   end end   要使用除current_user之外的方法，請在初始化的程式碼中放入以下內容： Audited.current_user_method = :authenticated_user   除此之外，審核也可以使用as_user方法直接指定記錄的使用者： Audited::Audit.as_user(User.find(1)) do   post.update_attribute!(title: &quot;Hello, world!&quot;) end post.audits.last.user # =&gt; #&lt;User id: 1&gt;   自定義的Auditor 您可能需要不時使用自定義審核程序。它可以通過簡單的傳遞一個字符串： class ApplicationController &lt; ActionController::Base   def authenticated_user     if current_user       current_user     else       &#39;Elon Musk&#39;     end   end end   關聯的應用 有時，model相關聯很有用。例如，給定以下model：  class User &lt; ActiveRecord::Base   belongs_to :company   audited end  class Company &lt; ActiveRecord::Base   has_many :users end   對使用者的每個更改都進行紀錄，但如果您想要取得屬於特定公司使用者的所有紀錄該怎麼辦？您可以使用：associated_with選項： class User &lt; ActiveRecord::Base   belongs_to :company   audited associated_with: :company end  class Company &lt; ActiveRecord::Base   has_many :users   has_associated_audits end   現在，當使用者建立紀錄時，該用戶的公司也會一起保存。讓間接相關的公司紀錄變得更容易（也更快）。 company = Company.create!(name: &quot;Collective Idea&quot;) user = company.users.create!(name: &quot;Steve&quot;) user.update_attribute!(name: &quot;Steve Richert&quot;) user.audits.last.associated # =&gt; #&lt;Company name: &quot;Collective Idea&quot;&gt; company.associated_audits.last.auditable # =&gt; #&lt;User name: &quot;Steve Richert&quot;&gt;   暫時禁用 如果要暫時的禁用記錄某些紀錄，有幾種方法可使用： @user.save_without_auditing  或 @user.without_auditing do   @user.save end   指定欄位禁用 User.non_audited_columns = [:first_name, :last_name]   整個model禁用 User.auditing_enabled = false">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Gem] 紀錄欄位異動的好幫手 audited">
+<meta property="og:url" content="https://blog.anxgang.com/gem-record-field-changes-a-good-helper-audited/">
+
+
+  <meta property="og:description" content="非常棒的gem  audited https://github.com/collectiveidea/audited  安裝方式  gem &quot;audited&quot;, &quot;~&gt; 4.3&quot;   rails 5.0 要加上  gem &quot;rails-observers&quot;, github: &#39;rails/rails-observers&#39;   產生table  $ rails generate audited:install $ rake db:migrate   更新方式  如果官方有出新版本，有異動欄位，你想更新的話  $ rails generate audited:upgrade $ rake db:migrate   使用方式  只需在您的model上 audited ：  class User &lt; ActiveRecord::Base   audited end   預設情況下，無論何時創建，更新或刪除用戶，都會建立新的紀錄。  user = User.create!(name: &quot;Steve&quot;) user.audits.count # =&gt; 1 user.update_attributes!(name: &quot;Ryan&quot;) user.audits.count # =&gt; 2 user.destroy user.audits.count # =&gt; 3   紀錄包含對model採取了什麼行動，以及做出了哪些修改。  user.update_attributes!(name: &quot;Ryan&quot;) audit = user.audits.last audit.action # =&gt; &quot;update&quot; audit.audited_changes # =&gt; {&quot;name&quot;=&gt;[&quot;Steve&quot;, &quot;Ryan&quot;]}   可以通過索引或日期取得該次版本紀錄，或列出所有修訂版本。  user.revisions user.revision(1) user.revision_at(Date.parse(&quot;2016-01-01&quot;))   限制記錄欄位 預設情況下，任何屬性更改都會建立新的紀錄。但仍可以手動指定需要紀錄的欄位。  class User &lt; ActiveRecord::Base   # 預設，全部欄位皆紀錄   audited    # 單一欄位   audited only: :name    # 複數欄位   audited only: [:name, :address]    # 排除欄位   audited except: :password end   特殊callback 預設情況下，可以進行新增、更新或刪除紀錄。但仍可以限定操作。  class User &lt; ActiveRecord::Base   # 預設，全部動作皆可   audited    # 限制name只紀錄更新和刪除   audited only: :name, on: [:update, :destroy] end   加入備註 可以在model上使用 audit_comment 屬性為每筆紀錄加入註解  user.update_attributes!(name: &quot;Ryan&quot;, audit_comment: &quot;Changing name, just because&quot;) user.audits.last.comment # =&gt; &quot;Changing name, just because&quot;   可以選擇加入：comment_required選項，以便對所有紀錄都要求註解。  class User &lt; ActiveRecord::Base   audited :comment_required =&gt; true end   追蹤使用者  如果您在Rails中，則請求中進行的所有紀錄更改將自動被列為目前使用者。預設情況下，Audited使用controller中的current_user方法。  class PostsController &lt; ApplicationController   def create     current_user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;     @post = Post.create(params[:post])     @post.audits.last.user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;   end end   要使用除current_user之外的方法，請在初始化的程式碼中放入以下內容： Audited.current_user_method = :authenticated_user   除此之外，審核也可以使用as_user方法直接指定記錄的使用者： Audited::Audit.as_user(User.find(1)) do   post.update_attribute!(title: &quot;Hello, world!&quot;) end post.audits.last.user # =&gt; #&lt;User id: 1&gt;   自定義的Auditor 您可能需要不時使用自定義審核程序。它可以通過簡單的傳遞一個字符串： class ApplicationController &lt; ActionController::Base   def authenticated_user     if current_user       current_user     else       &#39;Elon Musk&#39;     end   end end   關聯的應用 有時，model相關聯很有用。例如，給定以下model：  class User &lt; ActiveRecord::Base   belongs_to :company   audited end  class Company &lt; ActiveRecord::Base   has_many :users end   對使用者的每個更改都進行紀錄，但如果您想要取得屬於特定公司使用者的所有紀錄該怎麼辦？您可以使用：associated_with選項： class User &lt; ActiveRecord::Base   belongs_to :company   audited associated_with: :company end  class Company &lt; ActiveRecord::Base   has_many :users   has_associated_audits end   現在，當使用者建立紀錄時，該用戶的公司也會一起保存。讓間接相關的公司紀錄變得更容易（也更快）。 company = Company.create!(name: &quot;Collective Idea&quot;) user = company.users.create!(name: &quot;Steve&quot;) user.update_attribute!(name: &quot;Steve Richert&quot;) user.audits.last.associated # =&gt; #&lt;Company name: &quot;Collective Idea&quot;&gt; company.associated_audits.last.auditable # =&gt; #&lt;User name: &quot;Steve Richert&quot;&gt;   暫時禁用 如果要暫時的禁用記錄某些紀錄，有幾種方法可使用： @user.save_without_auditing  或 @user.without_auditing do   @user.save end   指定欄位禁用 User.non_audited_columns = [:first_name, :last_name]   整個model禁用 User.auditing_enabled = false">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Gem] 紀錄欄位異動的好幫手 audited">
+  <meta name="twitter:description" content="非常棒的gem  audited https://github.com/collectiveidea/audited  安裝方式  gem &quot;audited&quot;, &quot;~&gt; 4.3&quot;   rails 5.0 要加上  gem &quot;rails-observers&quot;, github: &#39;rails/rails-observers&#39;   產生table  $ rails generate audited:install $ rake db:migrate   更新方式  如果官方有出新版本，有異動欄位，你想更新的話  $ rails generate audited:upgrade $ rake db:migrate   使用方式  只需在您的model上 audited ：  class User &lt; ActiveRecord::Base   audited end   預設情況下，無論何時創建，更新或刪除用戶，都會建立新的紀錄。  user = User.create!(name: &quot;Steve&quot;) user.audits.count # =&gt; 1 user.update_attributes!(name: &quot;Ryan&quot;) user.audits.count # =&gt; 2 user.destroy user.audits.count # =&gt; 3   紀錄包含對model採取了什麼行動，以及做出了哪些修改。  user.update_attributes!(name: &quot;Ryan&quot;) audit = user.audits.last audit.action # =&gt; &quot;update&quot; audit.audited_changes # =&gt; {&quot;name&quot;=&gt;[&quot;Steve&quot;, &quot;Ryan&quot;]}   可以通過索引或日期取得該次版本紀錄，或列出所有修訂版本。  user.revisions user.revision(1) user.revision_at(Date.parse(&quot;2016-01-01&quot;))   限制記錄欄位 預設情況下，任何屬性更改都會建立新的紀錄。但仍可以手動指定需要紀錄的欄位。  class User &lt; ActiveRecord::Base   # 預設，全部欄位皆紀錄   audited    # 單一欄位   audited only: :name    # 複數欄位   audited only: [:name, :address]    # 排除欄位   audited except: :password end   特殊callback 預設情況下，可以進行新增、更新或刪除紀錄。但仍可以限定操作。  class User &lt; ActiveRecord::Base   # 預設，全部動作皆可   audited    # 限制name只紀錄更新和刪除   audited only: :name, on: [:update, :destroy] end   加入備註 可以在model上使用 audit_comment 屬性為每筆紀錄加入註解  user.update_attributes!(name: &quot;Ryan&quot;, audit_comment: &quot;Changing name, just because&quot;) user.audits.last.comment # =&gt; &quot;Changing name, just because&quot;   可以選擇加入：comment_required選項，以便對所有紀錄都要求註解。  class User &lt; ActiveRecord::Base   audited :comment_required =&gt; true end   追蹤使用者  如果您在Rails中，則請求中進行的所有紀錄更改將自動被列為目前使用者。預設情況下，Audited使用controller中的current_user方法。  class PostsController &lt; ApplicationController   def create     current_user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;     @post = Post.create(params[:post])     @post.audits.last.user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;   end end   要使用除current_user之外的方法，請在初始化的程式碼中放入以下內容： Audited.current_user_method = :authenticated_user   除此之外，審核也可以使用as_user方法直接指定記錄的使用者： Audited::Audit.as_user(User.find(1)) do   post.update_attribute!(title: &quot;Hello, world!&quot;) end post.audits.last.user # =&gt; #&lt;User id: 1&gt;   自定義的Auditor 您可能需要不時使用自定義審核程序。它可以通過簡單的傳遞一個字符串： class ApplicationController &lt; ActionController::Base   def authenticated_user     if current_user       current_user     else       &#39;Elon Musk&#39;     end   end end   關聯的應用 有時，model相關聯很有用。例如，給定以下model：  class User &lt; ActiveRecord::Base   belongs_to :company   audited end  class Company &lt; ActiveRecord::Base   has_many :users end   對使用者的每個更改都進行紀錄，但如果您想要取得屬於特定公司使用者的所有紀錄該怎麼辦？您可以使用：associated_with選項： class User &lt; ActiveRecord::Base   belongs_to :company   audited associated_with: :company end  class Company &lt; ActiveRecord::Base   has_many :users   has_associated_audits end   現在，當使用者建立紀錄時，該用戶的公司也會一起保存。讓間接相關的公司紀錄變得更容易（也更快）。 company = Company.create!(name: &quot;Collective Idea&quot;) user = company.users.create!(name: &quot;Steve&quot;) user.update_attribute!(name: &quot;Steve Richert&quot;) user.audits.last.associated # =&gt; #&lt;Company name: &quot;Collective Idea&quot;&gt; company.associated_audits.last.auditable # =&gt; #&lt;User name: &quot;Steve Richert&quot;&gt;   暫時禁用 如果要暫時的禁用記錄某些紀錄，有幾種方法可使用： @user.save_without_auditing  或 @user.without_auditing do   @user.save end   指定欄位禁用 User.non_audited_columns = [:first_name, :last_name]   整個model禁用 User.auditing_enabled = false">
+  <meta name="twitter:url" content="https://blog.anxgang.com/gem-record-field-changes-a-good-helper-audited/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-12-01T01:18:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/gem-record-field-changes-a-good-helper-audited/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Gem] 紀錄欄位異動的好幫手 audited">
+        
+        
+        <meta itemprop="description"
+            content="非常棒的gemaudited https://github.com/collectiveidea/audited安裝方式gem &quot;audited&quot;, &quot;~&gt; 4.3&quot;rails 5.0 要加上gem &quot;rails-observers&quot;, github: &#39;rails/rails-observers&#39;產生table$ rails generate audited:install$ rake db:migrate更新方式如果官方有出新版本，有異動欄位，你想更新的話$ rails generate audited:upgrade$ rake db:migrate使用方式只需在您的model上 audited ：class User &lt; ActiveRecord::Base  auditedend預設情況下，無論何時創建，更新或刪除用戶，都會建立新的紀錄。user = User.create!(name: &quot;Steve&quot;)user.audits.count # =&gt; 1user.update_attributes!(name: &quot;Ryan&quot;)user.audits.count # =&gt; 2user.destroyuser.audits.count # =&gt; 3紀錄包含對model採取了什麼行動，以及做出了哪些修改。user.update_attributes!(name: &quot;Ryan&quot;)audit = user.audits.lastaudit.action # =&gt; &quot;update&quot;audit.audited_changes # =&gt; {&quot;name&quot;=&gt;[&quot;Steve&quot;, &quot;Ryan&quot;]}可以通過索引或日期取得該次版本紀錄，或列出所有修訂版本。user.revisionsuser.revision(1)user.revision_at(Date.parse(&quot;2016-01-01&quot;))限制記錄欄位預設情況下，任何屬性更改都會建立新的紀錄。但仍可以手動指定需要紀錄的欄位。class User &lt; ActiveRecord::Base  # 預設，全部欄位皆紀錄  audited  # 單一欄位  audited only: :name  # 複數欄位  audited only: [:name, :address]  # 排除欄位  audited except: :passwordend特殊callback預設情況下，可以進行新增、更新或刪除紀錄。但仍可以限定操作。class User &lt; ActiveRecord::Base  # 預設，全部動作皆可  audited  # 限制name只紀錄更新和刪除  audited only: :name, on: [:update, :destroy]end加入備註可以在model上使用 audit_comment 屬性為每筆紀錄加入註解user.update_attributes!(name: &quot;Ryan&quot;, audit_comment: &quot;Changing name, just because&quot;)user.audits.last.comment # =&gt; &quot;Changing name, just because&quot;可以選擇加入：comment_required選項，以便對所有紀錄都要求註解。class User &lt; ActiveRecord::Base  audited :comment_required =&gt; trueend追蹤使用者如果您在Rails中，則請求中進行的所有紀錄更改將自動被列為目前使用者。預設情況下，Audited使用controller中的current_user方法。class PostsController &lt; ApplicationController  def create    current_user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;    @post = Post.create(params[:post])    @post.audits.last.user # =&gt; #&lt;User name: &quot;Steve&quot;&gt;  endend要使用除current_user之外的方法，請在初始化的程式碼中放入以下內容：Audited.current_user_method = :authenticated_user除此之外，審核也可以使用as_user方法直接指定記錄的使用者：Audited::Audit.as_user(User.find(1)) do  post.update_attribute!(title: &quot;Hello, world!&quot;)endpost.audits.last.user # =&gt; #&lt;User id: 1&gt;自定義的Auditor您可能需要不時使用自定義審核程序。它可以通過簡單的傳遞一個字符串：class ApplicationController &lt; ActionController::Base  def authenticated_user    if current_user      current_user    else      &#39;Elon Musk&#39;    end  endend關聯的應用有時，model相關聯很有用。例如，給定以下model：class User &lt; ActiveRecord::Base  belongs_to :company  auditedendclass Company &lt; ActiveRecord::Base  has_many :usersend對使用者的每個更改都進行紀錄，但如果您想要取得屬於特定公司使用者的所有紀錄該怎麼辦？您可以使用：associated_with選項：class User &lt; ActiveRecord::Base  belongs_to :company  audited associated_with: :companyendclass Company &lt; ActiveRecord::Base  has_many :users  has_associated_auditsend現在，當使用者建立紀錄時，該用戶的公司也會一起保存。讓間接相關的公司紀錄變得更容易（也更快）。company = Company.create!(name: &quot;Collective Idea&quot;)user = company.users.create!(name: &quot;Steve&quot;)user.update_attribute!(name: &quot;Steve Richert&quot;)user.audits.last.associated # =&gt; #&lt;Company name: &quot;Collective Idea&quot;&gt;company.associated_audits.last.auditable # =&gt; #&lt;User name: &quot;Steve Richert&quot;&gt;暫時禁用如果要暫時的禁用記錄某些紀錄，有幾種方法可使用：@user.save_without_auditing或@user.without_auditing do  @user.saveend指定欄位禁用User.non_audited_columns = [:first_name, :last_name]整個model禁用User.auditing_enabled = false">
+        
+        <meta itemprop="datePublished" content="2016-12-01T01:18:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/gem-record-field-changes-a-good-helper-audited/" class="u-url"
+                        itemprop="url">[Gem] 紀錄欄位異動的好幫手 audited
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-12-01T01:18:00+08:00">2016-12-01</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#非常棒的gem">非常棒的gem</a></li><li><a href="#安裝方式">安裝方式</a></li><li><a href="#更新方式">更新方式</a></li><li><a href="#使用方式">使用方式</a></li><li><a href="#限制記錄欄位">限制記錄欄位</a></li><li><a href="#特殊callback">特殊callback</a></li><li><a href="#加入備註">加入備註</a></li><li><a href="#追蹤使用者">追蹤使用者</a></li><li><a href="#自定義的auditor">自定義的Auditor</a></li><li><a href="#關聯的應用">關聯的應用</a></li><li><a href="#暫時禁用">暫時禁用</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="非常棒的gem">非常棒的gem</h1>
+
+<p>audited https://github.com/collectiveidea/audited</p>
+
+<h1 id="安裝方式">安裝方式</h1>
+
+<pre><code class="language-gem">gem "audited", "~&gt; 4.3"
+</code></pre>
+
+<p>rails 5.0 要加上</p>
+
+<pre><code class="language-gem">gem "rails-observers", github: 'rails/rails-observers'
+</code></pre>
+
+<p>產生table</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rails generate audited:install
+<span class="nv">$ </span>rake db:migrate
+</code></pre></div></div>
+
+<h1 id="更新方式">更新方式</h1>
+
+<p>如果官方有出新版本，有異動欄位，你想更新的話</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rails generate audited:upgrade
+<span class="nv">$ </span>rake db:migrate
+</code></pre></div></div>
+
+<h1 id="使用方式">使用方式</h1>
+
+<p>只需在您的model上 <code class="language-plaintext highlighter-rouge">audited</code> ：</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">audited</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>預設情況下，無論何時創建，更新或刪除用戶，都會建立新的紀錄。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Steve"</span><span class="p">)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">count</span> <span class="c1"># =&gt; 1</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">update_attributes!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Ryan"</span><span class="p">)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">count</span> <span class="c1"># =&gt; 2</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">destroy</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">count</span> <span class="c1"># =&gt; 3</span>
+</code></pre></div></div>
+
+<p>紀錄包含對model採取了什麼行動，以及做出了哪些修改。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">user</span><span class="p">.</span><span class="nf">update_attributes!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Ryan"</span><span class="p">)</span>
+<span class="n">audit</span> <span class="o">=</span> <span class="n">user</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">last</span>
+<span class="n">audit</span><span class="p">.</span><span class="nf">action</span> <span class="c1"># =&gt; "update"</span>
+<span class="n">audit</span><span class="p">.</span><span class="nf">audited_changes</span> <span class="c1"># =&gt; {"name"=&gt;["Steve", "Ryan"]}</span>
+</code></pre></div></div>
+
+<p>可以通過索引或日期取得該次版本紀錄，或列出所有修訂版本。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">user</span><span class="p">.</span><span class="nf">revisions</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">revision</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">revision_at</span><span class="p">(</span><span class="no">Date</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="s2">"2016-01-01"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h1 id="限制記錄欄位">限制記錄欄位</h1>
+<p>預設情況下，任何屬性更改都會建立新的紀錄。但仍可以手動指定需要紀錄的欄位。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="c1"># 預設，全部欄位皆紀錄</span>
+  <span class="n">audited</span>
+
+  <span class="c1"># 單一欄位</span>
+  <span class="n">audited</span> <span class="ss">only: :name</span>
+
+  <span class="c1"># 複數欄位</span>
+  <span class="n">audited</span> <span class="ss">only: </span><span class="p">[</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:address</span><span class="p">]</span>
+
+  <span class="c1"># 排除欄位</span>
+  <span class="n">audited</span> <span class="ss">except: :password</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="特殊callback">特殊callback</h1>
+<p>預設情況下，可以進行新增、更新或刪除紀錄。但仍可以限定操作。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="c1"># 預設，全部動作皆可</span>
+  <span class="n">audited</span>
+
+  <span class="c1"># 限制name只紀錄更新和刪除</span>
+  <span class="n">audited</span> <span class="ss">only: :name</span><span class="p">,</span> <span class="ss">on: </span><span class="p">[</span><span class="ss">:update</span><span class="p">,</span> <span class="ss">:destroy</span><span class="p">]</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="加入備註">加入備註</h1>
+<p>可以在model上使用 <code class="language-plaintext highlighter-rouge">audit_comment</code> 屬性為每筆紀錄加入註解</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">user</span><span class="p">.</span><span class="nf">update_attributes!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Ryan"</span><span class="p">,</span> <span class="ss">audit_comment: </span><span class="s2">"Changing name, just because"</span><span class="p">)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">last</span><span class="p">.</span><span class="nf">comment</span> <span class="c1"># =&gt; "Changing name, just because"</span>
+</code></pre></div></div>
+
+<p>可以選擇加入：comment_required選項，以便對所有紀錄都要求註解。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">audited</span> <span class="ss">:comment_required</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="追蹤使用者">追蹤使用者</h1>
+
+<p>如果您在Rails中，則請求中進行的所有紀錄更改將自動被列為目前使用者。預設情況下，Audited使用controller中的current_user方法。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PostsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="n">current_user</span> <span class="c1"># =&gt; #&lt;User name: "Steve"&gt;</span>
+    <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:post</span><span class="p">])</span>
+    <span class="vi">@post</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">last</span><span class="p">.</span><span class="nf">user</span> <span class="c1"># =&gt; #&lt;User name: "Steve"&gt;</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>要使用除current_user之外的方法，請在初始化的程式碼中放入以下內容：</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Audited</span><span class="p">.</span><span class="nf">current_user_method</span> <span class="o">=</span> <span class="ss">:authenticated_user</span>
+</code></pre></div></div>
+
+<p>除此之外，審核也可以使用as_user方法直接指定記錄的使用者：</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Audited</span><span class="o">::</span><span class="no">Audit</span><span class="p">.</span><span class="nf">as_user</span><span class="p">(</span><span class="no">User</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="k">do</span>
+  <span class="n">post</span><span class="p">.</span><span class="nf">update_attribute!</span><span class="p">(</span><span class="ss">title: </span><span class="s2">"Hello, world!"</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">post</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">last</span><span class="p">.</span><span class="nf">user</span> <span class="c1"># =&gt; #&lt;User id: 1&gt;</span>
+</code></pre></div></div>
+
+<h1 id="自定義的auditor">自定義的Auditor</h1>
+<p>您可能需要不時使用自定義審核程序。它可以通過簡單的傳遞一個字符串：</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="k">def</span> <span class="nf">authenticated_user</span>
+    <span class="k">if</span> <span class="n">current_user</span>
+      <span class="n">current_user</span>
+    <span class="k">else</span>
+      <span class="s1">'Elon Musk'</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="關聯的應用">關聯的應用</h1>
+<p>有時，model相關聯很有用。例如，給定以下model：</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:company</span>
+  <span class="n">audited</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Company</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">has_many</span> <span class="ss">:users</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>對使用者的每個更改都進行紀錄，但如果您想要取得屬於特定公司使用者的所有紀錄該怎麼辦？您可以使用：associated_with選項：</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:company</span>
+  <span class="n">audited</span> <span class="ss">associated_with: :company</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Company</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">has_many</span> <span class="ss">:users</span>
+  <span class="n">has_associated_audits</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>現在，當使用者建立紀錄時，該用戶的公司也會一起保存。讓間接相關的公司紀錄變得更容易（也更快）。</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">company</span> <span class="o">=</span> <span class="no">Company</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Collective Idea"</span><span class="p">)</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">company</span><span class="p">.</span><span class="nf">users</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Steve"</span><span class="p">)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">update_attribute!</span><span class="p">(</span><span class="ss">name: </span><span class="s2">"Steve Richert"</span><span class="p">)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">audits</span><span class="p">.</span><span class="nf">last</span><span class="p">.</span><span class="nf">associated</span> <span class="c1"># =&gt; #&lt;Company name: "Collective Idea"&gt;</span>
+<span class="n">company</span><span class="p">.</span><span class="nf">associated_audits</span><span class="p">.</span><span class="nf">last</span><span class="p">.</span><span class="nf">auditable</span> <span class="c1"># =&gt; #&lt;User name: "Steve Richert"&gt;</span>
+</code></pre></div></div>
+
+<h1 id="暫時禁用">暫時禁用</h1>
+<p>如果要暫時的禁用記錄某些紀錄，有幾種方法可使用：</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vi">@user</span><span class="p">.</span><span class="nf">save_without_auditing</span>
+</code></pre></div></div>
+<p>或</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="vi">@user</span><span class="p">.</span><span class="nf">without_auditing</span> <span class="k">do</span>
+  <span class="vi">@user</span><span class="p">.</span><span class="nf">save</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>指定欄位禁用</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">non_audited_columns</span> <span class="o">=</span> <span class="p">[</span><span class="ss">:first_name</span><span class="p">,</span> <span class="ss">:last_name</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>整個model禁用</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">auditing_enabled</span> <span class="o">=</span> <span class="kp">false</span>
+</code></pre></div></div>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-12-01T01:18:00+08:00">December 1, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BGem%5D+%E7%B4%80%E9%8C%84%E6%AC%84%E4%BD%8D%E7%95%B0%E5%8B%95%E7%9A%84%E5%A5%BD%E5%B9%AB%E6%89%8B+audited%20https%3A%2F%2Fblog.anxgang.com%2Fgem-record-field-changes-a-good-helper-audited%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fgem-record-field-changes-a-good-helper-audited%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fgem-record-field-changes-a-good-helper-audited%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/1139742/" class="pagination--pager" title="[Redis] 管理工具推薦及遇到的問題
+">上一篇</a>
+    
+    
+      <a href="/ruby-differences-include-vs-extend/" class="pagination--pager" title="[Ruby] Include vs Extend
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/gem-record-field-changes-a-good-helper-audited/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/gem-record-field-changes-a-good-helper-audited"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

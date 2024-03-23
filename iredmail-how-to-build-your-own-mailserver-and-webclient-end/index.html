@@ -1,0 +1,1175 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[IRedMail] 如何建立自己的MailServer和WebClient端 - ANxGANG</title>
+<meta name="description" content="create dropets    3 GB Memory / 20 GB Disk / SGP1 - Ubuntu 16.04.3 x64   hostname: mail.yourdomain.com   with your ssh key   login with root by ssh key $ ssh root@[your.ip]   update all $ apt update; apt -y upgrade;   check hostname $ nano /etc/hostname # mail  $ hostname # mail $ hostname -f # mail.yourdomain.com   setup hosts make sure your domain is before localhost $ nano /etc/hosts # 127.0.0.1   mail.yourdomain.com mail localhost localhost.localdomain     do not move other lines ex. “127.0.1.1 mail.yourdomain.com mail”   then we need to reboot once. $ reboot   download iredmail and unzip it $ sudo apt-get install bzip2 $ wget https://bitbucket.org/zhb/iredmail/downloads/iRedMail-0.9.7.tar.bz2 $ tar xjf iRedMail-0.9.7.tar.bz2 $ cd iRedMail-0.9.7  setup iredmail $ bash iRedMail.sh # 1. &lt;yes&gt; # 2. where store? [/var/vmail] &lt;Next&gt; # 3. Which Http Serv.?[(*) Nginx] &lt;Next&gt; # 4. Which DB? [(*) MySQL] &lt;Next&gt; # 5. MySQL root password? [123456] &lt;Next&gt; # 6. default mail domain? [yourdomain.com] &lt;Next&gt; # 7. mail domain admin password? [123456] &lt;Next&gt; # 8. option component? [select all] &lt;Next&gt; # &lt; Question &gt; Continue? [y|N] y # ... # ...(long long waiting) # ...(we can go to next step while waiting) # ... # &lt; Question &gt; Would you like to use firewall rules provided by iRedMail? # &lt; Question &gt; File: /etc/default/iptables, with SSHD port: 22. [Y|n] n     we use ufw firewall setting for last step   after all we need to reboot $ reboot   Setup DNS @ 300 IN A 100.100.100.1 @ 300 IN MX 10 mail.yourdomain.com. @ 300 IN MX 20 mail.yourdomain.com. @ 300 IN TXT &quot;v=spf1 ip4:100.100.100.1 -all&quot; mail 300 IN A 100.100.100.1     DNS TEST https://mxtoolbox.com   check our apps    Web admin panel (iRedAdmin): httpS://mail.mealbox.com.tw/iredadmin/   Roundcube webmail: httpS://mail.mealbox.com.tw/mail/   SOGo groupware: httpS://mail.mealbox.com.tw/SOGo/   * Username: postmaster@mealbox.com.tw * Password: 1234   mail sp test https://www.mail-tester.com/  setup servername $ sudo nano /etc/nginx/sites-conf.d/default/0-server_name.conf server_name _;  to server_name mail.yourdomain.com;   $ sudo nginx -t $ sudo service nginx restart  install certbot  $ sudo apt-get update $ sudo apt-get install software-properties-common $ sudo add-apt-repository ppa:certbot/certbot $ sudo apt-get update $ sudo apt-get install python-certbot-nginx  $ sudo certbot --nginx certonly  # Enter email address ? your@gmail.com  # Which names would you like to activate HTTPS for? # ------------------------------------------------------------------------------- # 1: mail.yourdomain.com # ------------------------------------------------------------------------------- # select 1   $ mv /etc/ssl/private/iRedMail.key /etc/ssl/private/iRedMail.key.bak $ mv /etc/ssl/certs/iRedMail.crt /etc/ssl/certs/iRedMail.crt.bak $ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/privkey.pem /etc/ssl/private/iRedMail.key $ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/fullchain.pem /etc/ssl/certs/iRedMail.crt   autorenew checkout $ sudo certbot renew --dry-run   setup ufw firewall  $ sudo ufw default deny incoming $ sudo ufw default allow outgoing   $ sudo ufw allow ssh $ sudo ufw allow http $ sudo ufw allow https $ sudo ufw allow smtp $ sudo ufw allow submission $ sudo ufw allow pop3 $ sudo ufw allow pop3s $ sudo ufw allow imap $ sudo ufw allow imaps   Reference    Download the Latest iRedMail Release   Install Guide   certbot   mxtoolbox   easy let’s encrypt guide for ubuntu 16.04 iredmail server with nginx   Which network ports are open by iRedMail">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[IRedMail] 如何建立自己的MailServer和WebClient端">
+<meta property="og:url" content="https://blog.anxgang.com/iredmail-how-to-build-your-own-mailserver-and-webclient-end/">
+
+
+  <meta property="og:description" content="create dropets    3 GB Memory / 20 GB Disk / SGP1 - Ubuntu 16.04.3 x64   hostname: mail.yourdomain.com   with your ssh key   login with root by ssh key $ ssh root@[your.ip]   update all $ apt update; apt -y upgrade;   check hostname $ nano /etc/hostname # mail  $ hostname # mail $ hostname -f # mail.yourdomain.com   setup hosts make sure your domain is before localhost $ nano /etc/hosts # 127.0.0.1   mail.yourdomain.com mail localhost localhost.localdomain     do not move other lines ex. “127.0.1.1 mail.yourdomain.com mail”   then we need to reboot once. $ reboot   download iredmail and unzip it $ sudo apt-get install bzip2 $ wget https://bitbucket.org/zhb/iredmail/downloads/iRedMail-0.9.7.tar.bz2 $ tar xjf iRedMail-0.9.7.tar.bz2 $ cd iRedMail-0.9.7  setup iredmail $ bash iRedMail.sh # 1. &lt;yes&gt; # 2. where store? [/var/vmail] &lt;Next&gt; # 3. Which Http Serv.?[(*) Nginx] &lt;Next&gt; # 4. Which DB? [(*) MySQL] &lt;Next&gt; # 5. MySQL root password? [123456] &lt;Next&gt; # 6. default mail domain? [yourdomain.com] &lt;Next&gt; # 7. mail domain admin password? [123456] &lt;Next&gt; # 8. option component? [select all] &lt;Next&gt; # &lt; Question &gt; Continue? [y|N] y # ... # ...(long long waiting) # ...(we can go to next step while waiting) # ... # &lt; Question &gt; Would you like to use firewall rules provided by iRedMail? # &lt; Question &gt; File: /etc/default/iptables, with SSHD port: 22. [Y|n] n     we use ufw firewall setting for last step   after all we need to reboot $ reboot   Setup DNS @ 300 IN A 100.100.100.1 @ 300 IN MX 10 mail.yourdomain.com. @ 300 IN MX 20 mail.yourdomain.com. @ 300 IN TXT &quot;v=spf1 ip4:100.100.100.1 -all&quot; mail 300 IN A 100.100.100.1     DNS TEST https://mxtoolbox.com   check our apps    Web admin panel (iRedAdmin): httpS://mail.mealbox.com.tw/iredadmin/   Roundcube webmail: httpS://mail.mealbox.com.tw/mail/   SOGo groupware: httpS://mail.mealbox.com.tw/SOGo/   * Username: postmaster@mealbox.com.tw * Password: 1234   mail sp test https://www.mail-tester.com/  setup servername $ sudo nano /etc/nginx/sites-conf.d/default/0-server_name.conf server_name _;  to server_name mail.yourdomain.com;   $ sudo nginx -t $ sudo service nginx restart  install certbot  $ sudo apt-get update $ sudo apt-get install software-properties-common $ sudo add-apt-repository ppa:certbot/certbot $ sudo apt-get update $ sudo apt-get install python-certbot-nginx  $ sudo certbot --nginx certonly  # Enter email address ? your@gmail.com  # Which names would you like to activate HTTPS for? # ------------------------------------------------------------------------------- # 1: mail.yourdomain.com # ------------------------------------------------------------------------------- # select 1   $ mv /etc/ssl/private/iRedMail.key /etc/ssl/private/iRedMail.key.bak $ mv /etc/ssl/certs/iRedMail.crt /etc/ssl/certs/iRedMail.crt.bak $ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/privkey.pem /etc/ssl/private/iRedMail.key $ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/fullchain.pem /etc/ssl/certs/iRedMail.crt   autorenew checkout $ sudo certbot renew --dry-run   setup ufw firewall  $ sudo ufw default deny incoming $ sudo ufw default allow outgoing   $ sudo ufw allow ssh $ sudo ufw allow http $ sudo ufw allow https $ sudo ufw allow smtp $ sudo ufw allow submission $ sudo ufw allow pop3 $ sudo ufw allow pop3s $ sudo ufw allow imap $ sudo ufw allow imaps   Reference    Download the Latest iRedMail Release   Install Guide   certbot   mxtoolbox   easy let’s encrypt guide for ubuntu 16.04 iredmail server with nginx   Which network ports are open by iRedMail">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[IRedMail] 如何建立自己的MailServer和WebClient端">
+  <meta name="twitter:description" content="create dropets    3 GB Memory / 20 GB Disk / SGP1 - Ubuntu 16.04.3 x64   hostname: mail.yourdomain.com   with your ssh key   login with root by ssh key $ ssh root@[your.ip]   update all $ apt update; apt -y upgrade;   check hostname $ nano /etc/hostname # mail  $ hostname # mail $ hostname -f # mail.yourdomain.com   setup hosts make sure your domain is before localhost $ nano /etc/hosts # 127.0.0.1   mail.yourdomain.com mail localhost localhost.localdomain     do not move other lines ex. “127.0.1.1 mail.yourdomain.com mail”   then we need to reboot once. $ reboot   download iredmail and unzip it $ sudo apt-get install bzip2 $ wget https://bitbucket.org/zhb/iredmail/downloads/iRedMail-0.9.7.tar.bz2 $ tar xjf iRedMail-0.9.7.tar.bz2 $ cd iRedMail-0.9.7  setup iredmail $ bash iRedMail.sh # 1. &lt;yes&gt; # 2. where store? [/var/vmail] &lt;Next&gt; # 3. Which Http Serv.?[(*) Nginx] &lt;Next&gt; # 4. Which DB? [(*) MySQL] &lt;Next&gt; # 5. MySQL root password? [123456] &lt;Next&gt; # 6. default mail domain? [yourdomain.com] &lt;Next&gt; # 7. mail domain admin password? [123456] &lt;Next&gt; # 8. option component? [select all] &lt;Next&gt; # &lt; Question &gt; Continue? [y|N] y # ... # ...(long long waiting) # ...(we can go to next step while waiting) # ... # &lt; Question &gt; Would you like to use firewall rules provided by iRedMail? # &lt; Question &gt; File: /etc/default/iptables, with SSHD port: 22. [Y|n] n     we use ufw firewall setting for last step   after all we need to reboot $ reboot   Setup DNS @ 300 IN A 100.100.100.1 @ 300 IN MX 10 mail.yourdomain.com. @ 300 IN MX 20 mail.yourdomain.com. @ 300 IN TXT &quot;v=spf1 ip4:100.100.100.1 -all&quot; mail 300 IN A 100.100.100.1     DNS TEST https://mxtoolbox.com   check our apps    Web admin panel (iRedAdmin): httpS://mail.mealbox.com.tw/iredadmin/   Roundcube webmail: httpS://mail.mealbox.com.tw/mail/   SOGo groupware: httpS://mail.mealbox.com.tw/SOGo/   * Username: postmaster@mealbox.com.tw * Password: 1234   mail sp test https://www.mail-tester.com/  setup servername $ sudo nano /etc/nginx/sites-conf.d/default/0-server_name.conf server_name _;  to server_name mail.yourdomain.com;   $ sudo nginx -t $ sudo service nginx restart  install certbot  $ sudo apt-get update $ sudo apt-get install software-properties-common $ sudo add-apt-repository ppa:certbot/certbot $ sudo apt-get update $ sudo apt-get install python-certbot-nginx  $ sudo certbot --nginx certonly  # Enter email address ? your@gmail.com  # Which names would you like to activate HTTPS for? # ------------------------------------------------------------------------------- # 1: mail.yourdomain.com # ------------------------------------------------------------------------------- # select 1   $ mv /etc/ssl/private/iRedMail.key /etc/ssl/private/iRedMail.key.bak $ mv /etc/ssl/certs/iRedMail.crt /etc/ssl/certs/iRedMail.crt.bak $ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/privkey.pem /etc/ssl/private/iRedMail.key $ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/fullchain.pem /etc/ssl/certs/iRedMail.crt   autorenew checkout $ sudo certbot renew --dry-run   setup ufw firewall  $ sudo ufw default deny incoming $ sudo ufw default allow outgoing   $ sudo ufw allow ssh $ sudo ufw allow http $ sudo ufw allow https $ sudo ufw allow smtp $ sudo ufw allow submission $ sudo ufw allow pop3 $ sudo ufw allow pop3s $ sudo ufw allow imap $ sudo ufw allow imaps   Reference    Download the Latest iRedMail Release   Install Guide   certbot   mxtoolbox   easy let’s encrypt guide for ubuntu 16.04 iredmail server with nginx   Which network ports are open by iRedMail">
+  <meta name="twitter:url" content="https://blog.anxgang.com/iredmail-how-to-build-your-own-mailserver-and-webclient-end/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-12-11T08:20:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/iredmail-how-to-build-your-own-mailserver-and-webclient-end/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[IRedMail] 如何建立自己的MailServer和WebClient端">
+        
+        
+        <meta itemprop="description"
+            content="create dropets  3 GB Memory / 20 GB Disk / SGP1 - Ubuntu 16.04.3 x64  hostname: mail.yourdomain.com  with your ssh keylogin with root by ssh key$ ssh root@[your.ip]update all$ apt update; apt -y upgrade;check hostname$ nano /etc/hostname# mail$ hostname# mail$ hostname -f# mail.yourdomain.comsetup hostsmake sure your domain is before localhost$ nano /etc/hosts# 127.0.0.1   mail.yourdomain.com mail localhost localhost.localdomain  do not move other lines ex. “127.0.1.1 mail.yourdomain.com mail”then we need to reboot once.$ rebootdownload iredmail and unzip it$ sudo apt-get install bzip2$ wget https://bitbucket.org/zhb/iredmail/downloads/iRedMail-0.9.7.tar.bz2$ tar xjf iRedMail-0.9.7.tar.bz2$ cd iRedMail-0.9.7setup iredmail$ bash iRedMail.sh# 1. &lt;yes&gt;# 2. where store? [/var/vmail] &lt;Next&gt;# 3. Which Http Serv.?[(*) Nginx] &lt;Next&gt;# 4. Which DB? [(*) MySQL] &lt;Next&gt;# 5. MySQL root password? [123456] &lt;Next&gt;# 6. default mail domain? [yourdomain.com] &lt;Next&gt;# 7. mail domain admin password? [123456] &lt;Next&gt;# 8. option component? [select all] &lt;Next&gt;# &lt; Question &gt; Continue? [y|N] y# ...# ...(long long waiting)# ...(we can go to next step while waiting)# ...# &lt; Question &gt; Would you like to use firewall rules provided by iRedMail?# &lt; Question &gt; File: /etc/default/iptables, with SSHD port: 22. [Y|n] n  we use ufw firewall setting for last stepafter all we need to reboot$ rebootSetup DNS@ 300 IN A 100.100.100.1@ 300 IN MX 10 mail.yourdomain.com.@ 300 IN MX 20 mail.yourdomain.com.@ 300 IN TXT &quot;v=spf1 ip4:100.100.100.1 -all&quot;mail 300 IN A 100.100.100.1  DNS TESThttps://mxtoolbox.comcheck our apps  Web admin panel (iRedAdmin): httpS://mail.mealbox.com.tw/iredadmin/  Roundcube webmail: httpS://mail.mealbox.com.tw/mail/  SOGo groupware: httpS://mail.mealbox.com.tw/SOGo/* Username: postmaster@mealbox.com.tw* Password: 1234mail sp testhttps://www.mail-tester.com/setup servername$ sudo nano /etc/nginx/sites-conf.d/default/0-server_name.confserver_name _;toserver_name mail.yourdomain.com;$ sudo nginx -t$ sudo service nginx restartinstall certbot$ sudo apt-get update$ sudo apt-get install software-properties-common$ sudo add-apt-repository ppa:certbot/certbot$ sudo apt-get update$ sudo apt-get install python-certbot-nginx $ sudo certbot --nginx certonly# Enter email address ? your@gmail.com# Which names would you like to activate HTTPS for?# -------------------------------------------------------------------------------# 1: mail.yourdomain.com# -------------------------------------------------------------------------------# select 1$ mv /etc/ssl/private/iRedMail.key /etc/ssl/private/iRedMail.key.bak$ mv /etc/ssl/certs/iRedMail.crt /etc/ssl/certs/iRedMail.crt.bak$ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/privkey.pem /etc/ssl/private/iRedMail.key$ ln -s /etc/letsencrypt/live/mail.mealbox.com.tw/fullchain.pem /etc/ssl/certs/iRedMail.crtautorenew checkout$ sudo certbot renew --dry-runsetup ufw firewall$ sudo ufw default deny incoming$ sudo ufw default allow outgoing$ sudo ufw allow ssh$ sudo ufw allow http$ sudo ufw allow https$ sudo ufw allow smtp$ sudo ufw allow submission$ sudo ufw allow pop3$ sudo ufw allow pop3s$ sudo ufw allow imap$ sudo ufw allow imapsReference  Download the Latest iRedMail Release  Install Guide  certbot  mxtoolbox  easy let’s encrypt guide for ubuntu 16.04 iredmail server with nginx  Which network ports are open by iRedMail">
+        
+        <meta itemprop="datePublished" content="2017-12-11T08:20:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/iredmail-how-to-build-your-own-mailserver-and-webclient-end/" class="u-url"
+                        itemprop="url">[IRedMail] 如何建立自己的MailServer和WebClient端
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2017-12-11T08:20:00+08:00">2017-12-11</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#create-dropets">create dropets</a></li><li><a href="#login-with-root-by-ssh-key">login with root by ssh key</a></li><li><a href="#update-all">update all</a></li><li><a href="#check-hostname">check hostname</a></li><li><a href="#setup-hosts">setup hosts</a></li><li><a href="#download-iredmail-and-unzip-it">download iredmail and unzip it</a></li><li><a href="#setup-iredmail">setup iredmail</a></li><li><a href="#setup-dns">Setup DNS</a></li><li><a href="#check-our-apps">check our apps</a></li><li><a href="#mail-sp-test">mail sp test</a></li><li><a href="#setup-servername">setup servername</a></li><li><a href="#install-certbot">install certbot</a></li><li><a href="#autorenew-checkout">autorenew checkout</a></li><li><a href="#setup-ufw-firewall">setup ufw firewall</a></li><li><a href="#reference">Reference</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="create-dropets">create dropets</h1>
+<ol>
+  <li>3 GB Memory / 20 GB Disk / SGP1 - Ubuntu 16.04.3 x64</li>
+  <li>hostname: mail.yourdomain.com</li>
+  <li>with your ssh key</li>
+</ol>
+
+<h1 id="login-with-root-by-ssh-key">login with root by ssh key</h1>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ssh root@[your.ip]
+</code></pre></div></div>
+
+<h1 id="update-all">update all</h1>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>apt update<span class="p">;</span> apt <span class="nt">-y</span> upgrade<span class="p">;</span>
+</code></pre></div></div>
+
+<h1 id="check-hostname">check hostname</h1>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nano /etc/hostname
+<span class="c"># mail</span>
+</code></pre></div></div>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">hostname</span>
+<span class="c"># mail</span>
+<span class="nv">$ </span><span class="nb">hostname</span> <span class="nt">-f</span>
+<span class="c"># mail.yourdomain.com</span>
+</code></pre></div></div>
+
+<h1 id="setup-hosts">setup hosts</h1>
+<p>make sure your domain is before localhost</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nano /etc/hosts
+<span class="c"># 127.0.0.1   mail.yourdomain.com mail localhost localhost.localdomain</span>
+</code></pre></div></div>
+<blockquote>
+  <p>do not move other lines ex. “127.0.1.1 mail.yourdomain.com mail”</p>
+</blockquote>
+
+<p>then we need to reboot once.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ reboot
+</code></pre></div></div>
+
+<h1 id="download-iredmail-and-unzip-it">download iredmail and unzip it</h1>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>apt-get <span class="nb">install </span>bzip2
+<span class="nv">$ </span>wget https://bitbucket.org/zhb/iredmail/downloads/iRedMail-0.9.7.tar.bz2
+<span class="nv">$ </span><span class="nb">tar </span>xjf iRedMail-0.9.7.tar.bz2
+<span class="nv">$ </span><span class="nb">cd </span>iRedMail-0.9.7
+</code></pre></div></div>
+<h1 id="setup-iredmail">setup iredmail</h1>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bash iRedMail.sh
+<span class="c"># 1. &lt;yes&gt;</span>
+<span class="c"># 2. where store? [/var/vmail] &lt;Next&gt;</span>
+<span class="c"># 3. Which Http Serv.?[(*) Nginx] &lt;Next&gt;</span>
+<span class="c"># 4. Which DB? [(*) MySQL] &lt;Next&gt;</span>
+<span class="c"># 5. MySQL root password? [123456] &lt;Next&gt;</span>
+<span class="c"># 6. default mail domain? [yourdomain.com] &lt;Next&gt;</span>
+<span class="c"># 7. mail domain admin password? [123456] &lt;Next&gt;</span>
+<span class="c"># 8. option component? [select all] &lt;Next&gt;</span>
+<span class="c"># &lt; Question &gt; Continue? [y|N] y</span>
+<span class="c"># ...</span>
+<span class="c"># ...(long long waiting)</span>
+<span class="c"># ...(we can go to next step while waiting)</span>
+<span class="c"># ...</span>
+<span class="c"># &lt; Question &gt; Would you like to use firewall rules provided by iRedMail?</span>
+<span class="c"># &lt; Question &gt; File: /etc/default/iptables, with SSHD port: 22. [Y|n] n</span>
+</code></pre></div></div>
+<blockquote>
+  <p>we use ufw firewall setting for last step</p>
+</blockquote>
+
+<p>after all we need to reboot</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ reboot
+</code></pre></div></div>
+
+<h1 id="setup-dns">Setup DNS</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@ 300 IN A 100.100.100.1
+@ 300 IN MX 10 mail.yourdomain.com.
+@ 300 IN MX 20 mail.yourdomain.com.
+@ 300 IN TXT "v=spf1 ip4:100.100.100.1 -all"
+mail 300 IN A 100.100.100.1
+</code></pre></div></div>
+<blockquote>
+  <p>DNS TEST<br />
+https://mxtoolbox.com</p>
+</blockquote>
+
+<h1 id="check-our-apps">check our apps</h1>
+<ul>
+  <li>Web admin panel (iRedAdmin): httpS://mail.mealbox.com.tw/iredadmin/</li>
+  <li>Roundcube webmail: httpS://mail.mealbox.com.tw/mail/</li>
+  <li>SOGo groupware: httpS://mail.mealbox.com.tw/SOGo/</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>* Username: postmaster@mealbox.com.tw
+* Password: 1234
+</code></pre></div></div>
+
+<h1 id="mail-sp-test">mail sp test</h1>
+<p>https://www.mail-tester.com/</p>
+
+<h1 id="setup-servername">setup servername</h1>
+<p>$ sudo nano /etc/nginx/sites-conf.d/default/0-server_name.conf</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server_name _;
+</code></pre></div></div>
+<p>to</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server_name mail.yourdomain.com;
+</code></pre></div></div>
+
+<p>$ sudo nginx -t
+$ sudo service nginx restart</p>
+
+<h1 id="install-certbot">install certbot</h1>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="err">$</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">software</span><span class="o">-</span><span class="n">properties</span><span class="o">-</span><span class="n">common</span>
+<span class="err">$</span> <span class="n">sudo</span> <span class="n">add</span><span class="o">-</span><span class="n">apt</span><span class="o">-</span><span class="n">repository</span> <span class="n">ppa</span><span class="ss">:certbot</span><span class="o">/</span><span class="n">certbot</span>
+<span class="err">$</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="err">$</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">python</span><span class="o">-</span><span class="n">certbot</span><span class="o">-</span><span class="n">nginx</span> 
+<span class="err">$</span> <span class="n">sudo</span> <span class="n">certbot</span> <span class="o">--</span><span class="n">nginx</span> <span class="n">certonly</span>
+
+<span class="c1"># Enter email address ? your@gmail.com</span>
+
+<span class="c1"># Which names would you like to activate HTTPS for?</span>
+<span class="c1"># -------------------------------------------------------------------------------</span>
+<span class="c1"># 1: mail.yourdomain.com</span>
+<span class="c1"># -------------------------------------------------------------------------------</span>
+<span class="c1"># select 1</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">mv</span> /etc/ssl/private/iRedMail.key /etc/ssl/private/iRedMail.key.bak
+<span class="nv">$ </span><span class="nb">mv</span> /etc/ssl/certs/iRedMail.crt /etc/ssl/certs/iRedMail.crt.bak
+<span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> /etc/letsencrypt/live/mail.mealbox.com.tw/privkey.pem /etc/ssl/private/iRedMail.key
+<span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> /etc/letsencrypt/live/mail.mealbox.com.tw/fullchain.pem /etc/ssl/certs/iRedMail.crt
+</code></pre></div></div>
+
+<h1 id="autorenew-checkout">autorenew checkout</h1>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo certbot renew --dry-run
+</code></pre></div></div>
+
+<h1 id="setup-ufw-firewall">setup ufw firewall</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo ufw default deny incoming
+$ sudo ufw default allow outgoing
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo ufw allow ssh
+$ sudo ufw allow http
+$ sudo ufw allow https
+$ sudo ufw allow smtp
+$ sudo ufw allow submission
+$ sudo ufw allow pop3
+$ sudo ufw allow pop3s
+$ sudo ufw allow imap
+$ sudo ufw allow imaps
+</code></pre></div></div>
+
+<h1 id="reference">Reference</h1>
+<ol>
+  <li><a href="https://www.iredmail.org/download.html">Download the Latest iRedMail Release</a></li>
+  <li><a href="https://docs.iredmail.org/index.html#install-iredmail">Install Guide</a></li>
+  <li><a href="https://certbot.eff.org/#ubuntuxenial-nginx">certbot</a></li>
+  <li><a href="https://mxtoolbox.com/SuperTool.aspx?action=mx%3amealbox.com.tw&amp;run=toolpage#">mxtoolbox</a></li>
+  <li><a href="https://forum.iredmail.org/topic12500-iredmail-support-easy-lets-encrypt-guide-for-ubuntu-1604-iredmail-server-with-nginx.html">easy let’s encrypt guide for ubuntu 16.04 iredmail server with nginx</a></li>
+  <li><a href="https://docs.iredmail.org/network.ports.html">Which network ports are open by iRedMail</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2017-12-11T08:20:00+08:00">December 11, 2017</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BIRedMail%5D+%E5%A6%82%E4%BD%95%E5%BB%BA%E7%AB%8B%E8%87%AA%E5%B7%B1%E7%9A%84MailServer%E5%92%8CWebClient%E7%AB%AF%20https%3A%2F%2Fblog.anxgang.com%2Firedmail-how-to-build-your-own-mailserver-and-webclient-end%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Firedmail-how-to-build-your-own-mailserver-and-webclient-end%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Firedmail-how-to-build-your-own-mailserver-and-webclient-end%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/digitalocean-how-to-create-swap-for-space-with-low-ram/" class="pagination--pager" title="[DigitalOcean] 如何為ram不足的空間建立swap
+">上一篇</a>
+    
+    
+      <a href="/4732212/" class="pagination--pager" title="[Rails] API設計模式*
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/iredmail-how-to-build-your-own-mailserver-and-webclient-end/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/iredmail-how-to-build-your-own-mailserver-and-webclient-end"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

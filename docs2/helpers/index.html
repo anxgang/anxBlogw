@@ -165,11 +165,19 @@
                 <ul class="dropdown-content">
                   
                   <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
                     <a href="/tags/"> By Tag</a>
                   </li>
                   
                   <li>
                     <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
                   </li>
                   
                 </ul>
@@ -412,7 +420,7 @@
 
 <p>Using the <code class="language-plaintext highlighter-rouge">figure</code> include like so:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">figure</span><span class="w"> </span><span class="na">image_path</span><span class="o">=</span><span class="s2">"/assets/images/unsplash-image-10.jpg"</span><span class="w"> </span><span class="na">alt</span><span class="o">=</span><span class="s2">"this is a placeholder image"</span><span class="w"> </span><span class="na">caption</span><span class="o">=</span><span class="s2">"This is a figure caption."</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">figure</span><span class="w"> </span><span class="na">image_path</span><span class="o">=</span><span class="s2">"/assets/images/unsplash-image-10.jpg"</span><span class="w"> </span><span class="na">alt</span><span class="o">=</span><span class="s2">"this is a placeholder image"</span><span class="w"> </span><span class="na">caption</span><span class="o">=</span><span class="s2">"This is a figure caption."</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <p>Will output the following:</p>
@@ -521,7 +529,7 @@
   </tbody>
 </table>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">gallery</span><span class="w"> </span><span class="na">caption</span><span class="o">=</span><span class="s2">"This is a sample gallery with **Markdown support**."</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">gallery</span><span class="w"> </span><span class="na">caption</span><span class="o">=</span><span class="s2">"This is a sample gallery with **Markdown support**."</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <p><strong>Gallery example with caption:</strong></p>
@@ -665,7 +673,7 @@
   </tbody>
 </table>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">feature_row</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">feature_row</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <div class="feature__wrapper">
@@ -791,7 +799,7 @@
 
 <p>To embed the following YouTube video at url <code class="language-plaintext highlighter-rouge">https://www.youtube.com/watch?v=XsxDH4HcOWA</code> (long version) or <code class="language-plaintext highlighter-rouge">https://youtu.be/XsxDH4HcOWA</code> (short version) into a post or page’s main content you’d use:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"XsxDH4HcOWA"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"youtube"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"XsxDH4HcOWA"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"youtube"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <!-- Courtesy of embedresponsively.com -->
@@ -814,7 +822,7 @@
 
 <p>To embed the following Vimeo video at url <code class="language-plaintext highlighter-rouge">https://vimeo.com/212731897</code> into a post or page’s main content you’d use:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"212731897"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"vimeo"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"212731897"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"vimeo"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <!-- Courtesy of embedresponsively.com -->
@@ -835,7 +843,7 @@
 
 <p>To embed the following Google Drive video at url <code class="language-plaintext highlighter-rouge">https://drive.google.com/file/d/1u41lIbMLbV53PvMbyYc9HzvBug5lNWaO/preview</code> into a post or page’s main content you’d use:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"1u41lIbMLbV53PvMbyYc9HzvBug5lNWaO"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"google-drive"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"1u41lIbMLbV53PvMbyYc9HzvBug5lNWaO"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"google-drive"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <!-- Courtesy of embedresponsively.com -->
@@ -856,12 +864,12 @@
 
 <p>To embed the following Bilibili video at url <code class="language-plaintext highlighter-rouge">https://www.bilibili.com/video/BV1E7411e7hC</code> into a post or page’s main content you’d use:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"BV1E7411e7hC"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"bilibili"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"BV1E7411e7hC"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"bilibili"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <p>If you want to enable danmaku (弹幕) for the embedded video, which is disabled by default, you can supply an additional parameter <code class="language-plaintext highlighter-rouge">danmaku="1"</code> as shown below:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"BV1E7411e7hC"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"bilibili"</span><span class="w"> </span><span class="na">danmaku</span><span class="o">=</span><span class="s2">"1"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="na">id</span><span class="o">=</span><span class="s2">"BV1E7411e7hC"</span><span class="w"> </span><span class="na">provider</span><span class="o">=</span><span class="s2">"bilibili"</span><span class="w"> </span><span class="na">danmaku</span><span class="o">=</span><span class="s2">"1"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <p>To embed it as a video header you’d use the following YAML Front Matter:</p>
@@ -922,7 +930,7 @@
 
 <p><strong>TOC example with custom title and icon</strong></p>
 
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">toc</span><span class="pi">:</span> <span class="no">true</span>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">toc</span><span class="pi">:</span> <span class="kc">true</span>
 <span class="na">toc_label</span><span class="pi">:</span> <span class="s2">"</span><span class="s">My</span><span class="nv"> </span><span class="s">Table</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">Contents"</span>
 <span class="na">toc_icon</span><span class="pi">:</span> <span class="s2">"</span><span class="s">cog"</span>
 <span class="nn">---</span>
@@ -957,7 +965,7 @@ Bad headings:
 
 <p>To include a Kramdown <a href="https://kramdown.gettalong.org/converter/html.html#toc">auto-generated table of contents</a> for posts and pages, add the following helper to your content.</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">toc</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">toc</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <p class="notice--warning"><strong>Note:</strong> this method only works with Markdown files.</p>
@@ -991,7 +999,7 @@ Bad headings:
 
 <p><strong>TOC example with custom title and icon</strong></p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">toc</span><span class="w"> </span><span class="na">icon</span><span class="o">=</span><span class="s2">"cog"</span><span class="w"> </span><span class="na">title</span><span class="o">=</span><span class="s2">"My Table of Contents"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">toc</span><span class="w"> </span><span class="na">icon</span><span class="o">=</span><span class="s2">"cog"</span><span class="w"> </span><span class="na">title</span><span class="o">=</span><span class="s2">"My Table of Contents"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <h2 id="navigation-list">Navigation list</h2>
@@ -1052,7 +1060,7 @@ Bad headings:
 
 <p>To add a navigation list to a post or page’s main content instead of the sidebar use the include this way:</p>
 
-<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">nav_list</span><span class="w"> </span><span class="na">nav</span><span class="o">=</span><span class="s2">"foo"</span><span class="w"> </span><span class="p">%}</span>
+<div class="language-liquid highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">{%</span><span class="w"> </span><span class="nt">include</span><span class="w"> </span><span class="nv">nav_list</span><span class="w"> </span><span class="na">nav</span><span class="o">=</span><span class="s2">"foo"</span><span class="w"> </span><span class="cp">%}</span>
 </code></pre></div></div>
 
 <nav class="nav__list">
@@ -1223,7 +1231,7 @@ Bad headings:
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2023 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>

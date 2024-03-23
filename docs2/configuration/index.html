@@ -165,11 +165,19 @@
                 <ul class="dropdown-content">
                   
                   <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
                     <a href="/tags/"> By Tag</a>
                   </li>
                   
                   <li>
                     <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
                   </li>
                   
                 </ul>
@@ -605,7 +613,7 @@
 
 <p><img src="/assets/images/mm-breadcrumbs-example.jpg" alt="breadcrumb navigation example" /></p>
 
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">breadcrumbs</span><span class="pi">:</span> <span class="no">true</span>  <span class="c1"># disabled by default</span>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">breadcrumbs</span><span class="pi">:</span> <span class="kc">true</span>  <span class="c1"># disabled by default</span>
 </code></pre></div></div>
 
 <p>Breadcrumb start link text and separator character can both be changed in the <a href="/docs2/ui-text/">UI Text data file</a>.</p>
@@ -624,7 +632,7 @@
       <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
       <span class="na">type</span><span class="pi">:</span> <span class="s">posts</span>
     <span class="na">values</span><span class="pi">:</span>
-      <span class="na">show_date</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">show_date</span><span class="pi">:</span> <span class="kc">true</span>
 </code></pre></div></div>
 
 <p>To disable post date for a post, add <code class="language-plaintext highlighter-rouge">show_date: false</code> to its YAML Front Matter, overriding what was set in <code class="language-plaintext highlighter-rouge">_config.yml</code>.</p>
@@ -648,7 +656,7 @@
       <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
       <span class="na">type</span><span class="pi">:</span> <span class="s">posts</span>
     <span class="na">values</span><span class="pi">:</span>
-      <span class="na">read_time</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">read_time</span><span class="pi">:</span> <span class="kc">true</span>
 </code></pre></div></div>
 
 <p>To disable reading time for a post, add <code class="language-plaintext highlighter-rouge">read_time: false</code> to its YAML Front Matter to override what was set in <code class="language-plaintext highlighter-rouge">_config.yml</code>.</p>
@@ -728,7 +736,7 @@
       <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
       <span class="na">type</span><span class="pi">:</span> <span class="s">posts</span>
     <span class="na">values</span><span class="pi">:</span>
-      <span class="na">comments</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">comments</span><span class="pi">:</span> <span class="kc">true</span>
 </code></pre></div></div>
 
 <p>If you add <code class="language-plaintext highlighter-rouge">comments: false</code> to a post’s YAML Front Matter it will override the default and disable comments for just that post.</p>
@@ -866,7 +874,7 @@
       <span class="na">type           </span><span class="pi">:</span> <span class="s2">"</span><span class="s">date"</span>
       <span class="na">options</span><span class="pi">:</span>
         <span class="na">format       </span><span class="pi">:</span> <span class="s2">"</span><span class="s">iso8601"</span>
-  <span class="na">moderation         </span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">moderation         </span><span class="pi">:</span> <span class="kc">true</span>
   <span class="na">path               </span><span class="pi">:</span> <span class="s2">"</span><span class="s">_data/comments/{options.slug}"</span>
   <span class="na">requiredFields     </span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">name"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">email"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">message"</span><span class="pi">]</span>
   <span class="na">transforms</span><span class="pi">:</span>
@@ -900,7 +908,7 @@
   <span class="na">commitMessage          </span><span class="pi">:</span> <span class="s2">"</span><span class="s">New</span><span class="nv"> </span><span class="s">comment</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">{fields.name}"</span>
   <span class="na">filename               </span><span class="pi">:</span> <span class="s">comment-{@timestamp}</span>
   <span class="na">format                 </span><span class="pi">:</span> <span class="s2">"</span><span class="s">yml"</span>
-  <span class="na">moderation             </span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">moderation             </span><span class="pi">:</span> <span class="kc">true</span>
   <span class="na">path                   </span><span class="pi">:</span> <span class="s2">"</span><span class="s">_data/comments/{options.slug}"</span>
   <span class="na">requiredFields         </span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">name'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">email'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">message'</span><span class="pi">]</span>
   <span class="na">transforms</span><span class="pi">:</span>
@@ -932,7 +940,7 @@
 </ol>
 
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">reCaptcha</span><span class="pi">:</span>
-  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="kc">true</span>
   <span class="na">siteKey</span><span class="pi">:</span> <span class="c1"># "6LdRBykTAAAAAFB46MnIu6ixuxwu9W1ihFF8G60Q"</span>
   <span class="na">secret</span><span class="pi">:</span> <span class="c1"># "PznnZGu3P6eTHRPLORniSq+J61YEf+A9zmColXDM5icqF49gbunH51B8+h+i2IvewpuxtA9TFoK68TuhUp/X3YKmmqhXasegHYabY50fqF9nJh9npWNhvITdkQHeaOqnFXUIwxfiEeUt49Yoa2waRR7a5LdRAP3SVM8hz0KIBT4="</span>
 </code></pre></div></div>
@@ -956,7 +964,7 @@
 <p>By default the theme links to <code class="language-plaintext highlighter-rouge">feed.xml</code> generated in the root of your site by the <strong>jekyll-feed</strong> plugin. To remove the RSS icon in the header and footer, update <code class="language-plaintext highlighter-rouge">atom_feed</code> in <code class="language-plaintext highlighter-rouge">_config.yml</code> like so:</p>
 
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">atom_feed</span><span class="pi">:</span>
-  <span class="na">hide</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">hide</span><span class="pi">:</span> <span class="kc">true</span>
 </code></pre></div></div>
 
 <h3 id="site-search">Site search</h3>
@@ -972,7 +980,7 @@
 <p>To have it index all pages, update <code class="language-plaintext highlighter-rouge">lunr</code> in <code class="language-plaintext highlighter-rouge">_config.yml</code> like so:</p>
 
 <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">lunr</span><span class="pi">:</span>
-  <span class="na">search_within_pages</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">search_within_pages</span><span class="pi">:</span> <span class="kc">true</span>
 </code></pre></div></div>
 
 <p class="notice--warning"><strong>Note:</strong> Only the first 50 words of a post or page’s body content is added to the Lunr search index. Setting <code class="language-plaintext highlighter-rouge">search_full_content</code> to <code class="language-plaintext highlighter-rouge">true</code> in your <code class="language-plaintext highlighter-rouge">_config.yml</code> will override this and could impact page load performance.</p>
@@ -985,7 +993,7 @@
   <li>
     <p>Add the <a href="https://github.com/algolia/jekyll-algolia"><code class="language-plaintext highlighter-rouge">jekyll-algolia</code></a> gem to your <code class="language-plaintext highlighter-rouge">Gemfile</code>, in the <code class="language-plaintext highlighter-rouge">:jekyll_plugins</code> section.</p>
 
-    <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">group</span> <span class="ss">:jekyll_plugins</span> <span class="k">do</span>
+    <div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">group</span> <span class="ss">:jekyll_plugins</span> <span class="k">do</span>
   <span class="n">gem</span> <span class="s2">"jekyll-feed"</span>
   <span class="n">gem</span> <span class="s2">"jekyll-seo-tag"</span>
   <span class="n">gem</span> <span class="s2">"jekyll-sitemap"</span>
@@ -1234,7 +1242,7 @@ bundle exec jekyll algolia
   <span class="na">provider</span><span class="pi">:</span> <span class="s2">"</span><span class="s">google-gtag"</span>
   <span class="na">google</span><span class="pi">:</span>
     <span class="na">tracking_id</span><span class="pi">:</span> <span class="s2">"</span><span class="s">UA-1234567-8"</span>
-    <span class="na">anonymize_ip</span><span class="pi">:</span> <span class="no">false</span> <span class="c1"># default</span>
+    <span class="na">anonymize_ip</span><span class="pi">:</span> <span class="kc">false</span> <span class="c1"># default</span>
 </code></pre></div></div>
 
 <p>To use another provider not included with the theme set <code class="language-plaintext highlighter-rouge">provider: "custom"</code> then add their embed code to <code class="language-plaintext highlighter-rouge">_includes/analytics-providers/custom.html</code>.</p>
@@ -1369,11 +1377,11 @@ bundle exec jekyll algolia
       <span class="na">type</span><span class="pi">:</span> <span class="s">posts</span>
     <span class="na">values</span><span class="pi">:</span>
       <span class="na">layout</span><span class="pi">:</span> <span class="s">single</span>
-      <span class="na">author_profile</span><span class="pi">:</span> <span class="no">true</span>
-      <span class="na">read_time</span><span class="pi">:</span> <span class="no">true</span>
-      <span class="na">comments</span><span class="pi">:</span> <span class="no">true</span>
-      <span class="na">share</span><span class="pi">:</span> <span class="no">true</span>
-      <span class="na">related</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">author_profile</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">read_time</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">comments</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">share</span><span class="pi">:</span> <span class="kc">true</span>
+      <span class="na">related</span><span class="pi">:</span> <span class="kc">true</span>
 </code></pre></div></div>
 
 <p>Pages Front Matter defaults can be scoped like this:</p>
@@ -1534,12 +1542,12 @@ end
       <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
       <span class="na">type</span><span class="pi">:</span> <span class="s">tag</span>
     <span class="na">values</span><span class="pi">:</span>
-      <span class="na">author_profile</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">author_profile</span><span class="pi">:</span> <span class="kc">true</span>
   <span class="pi">-</span> <span class="na">scope</span><span class="pi">:</span>
       <span class="na">path</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
       <span class="na">type</span><span class="pi">:</span> <span class="s">category</span>
     <span class="na">values</span><span class="pi">:</span>
-      <span class="na">comments</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">comments</span><span class="pi">:</span> <span class="kc">false</span>
 </code></pre></div>  </div>
 
 </div>
@@ -1640,7 +1648,7 @@ end
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2023 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>

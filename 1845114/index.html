@@ -1,0 +1,1154 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Rails] Using VueJS for Nested Forms with Rails - ANxGANG</title>
+<meta name="description" content="介紹 本文為 GoRails 的 Using VueJS for Nested Forms with Rails 練習 有興趣可以參考影片及git Video Part1 Video Part2 Git  準備工作    更新到 Rails 5.1   先安裝好npm   安裝新專案  $ rails new gorails --webpack=vue   $ git add . $ git commit -m &quot;initial commit&quot; $ git checkout -b &#39;episode-184&#39;  #開個新branch做此專案  補上jQuery 因為rails 5 取消了原本預設的jQuery 這邊建議還是先補上來，因為很多舊gem還沒把底層改為javascript  # [path] gemfile gem &#39;jquery-rails&#39;   // [path] application.js //= require rails-ujs //= require turbolinks //= require jquery   $ bundle install   建立model 此範例使用team及player來做nested from $ rails g model team name  $ rails g model player name position team:belongs_to   $ rake db:migrate   補上關聯及接受nested form # [path] team.rb class Team &lt; ApplicationRecord   has_many :players, dependent: :destroy   accepts_nested_attributes_for :players, allow_destroy: true end   建立Controller及View 這邊使用scaffold_controller快速搭建一個基本的team的CRUD (在已存在model時建立scaffold)  $ rails g scaffold_controller team name   補上player_attributes的params # [path] team_controller.rb def team_params   params.require(:team).permit(:name, players_attributes: [:id, :name, :position, :_destroy]) end   建立route  # [path] routes.rb resources :teams root &quot;teams#index&quot;   調整vue進入點  // [path] hello_vue.js import Vue from &#39;vue/dist/vue.esm&#39; import TurbolinksAdapter from &#39;vue-turbolinks&#39; import VueResource from &#39;vue-resource&#39;  Vue.use(VueResource)  document.addEventListener(&#39;turbolinks:load&#39;, () =&gt; {   Vue.http.headers.common[&#39;X-CSRF-Token&#39;] = document.querySelector(&#39;meta[name=&quot;csrf-token&quot;]&#39;).getAttribute(&#39;content&#39;)   var element = document.getElementById(&#39;team-form&#39;)   if (element != null){     var team = JSON.parse(element.dataset.team)     var players_attributes = JSON.parse(element.dataset.playersAttributes)     players_attributes.forEach(function(player){ player._destroy = null})     team.players_attribute = players_attributes      var app = new Vue({       el: element,       mixins: [TurbolinksAdapter],       data: function(){         return { team: team }       }     })      console.log(app);   } })   &lt;!-- [path] app.vue --&gt; &lt;%= content_tag :div,   id: &#39;team-form&#39;,   data: {     team: team.to_json(except: [:created_at, :updated_at]),     players_attributes: team.players.to_json(except: [:team_id, :created_at, :updated_at]),   } do %&gt;  &lt;label for=&quot;&quot;&gt;Team name&lt;/label&gt; &lt;input type=&quot;text&quot; v-model=&quot;team.name&quot; &gt;  &lt;% end %&gt;   $ yarn add vue-resource $ yarn add vue-turbolinks $ rails webpacker:compile   $ ./bin/webpack-dev-server $ rails s       參考        Video Part1     Video Part2     Git     https://medium.com/@hpux/rails-5-1-loves-javascript-a1d84d5318b">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Rails] Using VueJS for Nested Forms with Rails">
+<meta property="og:url" content="https://blog.anxgang.com/1845114/">
+
+
+  <meta property="og:description" content="介紹 本文為 GoRails 的 Using VueJS for Nested Forms with Rails 練習 有興趣可以參考影片及git Video Part1 Video Part2 Git  準備工作    更新到 Rails 5.1   先安裝好npm   安裝新專案  $ rails new gorails --webpack=vue   $ git add . $ git commit -m &quot;initial commit&quot; $ git checkout -b &#39;episode-184&#39;  #開個新branch做此專案  補上jQuery 因為rails 5 取消了原本預設的jQuery 這邊建議還是先補上來，因為很多舊gem還沒把底層改為javascript  # [path] gemfile gem &#39;jquery-rails&#39;   // [path] application.js //= require rails-ujs //= require turbolinks //= require jquery   $ bundle install   建立model 此範例使用team及player來做nested from $ rails g model team name  $ rails g model player name position team:belongs_to   $ rake db:migrate   補上關聯及接受nested form # [path] team.rb class Team &lt; ApplicationRecord   has_many :players, dependent: :destroy   accepts_nested_attributes_for :players, allow_destroy: true end   建立Controller及View 這邊使用scaffold_controller快速搭建一個基本的team的CRUD (在已存在model時建立scaffold)  $ rails g scaffold_controller team name   補上player_attributes的params # [path] team_controller.rb def team_params   params.require(:team).permit(:name, players_attributes: [:id, :name, :position, :_destroy]) end   建立route  # [path] routes.rb resources :teams root &quot;teams#index&quot;   調整vue進入點  // [path] hello_vue.js import Vue from &#39;vue/dist/vue.esm&#39; import TurbolinksAdapter from &#39;vue-turbolinks&#39; import VueResource from &#39;vue-resource&#39;  Vue.use(VueResource)  document.addEventListener(&#39;turbolinks:load&#39;, () =&gt; {   Vue.http.headers.common[&#39;X-CSRF-Token&#39;] = document.querySelector(&#39;meta[name=&quot;csrf-token&quot;]&#39;).getAttribute(&#39;content&#39;)   var element = document.getElementById(&#39;team-form&#39;)   if (element != null){     var team = JSON.parse(element.dataset.team)     var players_attributes = JSON.parse(element.dataset.playersAttributes)     players_attributes.forEach(function(player){ player._destroy = null})     team.players_attribute = players_attributes      var app = new Vue({       el: element,       mixins: [TurbolinksAdapter],       data: function(){         return { team: team }       }     })      console.log(app);   } })   &lt;!-- [path] app.vue --&gt; &lt;%= content_tag :div,   id: &#39;team-form&#39;,   data: {     team: team.to_json(except: [:created_at, :updated_at]),     players_attributes: team.players.to_json(except: [:team_id, :created_at, :updated_at]),   } do %&gt;  &lt;label for=&quot;&quot;&gt;Team name&lt;/label&gt; &lt;input type=&quot;text&quot; v-model=&quot;team.name&quot; &gt;  &lt;% end %&gt;   $ yarn add vue-resource $ yarn add vue-turbolinks $ rails webpacker:compile   $ ./bin/webpack-dev-server $ rails s       參考        Video Part1     Video Part2     Git     https://medium.com/@hpux/rails-5-1-loves-javascript-a1d84d5318b">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Rails] Using VueJS for Nested Forms with Rails">
+  <meta name="twitter:description" content="介紹 本文為 GoRails 的 Using VueJS for Nested Forms with Rails 練習 有興趣可以參考影片及git Video Part1 Video Part2 Git  準備工作    更新到 Rails 5.1   先安裝好npm   安裝新專案  $ rails new gorails --webpack=vue   $ git add . $ git commit -m &quot;initial commit&quot; $ git checkout -b &#39;episode-184&#39;  #開個新branch做此專案  補上jQuery 因為rails 5 取消了原本預設的jQuery 這邊建議還是先補上來，因為很多舊gem還沒把底層改為javascript  # [path] gemfile gem &#39;jquery-rails&#39;   // [path] application.js //= require rails-ujs //= require turbolinks //= require jquery   $ bundle install   建立model 此範例使用team及player來做nested from $ rails g model team name  $ rails g model player name position team:belongs_to   $ rake db:migrate   補上關聯及接受nested form # [path] team.rb class Team &lt; ApplicationRecord   has_many :players, dependent: :destroy   accepts_nested_attributes_for :players, allow_destroy: true end   建立Controller及View 這邊使用scaffold_controller快速搭建一個基本的team的CRUD (在已存在model時建立scaffold)  $ rails g scaffold_controller team name   補上player_attributes的params # [path] team_controller.rb def team_params   params.require(:team).permit(:name, players_attributes: [:id, :name, :position, :_destroy]) end   建立route  # [path] routes.rb resources :teams root &quot;teams#index&quot;   調整vue進入點  // [path] hello_vue.js import Vue from &#39;vue/dist/vue.esm&#39; import TurbolinksAdapter from &#39;vue-turbolinks&#39; import VueResource from &#39;vue-resource&#39;  Vue.use(VueResource)  document.addEventListener(&#39;turbolinks:load&#39;, () =&gt; {   Vue.http.headers.common[&#39;X-CSRF-Token&#39;] = document.querySelector(&#39;meta[name=&quot;csrf-token&quot;]&#39;).getAttribute(&#39;content&#39;)   var element = document.getElementById(&#39;team-form&#39;)   if (element != null){     var team = JSON.parse(element.dataset.team)     var players_attributes = JSON.parse(element.dataset.playersAttributes)     players_attributes.forEach(function(player){ player._destroy = null})     team.players_attribute = players_attributes      var app = new Vue({       el: element,       mixins: [TurbolinksAdapter],       data: function(){         return { team: team }       }     })      console.log(app);   } })   &lt;!-- [path] app.vue --&gt; &lt;%= content_tag :div,   id: &#39;team-form&#39;,   data: {     team: team.to_json(except: [:created_at, :updated_at]),     players_attributes: team.players.to_json(except: [:team_id, :created_at, :updated_at]),   } do %&gt;  &lt;label for=&quot;&quot;&gt;Team name&lt;/label&gt; &lt;input type=&quot;text&quot; v-model=&quot;team.name&quot; &gt;  &lt;% end %&gt;   $ yarn add vue-resource $ yarn add vue-turbolinks $ rails webpacker:compile   $ ./bin/webpack-dev-server $ rails s       參考        Video Part1     Video Part2     Git     https://medium.com/@hpux/rails-5-1-loves-javascript-a1d84d5318b">
+  <meta name="twitter:url" content="https://blog.anxgang.com/1845114/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-05-17T03:56:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/1845114/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Rails] Using VueJS for Nested Forms with Rails">
+        
+        
+        <meta itemprop="description"
+            content="介紹本文為 GoRails 的 Using VueJS for Nested Forms with Rails 練習有興趣可以參考影片及gitVideo Part1Video Part2Git準備工作  更新到 Rails 5.1  先安裝好npm安裝新專案$ rails new gorails --webpack=vue$ git add .$ git commit -m &quot;initial commit&quot;$ git checkout -b &#39;episode-184&#39;  #開個新branch做此專案補上jQuery因為rails 5 取消了原本預設的jQuery這邊建議還是先補上來，因為很多舊gem還沒把底層改為javascript# [path] gemfilegem &#39;jquery-rails&#39;// [path] application.js//= require rails-ujs//= require turbolinks//= require jquery$ bundle install建立model此範例使用team及player來做nested from$ rails g model team name$ rails g model player name position team:belongs_to$ rake db:migrate補上關聯及接受nested form# [path] team.rbclass Team &lt; ApplicationRecord  has_many :players, dependent: :destroy  accepts_nested_attributes_for :players, allow_destroy: trueend建立Controller及View這邊使用scaffold_controller快速搭建一個基本的team的CRUD (在已存在model時建立scaffold)$ rails g scaffold_controller team name補上player_attributes的params# [path] team_controller.rbdef team_params  params.require(:team).permit(:name, players_attributes: [:id, :name, :position, :_destroy])end建立route# [path] routes.rbresources :teamsroot &quot;teams#index&quot;調整vue進入點// [path] hello_vue.jsimport Vue from &#39;vue/dist/vue.esm&#39;import TurbolinksAdapter from &#39;vue-turbolinks&#39;import VueResource from &#39;vue-resource&#39;Vue.use(VueResource)document.addEventListener(&#39;turbolinks:load&#39;, () =&gt; {  Vue.http.headers.common[&#39;X-CSRF-Token&#39;] = document.querySelector(&#39;meta[name=&quot;csrf-token&quot;]&#39;).getAttribute(&#39;content&#39;)  var element = document.getElementById(&#39;team-form&#39;)  if (element != null){    var team = JSON.parse(element.dataset.team)    var players_attributes = JSON.parse(element.dataset.playersAttributes)    players_attributes.forEach(function(player){ player._destroy = null})    team.players_attribute = players_attributes    var app = new Vue({      el: element,      mixins: [TurbolinksAdapter],      data: function(){        return { team: team }      }    })    console.log(app);  }})&lt;!-- [path] app.vue --&gt;&lt;%= content_tag :div,  id: &#39;team-form&#39;,  data: {    team: team.to_json(except: [:created_at, :updated_at]),    players_attributes: team.players.to_json(except: [:team_id, :created_at, :updated_at]),  } do %&gt;&lt;label for=&quot;&quot;&gt;Team name&lt;/label&gt;&lt;input type=&quot;text&quot; v-model=&quot;team.name&quot; &gt;&lt;% end %&gt;$ yarn add vue-resource$ yarn add vue-turbolinks$ rails webpacker:compile$ ./bin/webpack-dev-server$ rails s   參考      Video Part1    Video Part2    Git    https://medium.com/@hpux/rails-5-1-loves-javascript-a1d84d5318b  ">
+        
+        <meta itemprop="datePublished" content="2017-05-17T03:56:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/1845114/" class="u-url"
+                        itemprop="url">[Rails] Using VueJS for Nested Forms with Rails
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2017-05-17T03:56:00+08:00">2017-05-17</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#介紹">介紹</a></li><li><a href="#準備工作">準備工作</a></li><li><a href="#安裝新專案">安裝新專案</a></li><li><a href="#補上jquery">補上jQuery</a></li><li><a href="#建立model">建立model</a></li><li><a href="#建立controller及view">建立Controller及View</a></li><li><a href="#建立route">建立route</a></li><li><a href="#調整vue進入點">調整vue進入點</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="介紹">介紹</h1>
+<p>本文為 GoRails 的 Using VueJS for Nested Forms with Rails 練習
+有興趣可以參考影片及git
+<a href="https://www.youtube.com/watch?v=3Vt20jpoUiI&amp;feature=youtu.be">Video Part1</a>
+<a href="https://www.youtube.com/watch?v=C3nug3Xo0D8&amp;feature=youtu.be">Video Part2</a>
+<a href="https://github.com/gorails-screencasts/gorails-episode-184">Git</a></p>
+
+<h1 id="準備工作">準備工作</h1>
+<ol>
+  <li>更新到 Rails 5.1</li>
+  <li>先安裝好npm</li>
+</ol>
+
+<h1 id="安裝新專案">安裝新專案</h1>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rails new gorails <span class="nt">--webpack</span><span class="o">=</span>vue
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git add <span class="nb">.</span>
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"initial commit"</span>
+<span class="nv">$ </span>git checkout <span class="nt">-b</span> <span class="s1">'episode-184'</span>  <span class="c">#開個新branch做此專案</span>
+</code></pre></div></div>
+<h1 id="補上jquery">補上jQuery</h1>
+<p>因為rails 5 取消了原本預設的jQuery
+這邊建議還是先補上來，因為很多舊gem還沒把底層改為javascript</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gemfile</span>
+<span class="n">gem</span> <span class="s1">'jquery-rails'</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// [path] application.js</span>
+<span class="c1">//= require rails-ujs</span>
+<span class="c1">//= require turbolinks</span>
+<span class="c1">//= require jquery</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ bundle install
+</code></pre></div></div>
+
+<h1 id="建立model">建立model</h1>
+<p>此範例使用team及player來做nested from</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rails g model team name
+</code></pre></div></div>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rails g model player name position team:belongs_to
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rake db:migrate
+</code></pre></div></div>
+
+<p>補上關聯及接受nested form</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] team.rb</span>
+<span class="k">class</span> <span class="nc">Team</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="n">has_many</span> <span class="ss">:players</span><span class="p">,</span> <span class="ss">dependent: :destroy</span>
+  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:players</span><span class="p">,</span> <span class="ss">allow_destroy: </span><span class="kp">true</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="建立controller及view">建立Controller及View</h1>
+<p>這邊使用scaffold_controller快速搭建一個基本的team的CRUD (在已存在model時建立scaffold)</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rails g scaffold_controller team name
+</code></pre></div></div>
+
+<p>補上player_attributes的params</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] team_controller.rb</span>
+<span class="k">def</span> <span class="nf">team_params</span>
+  <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:team</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">players_attributes: </span><span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:position</span><span class="p">,</span> <span class="ss">:_destroy</span><span class="p">])</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="建立route">建立route</h1>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] routes.rb</span>
+<span class="n">resources</span> <span class="ss">:teams</span>
+<span class="n">root</span> <span class="s2">"teams#index"</span>
+</code></pre></div></div>
+
+<h1 id="調整vue進入點">調整vue進入點</h1>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// [path] hello_vue.js</span>
+<span class="k">import</span> <span class="nx">Vue</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vue/dist/vue.esm</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">TurbolinksAdapter</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vue-turbolinks</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">VueResource</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vue-resource</span><span class="dl">'</span>
+
+<span class="nx">Vue</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="nx">VueResource</span><span class="p">)</span>
+
+<span class="nb">document</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">turbolinks:load</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nx">Vue</span><span class="p">.</span><span class="nx">http</span><span class="p">.</span><span class="nx">headers</span><span class="p">.</span><span class="nx">common</span><span class="p">[</span><span class="dl">'</span><span class="s1">X-CSRF-Token</span><span class="dl">'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">meta[name="csrf-token"]</span><span class="dl">'</span><span class="p">).</span><span class="nf">getAttribute</span><span class="p">(</span><span class="dl">'</span><span class="s1">content</span><span class="dl">'</span><span class="p">)</span>
+  <span class="kd">var</span> <span class="nx">element</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">team-form</span><span class="dl">'</span><span class="p">)</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">element</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">team</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">team</span><span class="p">)</span>
+    <span class="kd">var</span> <span class="nx">players_attributes</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">element</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">playersAttributes</span><span class="p">)</span>
+    <span class="nx">players_attributes</span><span class="p">.</span><span class="nf">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">player</span><span class="p">){</span> <span class="nx">player</span><span class="p">.</span><span class="nx">_destroy</span> <span class="o">=</span> <span class="kc">null</span><span class="p">})</span>
+    <span class="nx">team</span><span class="p">.</span><span class="nx">players_attribute</span> <span class="o">=</span> <span class="nx">players_attributes</span>
+
+    <span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Vue</span><span class="p">({</span>
+      <span class="na">el</span><span class="p">:</span> <span class="nx">element</span><span class="p">,</span>
+      <span class="na">mixins</span><span class="p">:</span> <span class="p">[</span><span class="nx">TurbolinksAdapter</span><span class="p">],</span>
+      <span class="na">data</span><span class="p">:</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="na">team</span><span class="p">:</span> <span class="nx">team</span> <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">})</span>
+
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">app</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app.vue --&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">content_tag</span> <span class="ss">:div</span><span class="p">,</span>
+  <span class="ss">id: </span><span class="s1">'team-form'</span><span class="p">,</span>
+  <span class="ss">data: </span><span class="p">{</span>
+    <span class="ss">team: </span><span class="n">team</span><span class="p">.</span><span class="nf">to_json</span><span class="p">(</span><span class="ss">except: </span><span class="p">[</span><span class="ss">:created_at</span><span class="p">,</span> <span class="ss">:updated_at</span><span class="p">]),</span>
+    <span class="ss">players_attributes: </span><span class="n">team</span><span class="p">.</span><span class="nf">players</span><span class="p">.</span><span class="nf">to_json</span><span class="p">(</span><span class="ss">except: </span><span class="p">[</span><span class="ss">:team_id</span><span class="p">,</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">:updated_at</span><span class="p">]),</span>
+  <span class="p">}</span> <span class="k">do</span> <span class="cp">%&gt;</span>
+
+<span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">""</span><span class="nt">&gt;</span>Team name<span class="nt">&lt;/label&gt;</span>
+<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">v-model=</span><span class="s">"team.name"</span> <span class="nt">&gt;</span>
+
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="n">yarn</span> <span class="n">add</span> <span class="n">vue</span><span class="o">-</span><span class="n">resource</span>
+<span class="err">$</span> <span class="n">yarn</span> <span class="n">add</span> <span class="n">vue</span><span class="o">-</span><span class="n">turbolinks</span>
+<span class="err">$</span> <span class="n">rails</span> <span class="n">webpacker</span><span class="ss">:compile</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="p">.</span><span class="nf">/</span><span class="n">bin</span><span class="o">/</span><span class="n">webpack</span><span class="o">-</span><span class="n">dev</span><span class="o">-</span><span class="n">server</span>
+<span class="err">$</span> <span class="n">rails</span> <span class="n">s</span> 
+</code></pre></div></div>
+
+<blockquote>
+  <p>參考</p>
+  <ol>
+    <li><a href="https://www.youtube.com/watch?v=3Vt20jpoUiI&amp;feature=youtu.be">Video Part1</a></li>
+    <li><a href="https://www.youtube.com/watch?v=C3nug3Xo0D8&amp;feature=youtu.be">Video Part2</a></li>
+    <li><a href="https://github.com/gorails-screencasts/gorails-episode-184">Git</a></li>
+    <li>https://medium.com/@hpux/rails-5-1-loves-javascript-a1d84d5318b</li>
+  </ol>
+</blockquote>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2017-05-17T03:56:00+08:00">May 17, 2017</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BRails%5D+Using+VueJS+for+Nested+Forms+with+Rails%20https%3A%2F%2Fblog.anxgang.com%2F1845114%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2F1845114%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2F1845114%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/1839447/" class="pagination--pager" title="[Rails] paperclip圖片是否存在判斷
+">上一篇</a>
+    
+    
+      <a href="/1846057/" class="pagination--pager" title="[Git] 修改最後一次提交方式
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/1845114/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/1845114"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

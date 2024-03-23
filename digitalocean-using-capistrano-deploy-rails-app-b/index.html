@@ -1,0 +1,1452 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[DigitalOcean] 使用 Capistrano Deploy Rails App (二) - ANxGANG</title>
+<meta name="description" content="本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0      接續上篇 DigitalOcean - 使用 Capistrano Deploy Rails App (一)   前言  續前篇建立Droplet及環境安裝，本文將講解專案如何透過Capistrano Deploy至我們準備好的production環境。 本文重點如下：     Server部分            MySQL 設定       Nginx 設定       Server安全性調整           Host部分（本機）            Capistrano安裝及設定       deploy流程           流程講解  再設定之前，先進行流程的講解， 這邊將主機分為Host(本機)、Git主機(github或bitbucket)、Server主機(production伺服器)來講解  Deply流程     在Host主機，將完成的專案(master branch) push上git主機   使用ssh連到Server主機，將剛剛上傳的master branch從git主機clone或pull下來   再回到Host主機，將yml檔透過ssh丟給Server。(因為有安全性問題，不透過git傳)   最後如果有調整一些設定值，我們還要至server主機重啟http server。     雖然上述流程感覺不難，但是真正操作起來指令也是很繁瑣，秉持『工欲善其事，必先利其器』的原則，我們請出Capistrano這個自動化部署工具，來幫我們處理這些繁複卻一貫的作業。  Capistrano的好處就是在於你只需要一個指令，就可以完成上述deploy的動作，甚至還可以客製化自己想要的指令，並且可以同時開啟多個Deploy狀態，並且同時部署至多台機器。  Server部分設定  請先連線至 ssh root@xxx.xxx.xxx.xxx 再開始以下動作  建立專案用資料庫  $ mysql -u root -p  #=&gt; 輸入密碼1234 mysql &gt; create database YOUR_DATABASE_NAME default character set utf8; mysql &gt; show databases; #=&gt; 確認是否有建立了 mysql &gt; exit   設定 Nginx 的 config symlinks到你的專案  sudo rm /etc/nginx/sites-enabled/default sudo ln -nfs &quot;/home/deploy/YOUR_PROJECT_NAME/current/config/nginx.conf&quot; &quot;/etc/nginx/sites-enabled/YOUR_PROJECT_NAME&quot;      註：因為nginx.conf裡面有設定會include /etc/nginx/sites-enabled/中所有設定symlinks的檔案，所以我們以後每增加一個project，你都可以多設定一個symlinks來指定一個虛擬伺服器   新增deploy帳號  $ adduser deploy # =&gt;設定密碼，其他資訊都enter跳過即可 $ gpasswd -a deploy sudo # =&gt; 將deploy加入sudo群組   關閉root遠端登入  $ vim /etc/ssh/sshd_config #=&gt; 找到 PermitRootLogin 將yes 改為no  $ service ssh restart   建立server自動git pull需要的金鑰  $ ssh-keygen #=&gt; 建立金鑰 $ cat ~/.ssh/id_rsa.pub #=&gt; 複製公鑰   到 github 或 Bitbucket開一個新專案     github 到 SSH and GPG keys 新增貼上   Bitbucket 到 專案 / Settings / Deployment keys 新增貼上   host部分設定  請輸入exit跳回自己電腦  新增git origin位置，並首次push  git remote add origin git@bitbucket.org:anxgang/kixerp.git git push -u origin --all   設定deploy免輸入密碼登入  執行此指令將本機公鑰複製到伺服器  ssh deploy@xxx.xxx.xxx.xxx &#39;mkdir -p ~/.ssh;cat &gt;&gt; ~/.ssh/authorized_keys&#39; &lt; ~/.ssh/id_rsa.pub   設定Capistrano自動化部署  修改 Gemfile  # [path] gemfile - gem &#39;sqlite3&#39; + gem &#39;sqlite3&#39;, group: :development  - # gem &#39;therubyracer&#39;, platforms: :ruby + gem &#39;therubyracer&#39;, platforms: :ruby  + group :development do +   gem &#39;capistrano&#39;,         &#39;~&gt; 3.6.0&#39;, require: false +   gem &#39;capistrano-rvm&#39;,     &#39;~&gt; 0.1&#39;,   require: false +   gem &#39;capistrano-rails&#39;,   &#39;~&gt; 1.1.7&#39;, require: false +   gem &#39;capistrano-bundler&#39;, &#39;~&gt; 1.1.4&#39;, require: false +   gem &#39;capistrano3-puma&#39;,   &#39;~&gt; 1.2.1&#39;, require: false + end  + group :production do +   gem &quot;mysql2&quot; + end   $ bundle install $ cap install # =&gt; 會詢問要不要安裝額外的套件，選NO   修改 Capfile  # Load DSL and set up stages require &quot;capistrano/setup&quot;  # Include default deployment tasks require &quot;capistrano/deploy&quot;  require &#39;capistrano/rails&#39; require &#39;capistrano/rvm&#39; require &#39;capistrano/bundler&#39; require &#39;capistrano/rails/assets&#39; require &#39;capistrano/rails/migrations&#39; require &#39;capistrano/puma&#39;  # Load custom tasks from `lib/capistrano/tasks` if you have any defined Dir.glob(&quot;lib/capistrano/tasks/*.rake&quot;).each { |r| import r }   覆寫 config/deploy.rb  並設定deploy.rb  # [path] config/deploy.rb # config valid only for current version of Capistrano  set :repo_url,        &#39;git@github.com:YOUR_USERNAME/YOUR_PROJECT_NAME.git&#39; # 改成你的 set :application,     &#39;YOUR_PROJECT_NAME&#39; # 改成你的 appname set :user,            &#39;deploy&#39; # 這個對應到我們剛剛增加的 user: deploy set :puma_threads,    [4, 16] set :puma_workers,    0  # Don&#39;t change these unless you know what you&#39;re doing set :pty,             true set :use_sudo,        false set :stage,           :production set :deploy_via,      :remote_cache set :deploy_to,       &quot;/home/#{fetch(:user)}/#{fetch(:application)}&quot; set :puma_bind,       &quot;unix://#{shared_path}/tmp/sockets/#{fetch(:application)}-puma.sock&quot; set :puma_state,      &quot;#{shared_path}/tmp/pids/puma.state&quot; set :puma_pid,        &quot;#{shared_path}/tmp/pids/puma.pid&quot; set :puma_access_log, &quot;#{release_path}/log/puma.error.log&quot; set :puma_error_log,  &quot;#{release_path}/log/puma.access.log&quot; set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: %w(~/.ssh/id_rsa.pub) } set :puma_preload_app, true set :puma_worker_timeout, nil set :puma_init_active_record, true  # Change to false when not using ActiveRecord  ## Defaults: # set :scm,           :git # set :branch,        :master # set :format,        :pretty # set :log_level,     :debug # set :keep_releases, 5  ## Linked Files &amp; Directories (Default None): set :linked_files, %w{config/database.yml config/secrets.yml} set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}  namespace :puma do   desc &#39;Create Directories for Puma Pids and Socket&#39;   task :make_dirs do     on roles(:app) do       execute &quot;mkdir #{shared_path}/tmp/sockets -p&quot;       execute &quot;mkdir #{shared_path}/tmp/pids -p&quot;     end   end    before :start, :make_dirs end  namespace :deploy do   desc &quot;Make sure local git is in sync with remote.&quot;   task :check_revision do     on roles(:app) do       unless `git rev-parse HEAD` == `git rev-parse origin/master`         puts &quot;WARNING: HEAD is not the same as origin/master&quot;         puts &quot;Run `git push` to sync changes.&quot;         exit       end     end   end    desc &#39;Initial Deploy&#39;   task :initial do     on roles(:app) do       before &#39;deploy:restart&#39;, &#39;puma:start&#39;       invoke &#39;deploy&#39;     end   end    desc &#39;Restart application&#39;   task :restart do     on roles(:app), in: :sequence, wait: 5 do       invoke &#39;puma:restart&#39;     end   end    desc &#39;Upload to shared/config&#39;   task :upload do     on roles (:app) do       upload! &quot;config/database.yml&quot;, &quot;#{shared_path}/config/database.yml&quot;       upload! &quot;config/secrets.yml&quot;,  &quot;#{shared_path}/config/secrets.yml&quot;     end   end    before :starting,  :check_revision   after  :finishing, :compile_assets   after  :finishing, :cleanup   after  :finishing, :restart end  desc &quot;Run rake db:seed on a remote server.&quot; task :seed do   on roles (:app) do     within release_path do       with rails_env: fetch(:rails_env) do        execute :rake, &quot;db:seed&quot;       end     end   end end  # ps aux | grep puma    # Get puma pid # kill -s SIGUSR2 pid   # Restart puma # kill -s SIGTERM pid   # Stop puma   修改 config/deploy/production.rb  set :stage, :production set :branch, :master  role :app, %w(deploy@xxx.xxx.xxx.xxx) role :web, %w(deploy@xxx.xxx.xxx.xxx) role :db, %w(deploy@xxx.xxx.xxx.xxx)  set :rails_env, &quot;production&quot; set :puma_env, &quot;production&quot; set :puma_config_file, &quot;#{shared_path}/config/puma.rb&quot; set :puma_conf, &quot;#{shared_path}/config/puma.rb&quot;   修改 config/nginx.conf  在專案新增 config/nginx.conf  // [path] config/nginx.conf upstream puma {   server unix:///home/deploy/YOUR_PROJECT_NAME/shared/tmp/sockets/KaohsiungRubbishTruck-puma.sock; }  server {   listen 80 default_server deferred;   # server_name example.com;    root /home/deploy/YOUR_PROJECT_NAME/current/public;   access_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.access.log;   error_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.error.log info;    location ^~ /assets/ {     gzip_static on;     expires max;     add_header Cache-Control public;   }    try_files $uri/index.html $uri @puma;   location @puma {     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;     proxy_set_header Host $http_host;     proxy_redirect off;      proxy_pass http://puma;   }    error_page 500 502 503 504 /500.html;   client_max_body_size 10M;   keepalive_timeout 10; }   調整 .gitignore  加入以下兩行  # [path] .gitignore /config/database.yml /config/secrets.yml   複製     config/database.yml -&gt; config/database.yml.sample   config/secrets.yml -&gt; config/secrets.yml.sample   刪除     config/database.yml   config/secrets.yml   將剛剛做的修改 commit 起來，push 到遠端  git add . git commit -m &quot;ready to deploy&quot; git push origin master   修改 config/database.yml   production: -  &lt;&lt;: *default -  database: db/production.sqlite3 +  adapter: mysql2 +  encoding: utf8 +  database: YOUR_PROJECT_NAME +  pool: 5 +  username: root +  password: 1234 +  socket: /var/run/mysqld/mysqld.sock   修改 config/secrets.yml  -  secret_key_base: &lt;%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt; +  secret_key_base: e4a98dd1063a6765xxxxxxx # 這一串從上面的 test 或是 development 複製過來即可   首次 deploy  $ cap production deploy:check $ cap production deploy:upload #=&gt; 把 database.yml 跟 secrets.yml 丟到 Ubuntu（之後如果有更改也可以這樣丟） $ cap production deploy:initial #=&gt; ssh 登入，重開 nginx：$ sudo service nginx restart $ cap production seed  #=&gt; 有寫seed可以順便丟   其他指令可以這樣查  cap -T      如果用 Capistrano 的時候他還是叫你打密碼， 修正方法如下：   eval `ssh-agent -s` ssh-add ~/.ssh/id_rsa      如果你是用 zsh，請再做以下修改   vi ~/.zshrc   plugins=(git ssh-agent) # 加上這一行   Normal deploy  git commit -m &quot;commit message&quot; git push origin master cap production deploy   查看網站是否Deploy成功  http:/xxx.xxx.xxx.xxx/  若失敗的話，可以進入Server查看log  ssh deploy@xxx.xxx.xxx.xxx tail -f /home/deploy/YOUR_PROJECT_NAME/current/log/production.log   參考     kakas/CapistranoDeployTest   (Mini Course) Deploy Rails Project to Linux Server - Growth School   Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[DigitalOcean] 使用 Capistrano Deploy Rails App (二)">
+<meta property="og:url" content="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-b/">
+
+
+  <meta property="og:description" content="本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0      接續上篇 DigitalOcean - 使用 Capistrano Deploy Rails App (一)   前言  續前篇建立Droplet及環境安裝，本文將講解專案如何透過Capistrano Deploy至我們準備好的production環境。 本文重點如下：     Server部分            MySQL 設定       Nginx 設定       Server安全性調整           Host部分（本機）            Capistrano安裝及設定       deploy流程           流程講解  再設定之前，先進行流程的講解， 這邊將主機分為Host(本機)、Git主機(github或bitbucket)、Server主機(production伺服器)來講解  Deply流程     在Host主機，將完成的專案(master branch) push上git主機   使用ssh連到Server主機，將剛剛上傳的master branch從git主機clone或pull下來   再回到Host主機，將yml檔透過ssh丟給Server。(因為有安全性問題，不透過git傳)   最後如果有調整一些設定值，我們還要至server主機重啟http server。     雖然上述流程感覺不難，但是真正操作起來指令也是很繁瑣，秉持『工欲善其事，必先利其器』的原則，我們請出Capistrano這個自動化部署工具，來幫我們處理這些繁複卻一貫的作業。  Capistrano的好處就是在於你只需要一個指令，就可以完成上述deploy的動作，甚至還可以客製化自己想要的指令，並且可以同時開啟多個Deploy狀態，並且同時部署至多台機器。  Server部分設定  請先連線至 ssh root@xxx.xxx.xxx.xxx 再開始以下動作  建立專案用資料庫  $ mysql -u root -p  #=&gt; 輸入密碼1234 mysql &gt; create database YOUR_DATABASE_NAME default character set utf8; mysql &gt; show databases; #=&gt; 確認是否有建立了 mysql &gt; exit   設定 Nginx 的 config symlinks到你的專案  sudo rm /etc/nginx/sites-enabled/default sudo ln -nfs &quot;/home/deploy/YOUR_PROJECT_NAME/current/config/nginx.conf&quot; &quot;/etc/nginx/sites-enabled/YOUR_PROJECT_NAME&quot;      註：因為nginx.conf裡面有設定會include /etc/nginx/sites-enabled/中所有設定symlinks的檔案，所以我們以後每增加一個project，你都可以多設定一個symlinks來指定一個虛擬伺服器   新增deploy帳號  $ adduser deploy # =&gt;設定密碼，其他資訊都enter跳過即可 $ gpasswd -a deploy sudo # =&gt; 將deploy加入sudo群組   關閉root遠端登入  $ vim /etc/ssh/sshd_config #=&gt; 找到 PermitRootLogin 將yes 改為no  $ service ssh restart   建立server自動git pull需要的金鑰  $ ssh-keygen #=&gt; 建立金鑰 $ cat ~/.ssh/id_rsa.pub #=&gt; 複製公鑰   到 github 或 Bitbucket開一個新專案     github 到 SSH and GPG keys 新增貼上   Bitbucket 到 專案 / Settings / Deployment keys 新增貼上   host部分設定  請輸入exit跳回自己電腦  新增git origin位置，並首次push  git remote add origin git@bitbucket.org:anxgang/kixerp.git git push -u origin --all   設定deploy免輸入密碼登入  執行此指令將本機公鑰複製到伺服器  ssh deploy@xxx.xxx.xxx.xxx &#39;mkdir -p ~/.ssh;cat &gt;&gt; ~/.ssh/authorized_keys&#39; &lt; ~/.ssh/id_rsa.pub   設定Capistrano自動化部署  修改 Gemfile  # [path] gemfile - gem &#39;sqlite3&#39; + gem &#39;sqlite3&#39;, group: :development  - # gem &#39;therubyracer&#39;, platforms: :ruby + gem &#39;therubyracer&#39;, platforms: :ruby  + group :development do +   gem &#39;capistrano&#39;,         &#39;~&gt; 3.6.0&#39;, require: false +   gem &#39;capistrano-rvm&#39;,     &#39;~&gt; 0.1&#39;,   require: false +   gem &#39;capistrano-rails&#39;,   &#39;~&gt; 1.1.7&#39;, require: false +   gem &#39;capistrano-bundler&#39;, &#39;~&gt; 1.1.4&#39;, require: false +   gem &#39;capistrano3-puma&#39;,   &#39;~&gt; 1.2.1&#39;, require: false + end  + group :production do +   gem &quot;mysql2&quot; + end   $ bundle install $ cap install # =&gt; 會詢問要不要安裝額外的套件，選NO   修改 Capfile  # Load DSL and set up stages require &quot;capistrano/setup&quot;  # Include default deployment tasks require &quot;capistrano/deploy&quot;  require &#39;capistrano/rails&#39; require &#39;capistrano/rvm&#39; require &#39;capistrano/bundler&#39; require &#39;capistrano/rails/assets&#39; require &#39;capistrano/rails/migrations&#39; require &#39;capistrano/puma&#39;  # Load custom tasks from `lib/capistrano/tasks` if you have any defined Dir.glob(&quot;lib/capistrano/tasks/*.rake&quot;).each { |r| import r }   覆寫 config/deploy.rb  並設定deploy.rb  # [path] config/deploy.rb # config valid only for current version of Capistrano  set :repo_url,        &#39;git@github.com:YOUR_USERNAME/YOUR_PROJECT_NAME.git&#39; # 改成你的 set :application,     &#39;YOUR_PROJECT_NAME&#39; # 改成你的 appname set :user,            &#39;deploy&#39; # 這個對應到我們剛剛增加的 user: deploy set :puma_threads,    [4, 16] set :puma_workers,    0  # Don&#39;t change these unless you know what you&#39;re doing set :pty,             true set :use_sudo,        false set :stage,           :production set :deploy_via,      :remote_cache set :deploy_to,       &quot;/home/#{fetch(:user)}/#{fetch(:application)}&quot; set :puma_bind,       &quot;unix://#{shared_path}/tmp/sockets/#{fetch(:application)}-puma.sock&quot; set :puma_state,      &quot;#{shared_path}/tmp/pids/puma.state&quot; set :puma_pid,        &quot;#{shared_path}/tmp/pids/puma.pid&quot; set :puma_access_log, &quot;#{release_path}/log/puma.error.log&quot; set :puma_error_log,  &quot;#{release_path}/log/puma.access.log&quot; set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: %w(~/.ssh/id_rsa.pub) } set :puma_preload_app, true set :puma_worker_timeout, nil set :puma_init_active_record, true  # Change to false when not using ActiveRecord  ## Defaults: # set :scm,           :git # set :branch,        :master # set :format,        :pretty # set :log_level,     :debug # set :keep_releases, 5  ## Linked Files &amp; Directories (Default None): set :linked_files, %w{config/database.yml config/secrets.yml} set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}  namespace :puma do   desc &#39;Create Directories for Puma Pids and Socket&#39;   task :make_dirs do     on roles(:app) do       execute &quot;mkdir #{shared_path}/tmp/sockets -p&quot;       execute &quot;mkdir #{shared_path}/tmp/pids -p&quot;     end   end    before :start, :make_dirs end  namespace :deploy do   desc &quot;Make sure local git is in sync with remote.&quot;   task :check_revision do     on roles(:app) do       unless `git rev-parse HEAD` == `git rev-parse origin/master`         puts &quot;WARNING: HEAD is not the same as origin/master&quot;         puts &quot;Run `git push` to sync changes.&quot;         exit       end     end   end    desc &#39;Initial Deploy&#39;   task :initial do     on roles(:app) do       before &#39;deploy:restart&#39;, &#39;puma:start&#39;       invoke &#39;deploy&#39;     end   end    desc &#39;Restart application&#39;   task :restart do     on roles(:app), in: :sequence, wait: 5 do       invoke &#39;puma:restart&#39;     end   end    desc &#39;Upload to shared/config&#39;   task :upload do     on roles (:app) do       upload! &quot;config/database.yml&quot;, &quot;#{shared_path}/config/database.yml&quot;       upload! &quot;config/secrets.yml&quot;,  &quot;#{shared_path}/config/secrets.yml&quot;     end   end    before :starting,  :check_revision   after  :finishing, :compile_assets   after  :finishing, :cleanup   after  :finishing, :restart end  desc &quot;Run rake db:seed on a remote server.&quot; task :seed do   on roles (:app) do     within release_path do       with rails_env: fetch(:rails_env) do        execute :rake, &quot;db:seed&quot;       end     end   end end  # ps aux | grep puma    # Get puma pid # kill -s SIGUSR2 pid   # Restart puma # kill -s SIGTERM pid   # Stop puma   修改 config/deploy/production.rb  set :stage, :production set :branch, :master  role :app, %w(deploy@xxx.xxx.xxx.xxx) role :web, %w(deploy@xxx.xxx.xxx.xxx) role :db, %w(deploy@xxx.xxx.xxx.xxx)  set :rails_env, &quot;production&quot; set :puma_env, &quot;production&quot; set :puma_config_file, &quot;#{shared_path}/config/puma.rb&quot; set :puma_conf, &quot;#{shared_path}/config/puma.rb&quot;   修改 config/nginx.conf  在專案新增 config/nginx.conf  // [path] config/nginx.conf upstream puma {   server unix:///home/deploy/YOUR_PROJECT_NAME/shared/tmp/sockets/KaohsiungRubbishTruck-puma.sock; }  server {   listen 80 default_server deferred;   # server_name example.com;    root /home/deploy/YOUR_PROJECT_NAME/current/public;   access_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.access.log;   error_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.error.log info;    location ^~ /assets/ {     gzip_static on;     expires max;     add_header Cache-Control public;   }    try_files $uri/index.html $uri @puma;   location @puma {     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;     proxy_set_header Host $http_host;     proxy_redirect off;      proxy_pass http://puma;   }    error_page 500 502 503 504 /500.html;   client_max_body_size 10M;   keepalive_timeout 10; }   調整 .gitignore  加入以下兩行  # [path] .gitignore /config/database.yml /config/secrets.yml   複製     config/database.yml -&gt; config/database.yml.sample   config/secrets.yml -&gt; config/secrets.yml.sample   刪除     config/database.yml   config/secrets.yml   將剛剛做的修改 commit 起來，push 到遠端  git add . git commit -m &quot;ready to deploy&quot; git push origin master   修改 config/database.yml   production: -  &lt;&lt;: *default -  database: db/production.sqlite3 +  adapter: mysql2 +  encoding: utf8 +  database: YOUR_PROJECT_NAME +  pool: 5 +  username: root +  password: 1234 +  socket: /var/run/mysqld/mysqld.sock   修改 config/secrets.yml  -  secret_key_base: &lt;%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt; +  secret_key_base: e4a98dd1063a6765xxxxxxx # 這一串從上面的 test 或是 development 複製過來即可   首次 deploy  $ cap production deploy:check $ cap production deploy:upload #=&gt; 把 database.yml 跟 secrets.yml 丟到 Ubuntu（之後如果有更改也可以這樣丟） $ cap production deploy:initial #=&gt; ssh 登入，重開 nginx：$ sudo service nginx restart $ cap production seed  #=&gt; 有寫seed可以順便丟   其他指令可以這樣查  cap -T      如果用 Capistrano 的時候他還是叫你打密碼， 修正方法如下：   eval `ssh-agent -s` ssh-add ~/.ssh/id_rsa      如果你是用 zsh，請再做以下修改   vi ~/.zshrc   plugins=(git ssh-agent) # 加上這一行   Normal deploy  git commit -m &quot;commit message&quot; git push origin master cap production deploy   查看網站是否Deploy成功  http:/xxx.xxx.xxx.xxx/  若失敗的話，可以進入Server查看log  ssh deploy@xxx.xxx.xxx.xxx tail -f /home/deploy/YOUR_PROJECT_NAME/current/log/production.log   參考     kakas/CapistranoDeployTest   (Mini Course) Deploy Rails Project to Linux Server - Growth School   Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[DigitalOcean] 使用 Capistrano Deploy Rails App (二)">
+  <meta name="twitter:description" content="本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0      接續上篇 DigitalOcean - 使用 Capistrano Deploy Rails App (一)   前言  續前篇建立Droplet及環境安裝，本文將講解專案如何透過Capistrano Deploy至我們準備好的production環境。 本文重點如下：     Server部分            MySQL 設定       Nginx 設定       Server安全性調整           Host部分（本機）            Capistrano安裝及設定       deploy流程           流程講解  再設定之前，先進行流程的講解， 這邊將主機分為Host(本機)、Git主機(github或bitbucket)、Server主機(production伺服器)來講解  Deply流程     在Host主機，將完成的專案(master branch) push上git主機   使用ssh連到Server主機，將剛剛上傳的master branch從git主機clone或pull下來   再回到Host主機，將yml檔透過ssh丟給Server。(因為有安全性問題，不透過git傳)   最後如果有調整一些設定值，我們還要至server主機重啟http server。     雖然上述流程感覺不難，但是真正操作起來指令也是很繁瑣，秉持『工欲善其事，必先利其器』的原則，我們請出Capistrano這個自動化部署工具，來幫我們處理這些繁複卻一貫的作業。  Capistrano的好處就是在於你只需要一個指令，就可以完成上述deploy的動作，甚至還可以客製化自己想要的指令，並且可以同時開啟多個Deploy狀態，並且同時部署至多台機器。  Server部分設定  請先連線至 ssh root@xxx.xxx.xxx.xxx 再開始以下動作  建立專案用資料庫  $ mysql -u root -p  #=&gt; 輸入密碼1234 mysql &gt; create database YOUR_DATABASE_NAME default character set utf8; mysql &gt; show databases; #=&gt; 確認是否有建立了 mysql &gt; exit   設定 Nginx 的 config symlinks到你的專案  sudo rm /etc/nginx/sites-enabled/default sudo ln -nfs &quot;/home/deploy/YOUR_PROJECT_NAME/current/config/nginx.conf&quot; &quot;/etc/nginx/sites-enabled/YOUR_PROJECT_NAME&quot;      註：因為nginx.conf裡面有設定會include /etc/nginx/sites-enabled/中所有設定symlinks的檔案，所以我們以後每增加一個project，你都可以多設定一個symlinks來指定一個虛擬伺服器   新增deploy帳號  $ adduser deploy # =&gt;設定密碼，其他資訊都enter跳過即可 $ gpasswd -a deploy sudo # =&gt; 將deploy加入sudo群組   關閉root遠端登入  $ vim /etc/ssh/sshd_config #=&gt; 找到 PermitRootLogin 將yes 改為no  $ service ssh restart   建立server自動git pull需要的金鑰  $ ssh-keygen #=&gt; 建立金鑰 $ cat ~/.ssh/id_rsa.pub #=&gt; 複製公鑰   到 github 或 Bitbucket開一個新專案     github 到 SSH and GPG keys 新增貼上   Bitbucket 到 專案 / Settings / Deployment keys 新增貼上   host部分設定  請輸入exit跳回自己電腦  新增git origin位置，並首次push  git remote add origin git@bitbucket.org:anxgang/kixerp.git git push -u origin --all   設定deploy免輸入密碼登入  執行此指令將本機公鑰複製到伺服器  ssh deploy@xxx.xxx.xxx.xxx &#39;mkdir -p ~/.ssh;cat &gt;&gt; ~/.ssh/authorized_keys&#39; &lt; ~/.ssh/id_rsa.pub   設定Capistrano自動化部署  修改 Gemfile  # [path] gemfile - gem &#39;sqlite3&#39; + gem &#39;sqlite3&#39;, group: :development  - # gem &#39;therubyracer&#39;, platforms: :ruby + gem &#39;therubyracer&#39;, platforms: :ruby  + group :development do +   gem &#39;capistrano&#39;,         &#39;~&gt; 3.6.0&#39;, require: false +   gem &#39;capistrano-rvm&#39;,     &#39;~&gt; 0.1&#39;,   require: false +   gem &#39;capistrano-rails&#39;,   &#39;~&gt; 1.1.7&#39;, require: false +   gem &#39;capistrano-bundler&#39;, &#39;~&gt; 1.1.4&#39;, require: false +   gem &#39;capistrano3-puma&#39;,   &#39;~&gt; 1.2.1&#39;, require: false + end  + group :production do +   gem &quot;mysql2&quot; + end   $ bundle install $ cap install # =&gt; 會詢問要不要安裝額外的套件，選NO   修改 Capfile  # Load DSL and set up stages require &quot;capistrano/setup&quot;  # Include default deployment tasks require &quot;capistrano/deploy&quot;  require &#39;capistrano/rails&#39; require &#39;capistrano/rvm&#39; require &#39;capistrano/bundler&#39; require &#39;capistrano/rails/assets&#39; require &#39;capistrano/rails/migrations&#39; require &#39;capistrano/puma&#39;  # Load custom tasks from `lib/capistrano/tasks` if you have any defined Dir.glob(&quot;lib/capistrano/tasks/*.rake&quot;).each { |r| import r }   覆寫 config/deploy.rb  並設定deploy.rb  # [path] config/deploy.rb # config valid only for current version of Capistrano  set :repo_url,        &#39;git@github.com:YOUR_USERNAME/YOUR_PROJECT_NAME.git&#39; # 改成你的 set :application,     &#39;YOUR_PROJECT_NAME&#39; # 改成你的 appname set :user,            &#39;deploy&#39; # 這個對應到我們剛剛增加的 user: deploy set :puma_threads,    [4, 16] set :puma_workers,    0  # Don&#39;t change these unless you know what you&#39;re doing set :pty,             true set :use_sudo,        false set :stage,           :production set :deploy_via,      :remote_cache set :deploy_to,       &quot;/home/#{fetch(:user)}/#{fetch(:application)}&quot; set :puma_bind,       &quot;unix://#{shared_path}/tmp/sockets/#{fetch(:application)}-puma.sock&quot; set :puma_state,      &quot;#{shared_path}/tmp/pids/puma.state&quot; set :puma_pid,        &quot;#{shared_path}/tmp/pids/puma.pid&quot; set :puma_access_log, &quot;#{release_path}/log/puma.error.log&quot; set :puma_error_log,  &quot;#{release_path}/log/puma.access.log&quot; set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: %w(~/.ssh/id_rsa.pub) } set :puma_preload_app, true set :puma_worker_timeout, nil set :puma_init_active_record, true  # Change to false when not using ActiveRecord  ## Defaults: # set :scm,           :git # set :branch,        :master # set :format,        :pretty # set :log_level,     :debug # set :keep_releases, 5  ## Linked Files &amp; Directories (Default None): set :linked_files, %w{config/database.yml config/secrets.yml} set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}  namespace :puma do   desc &#39;Create Directories for Puma Pids and Socket&#39;   task :make_dirs do     on roles(:app) do       execute &quot;mkdir #{shared_path}/tmp/sockets -p&quot;       execute &quot;mkdir #{shared_path}/tmp/pids -p&quot;     end   end    before :start, :make_dirs end  namespace :deploy do   desc &quot;Make sure local git is in sync with remote.&quot;   task :check_revision do     on roles(:app) do       unless `git rev-parse HEAD` == `git rev-parse origin/master`         puts &quot;WARNING: HEAD is not the same as origin/master&quot;         puts &quot;Run `git push` to sync changes.&quot;         exit       end     end   end    desc &#39;Initial Deploy&#39;   task :initial do     on roles(:app) do       before &#39;deploy:restart&#39;, &#39;puma:start&#39;       invoke &#39;deploy&#39;     end   end    desc &#39;Restart application&#39;   task :restart do     on roles(:app), in: :sequence, wait: 5 do       invoke &#39;puma:restart&#39;     end   end    desc &#39;Upload to shared/config&#39;   task :upload do     on roles (:app) do       upload! &quot;config/database.yml&quot;, &quot;#{shared_path}/config/database.yml&quot;       upload! &quot;config/secrets.yml&quot;,  &quot;#{shared_path}/config/secrets.yml&quot;     end   end    before :starting,  :check_revision   after  :finishing, :compile_assets   after  :finishing, :cleanup   after  :finishing, :restart end  desc &quot;Run rake db:seed on a remote server.&quot; task :seed do   on roles (:app) do     within release_path do       with rails_env: fetch(:rails_env) do        execute :rake, &quot;db:seed&quot;       end     end   end end  # ps aux | grep puma    # Get puma pid # kill -s SIGUSR2 pid   # Restart puma # kill -s SIGTERM pid   # Stop puma   修改 config/deploy/production.rb  set :stage, :production set :branch, :master  role :app, %w(deploy@xxx.xxx.xxx.xxx) role :web, %w(deploy@xxx.xxx.xxx.xxx) role :db, %w(deploy@xxx.xxx.xxx.xxx)  set :rails_env, &quot;production&quot; set :puma_env, &quot;production&quot; set :puma_config_file, &quot;#{shared_path}/config/puma.rb&quot; set :puma_conf, &quot;#{shared_path}/config/puma.rb&quot;   修改 config/nginx.conf  在專案新增 config/nginx.conf  // [path] config/nginx.conf upstream puma {   server unix:///home/deploy/YOUR_PROJECT_NAME/shared/tmp/sockets/KaohsiungRubbishTruck-puma.sock; }  server {   listen 80 default_server deferred;   # server_name example.com;    root /home/deploy/YOUR_PROJECT_NAME/current/public;   access_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.access.log;   error_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.error.log info;    location ^~ /assets/ {     gzip_static on;     expires max;     add_header Cache-Control public;   }    try_files $uri/index.html $uri @puma;   location @puma {     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;     proxy_set_header Host $http_host;     proxy_redirect off;      proxy_pass http://puma;   }    error_page 500 502 503 504 /500.html;   client_max_body_size 10M;   keepalive_timeout 10; }   調整 .gitignore  加入以下兩行  # [path] .gitignore /config/database.yml /config/secrets.yml   複製     config/database.yml -&gt; config/database.yml.sample   config/secrets.yml -&gt; config/secrets.yml.sample   刪除     config/database.yml   config/secrets.yml   將剛剛做的修改 commit 起來，push 到遠端  git add . git commit -m &quot;ready to deploy&quot; git push origin master   修改 config/database.yml   production: -  &lt;&lt;: *default -  database: db/production.sqlite3 +  adapter: mysql2 +  encoding: utf8 +  database: YOUR_PROJECT_NAME +  pool: 5 +  username: root +  password: 1234 +  socket: /var/run/mysqld/mysqld.sock   修改 config/secrets.yml  -  secret_key_base: &lt;%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt; +  secret_key_base: e4a98dd1063a6765xxxxxxx # 這一串從上面的 test 或是 development 複製過來即可   首次 deploy  $ cap production deploy:check $ cap production deploy:upload #=&gt; 把 database.yml 跟 secrets.yml 丟到 Ubuntu（之後如果有更改也可以這樣丟） $ cap production deploy:initial #=&gt; ssh 登入，重開 nginx：$ sudo service nginx restart $ cap production seed  #=&gt; 有寫seed可以順便丟   其他指令可以這樣查  cap -T      如果用 Capistrano 的時候他還是叫你打密碼， 修正方法如下：   eval `ssh-agent -s` ssh-add ~/.ssh/id_rsa      如果你是用 zsh，請再做以下修改   vi ~/.zshrc   plugins=(git ssh-agent) # 加上這一行   Normal deploy  git commit -m &quot;commit message&quot; git push origin master cap production deploy   查看網站是否Deploy成功  http:/xxx.xxx.xxx.xxx/  若失敗的話，可以進入Server查看log  ssh deploy@xxx.xxx.xxx.xxx tail -f /home/deploy/YOUR_PROJECT_NAME/current/log/production.log   參考     kakas/CapistranoDeployTest   (Mini Course) Deploy Rails Project to Linux Server - Growth School   Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+  <meta name="twitter:url" content="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-b/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-08-03T05:59:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-b/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[DigitalOcean] 使用 Capistrano Deploy Rails App (二)">
+        
+        
+        <meta itemprop="description"
+            content="  本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0  接續上篇 DigitalOcean - 使用 Capistrano Deploy Rails App (一)前言續前篇建立Droplet及環境安裝，本文將講解專案如何透過Capistrano Deploy至我們準備好的production環境。本文重點如下：  Server部分          MySQL 設定      Nginx 設定      Server安全性調整        Host部分（本機）          Capistrano安裝及設定      deploy流程      流程講解再設定之前，先進行流程的講解，這邊將主機分為Host(本機)、Git主機(github或bitbucket)、Server主機(production伺服器)來講解Deply流程  在Host主機，將完成的專案(master branch) push上git主機  使用ssh連到Server主機，將剛剛上傳的master branch從git主機clone或pull下來  再回到Host主機，將yml檔透過ssh丟給Server。(因為有安全性問題，不透過git傳)  最後如果有調整一些設定值，我們還要至server主機重啟http server。雖然上述流程感覺不難，但是真正操作起來指令也是很繁瑣，秉持『工欲善其事，必先利其器』的原則，我們請出Capistrano這個自動化部署工具，來幫我們處理這些繁複卻一貫的作業。Capistrano的好處就是在於你只需要一個指令，就可以完成上述deploy的動作，甚至還可以客製化自己想要的指令，並且可以同時開啟多個Deploy狀態，並且同時部署至多台機器。Server部分設定請先連線至 ssh root@xxx.xxx.xxx.xxx 再開始以下動作建立專案用資料庫$ mysql -u root -p #=&gt; 輸入密碼1234mysql &gt; create database YOUR_DATABASE_NAME default character set utf8;mysql &gt; show databases;#=&gt; 確認是否有建立了mysql &gt; exit設定 Nginx 的 config symlinks到你的專案sudo rm /etc/nginx/sites-enabled/defaultsudo ln -nfs &quot;/home/deploy/YOUR_PROJECT_NAME/current/config/nginx.conf&quot; &quot;/etc/nginx/sites-enabled/YOUR_PROJECT_NAME&quot;  註：因為nginx.conf裡面有設定會include /etc/nginx/sites-enabled/中所有設定symlinks的檔案，所以我們以後每增加一個project，你都可以多設定一個symlinks來指定一個虛擬伺服器新增deploy帳號$ adduser deploy# =&gt;設定密碼，其他資訊都enter跳過即可$ gpasswd -a deploy sudo# =&gt; 將deploy加入sudo群組關閉root遠端登入$ vim /etc/ssh/sshd_config#=&gt; 找到 PermitRootLogin 將yes 改為no $ service ssh restart建立server自動git pull需要的金鑰$ ssh-keygen#=&gt; 建立金鑰$ cat ~/.ssh/id_rsa.pub#=&gt; 複製公鑰到 github 或 Bitbucket開一個新專案  github 到 SSH and GPG keys 新增貼上  Bitbucket 到 專案 / Settings / Deployment keys 新增貼上host部分設定請輸入exit跳回自己電腦新增git origin位置，並首次pushgit remote add origin git@bitbucket.org:anxgang/kixerp.gitgit push -u origin --all設定deploy免輸入密碼登入執行此指令將本機公鑰複製到伺服器ssh deploy@xxx.xxx.xxx.xxx &#39;mkdir -p ~/.ssh;cat &gt;&gt; ~/.ssh/authorized_keys&#39; &lt; ~/.ssh/id_rsa.pub設定Capistrano自動化部署修改 Gemfile# [path] gemfile- gem &#39;sqlite3&#39;+ gem &#39;sqlite3&#39;, group: :development- # gem &#39;therubyracer&#39;, platforms: :ruby+ gem &#39;therubyracer&#39;, platforms: :ruby+ group :development do+   gem &#39;capistrano&#39;,         &#39;~&gt; 3.6.0&#39;, require: false+   gem &#39;capistrano-rvm&#39;,     &#39;~&gt; 0.1&#39;,   require: false+   gem &#39;capistrano-rails&#39;,   &#39;~&gt; 1.1.7&#39;, require: false+   gem &#39;capistrano-bundler&#39;, &#39;~&gt; 1.1.4&#39;, require: false+   gem &#39;capistrano3-puma&#39;,   &#39;~&gt; 1.2.1&#39;, require: false+ end+ group :production do+   gem &quot;mysql2&quot;+ end$ bundle install$ cap install# =&gt; 會詢問要不要安裝額外的套件，選NO修改 Capfile# Load DSL and set up stagesrequire &quot;capistrano/setup&quot;# Include default deployment tasksrequire &quot;capistrano/deploy&quot;require &#39;capistrano/rails&#39;require &#39;capistrano/rvm&#39;require &#39;capistrano/bundler&#39;require &#39;capistrano/rails/assets&#39;require &#39;capistrano/rails/migrations&#39;require &#39;capistrano/puma&#39;# Load custom tasks from `lib/capistrano/tasks` if you have any definedDir.glob(&quot;lib/capistrano/tasks/*.rake&quot;).each { |r| import r }覆寫 config/deploy.rb並設定deploy.rb# [path] config/deploy.rb# config valid only for current version of Capistranoset :repo_url,        &#39;git@github.com:YOUR_USERNAME/YOUR_PROJECT_NAME.git&#39; # 改成你的set :application,     &#39;YOUR_PROJECT_NAME&#39; # 改成你的 appnameset :user,            &#39;deploy&#39; # 這個對應到我們剛剛增加的 user: deployset :puma_threads,    [4, 16]set :puma_workers,    0# Don&#39;t change these unless you know what you&#39;re doingset :pty,             trueset :use_sudo,        falseset :stage,           :productionset :deploy_via,      :remote_cacheset :deploy_to,       &quot;/home/#{fetch(:user)}/#{fetch(:application)}&quot;set :puma_bind,       &quot;unix://#{shared_path}/tmp/sockets/#{fetch(:application)}-puma.sock&quot;set :puma_state,      &quot;#{shared_path}/tmp/pids/puma.state&quot;set :puma_pid,        &quot;#{shared_path}/tmp/pids/puma.pid&quot;set :puma_access_log, &quot;#{release_path}/log/puma.error.log&quot;set :puma_error_log,  &quot;#{release_path}/log/puma.access.log&quot;set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: %w(~/.ssh/id_rsa.pub) }set :puma_preload_app, trueset :puma_worker_timeout, nilset :puma_init_active_record, true  # Change to false when not using ActiveRecord## Defaults:# set :scm,           :git# set :branch,        :master# set :format,        :pretty# set :log_level,     :debug# set :keep_releases, 5## Linked Files &amp; Directories (Default None):set :linked_files, %w{config/database.yml config/secrets.yml}set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}namespace :puma do  desc &#39;Create Directories for Puma Pids and Socket&#39;  task :make_dirs do    on roles(:app) do      execute &quot;mkdir #{shared_path}/tmp/sockets -p&quot;      execute &quot;mkdir #{shared_path}/tmp/pids -p&quot;    end  end  before :start, :make_dirsendnamespace :deploy do  desc &quot;Make sure local git is in sync with remote.&quot;  task :check_revision do    on roles(:app) do      unless `git rev-parse HEAD` == `git rev-parse origin/master`        puts &quot;WARNING: HEAD is not the same as origin/master&quot;        puts &quot;Run `git push` to sync changes.&quot;        exit      end    end  end  desc &#39;Initial Deploy&#39;  task :initial do    on roles(:app) do      before &#39;deploy:restart&#39;, &#39;puma:start&#39;      invoke &#39;deploy&#39;    end  end  desc &#39;Restart application&#39;  task :restart do    on roles(:app), in: :sequence, wait: 5 do      invoke &#39;puma:restart&#39;    end  end  desc &#39;Upload to shared/config&#39;  task :upload do    on roles (:app) do      upload! &quot;config/database.yml&quot;, &quot;#{shared_path}/config/database.yml&quot;      upload! &quot;config/secrets.yml&quot;,  &quot;#{shared_path}/config/secrets.yml&quot;    end  end  before :starting,  :check_revision  after  :finishing, :compile_assets  after  :finishing, :cleanup  after  :finishing, :restartenddesc &quot;Run rake db:seed on a remote server.&quot;task :seed do  on roles (:app) do    within release_path do      with rails_env: fetch(:rails_env) do       execute :rake, &quot;db:seed&quot;      end    end  endend# ps aux | grep puma    # Get puma pid# kill -s SIGUSR2 pid   # Restart puma# kill -s SIGTERM pid   # Stop puma修改 config/deploy/production.rbset :stage, :productionset :branch, :masterrole :app, %w(deploy@xxx.xxx.xxx.xxx)role :web, %w(deploy@xxx.xxx.xxx.xxx)role :db, %w(deploy@xxx.xxx.xxx.xxx)set :rails_env, &quot;production&quot;set :puma_env, &quot;production&quot;set :puma_config_file, &quot;#{shared_path}/config/puma.rb&quot;set :puma_conf, &quot;#{shared_path}/config/puma.rb&quot;修改 config/nginx.conf在專案新增 config/nginx.conf// [path] config/nginx.confupstream puma {  server unix:///home/deploy/YOUR_PROJECT_NAME/shared/tmp/sockets/KaohsiungRubbishTruck-puma.sock;}server {  listen 80 default_server deferred;  # server_name example.com;  root /home/deploy/YOUR_PROJECT_NAME/current/public;  access_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.access.log;  error_log /home/deploy/YOUR_PROJECT_NAME/current/log/nginx.error.log info;  location ^~ /assets/ {    gzip_static on;    expires max;    add_header Cache-Control public;  }  try_files $uri/index.html $uri @puma;  location @puma {    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;    proxy_set_header Host $http_host;    proxy_redirect off;    proxy_pass http://puma;  }  error_page 500 502 503 504 /500.html;  client_max_body_size 10M;  keepalive_timeout 10;}調整 .gitignore加入以下兩行# [path] .gitignore/config/database.yml/config/secrets.yml複製  config/database.yml -&gt; config/database.yml.sample  config/secrets.yml -&gt; config/secrets.yml.sample刪除  config/database.yml  config/secrets.yml將剛剛做的修改 commit 起來，push 到遠端git add .git commit -m &quot;ready to deploy&quot;git push origin master修改 config/database.yml production:-  &lt;&lt;: *default-  database: db/production.sqlite3+  adapter: mysql2+  encoding: utf8+  database: YOUR_PROJECT_NAME+  pool: 5+  username: root+  password: 1234+  socket: /var/run/mysqld/mysqld.sock修改 config/secrets.yml-  secret_key_base: &lt;%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt;+  secret_key_base: e4a98dd1063a6765xxxxxxx # 這一串從上面的 test 或是 development 複製過來即可首次 deploy$ cap production deploy:check$ cap production deploy:upload#=&gt; 把 database.yml 跟 secrets.yml 丟到 Ubuntu（之後如果有更改也可以這樣丟）$ cap production deploy:initial#=&gt; ssh 登入，重開 nginx：$ sudo service nginx restart$ cap production seed #=&gt; 有寫seed可以順便丟其他指令可以這樣查cap -T  如果用 Capistrano 的時候他還是叫你打密碼， 修正方法如下：eval `ssh-agent -s`ssh-add ~/.ssh/id_rsa  如果你是用 zsh，請再做以下修改vi ~/.zshrcplugins=(git ssh-agent) # 加上這一行Normal deploygit commit -m &quot;commit message&quot;git push origin mastercap production deploy查看網站是否Deploy成功http:/xxx.xxx.xxx.xxx/若失敗的話，可以進入Server查看logssh deploy@xxx.xxx.xxx.xxxtail -f /home/deploy/YOUR_PROJECT_NAME/current/log/production.log參考  kakas/CapistranoDeployTest  (Mini Course) Deploy Rails Project to Linux Server - Growth School  Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+        
+        <meta itemprop="datePublished" content="2016-08-03T05:59:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-b/" class="u-url"
+                        itemprop="url">[DigitalOcean] 使用 Capistrano Deploy Rails App (二)
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-08-03T05:59:00+08:00">2016-08-03</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#前言">前言</a><ul><li><a href="#流程講解">流程講解</a><ul><li><a href="#deply流程">Deply流程</a></li></ul></li><li><a href="#server部分設定">Server部分設定</a><ul><li><a href="#建立專案用資料庫">建立專案用資料庫</a></li><li><a href="#設定-nginx-的-config-symlinks到你的專案">設定 Nginx 的 config symlinks到你的專案</a></li><li><a href="#新增deploy帳號">新增deploy帳號</a></li><li><a href="#關閉root遠端登入">關閉root遠端登入</a></li><li><a href="#建立server自動git-pull需要的金鑰">建立server自動git pull需要的金鑰</a></li></ul></li><li><a href="#host部分設定">host部分設定</a><ul><li><a href="#新增git-origin位置並首次push">新增git origin位置，並首次push</a></li><li><a href="#設定deploy免輸入密碼登入">設定deploy免輸入密碼登入</a></li></ul></li><li><a href="#設定capistrano自動化部署">設定Capistrano自動化部署</a><ul><li><a href="#修改-gemfile">修改 Gemfile</a></li><li><a href="#修改-capfile">修改 Capfile</a></li><li><a href="#覆寫-configdeployrb">覆寫 config/deploy.rb</a></li><li><a href="#修改-configdeployproductionrb">修改 config/deploy/production.rb</a></li><li><a href="#修改-confignginxconf">修改 config/nginx.conf</a></li><li><a href="#調整-gitignore">調整 .gitignore</a><ul><li><a href="#加入以下兩行">加入以下兩行</a></li><li><a href="#複製">複製</a></li><li><a href="#刪除">刪除</a></li></ul></li><li><a href="#將剛剛做的修改-commit-起來push-到遠端">將剛剛做的修改 commit 起來，push 到遠端</a></li><li><a href="#修改-configdatabaseyml">修改 config/database.yml</a></li><li><a href="#修改-configsecretsyml">修改 config/secrets.yml</a></li><li><a href="#首次-deploy">首次 deploy</a></li><li><a href="#normal-deploy">Normal deploy</a></li><li><a href="#查看網站是否deploy成功">查看網站是否Deploy成功</a></li></ul></li><li><a href="#參考">參考</a></li></ul></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <blockquote>
+  <p>本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0</p>
+</blockquote>
+
+<blockquote>
+  <p>接續上篇 <a href="http://anxgang.logdown.com/posts/776100-digitalocean-using-capistrano-deploy-rails-app-a">DigitalOcean - 使用 Capistrano Deploy Rails App (一)</a></p>
+</blockquote>
+
+<h1 id="前言">前言</h1>
+
+<p>續前篇建立Droplet及環境安裝，本文將講解專案如何透過Capistrano Deploy至我們準備好的production環境。
+本文重點如下：</p>
+
+<ul>
+  <li>Server部分
+    <ul>
+      <li>MySQL 設定</li>
+      <li>Nginx 設定</li>
+      <li>Server安全性調整</li>
+    </ul>
+  </li>
+  <li>Host部分（本機）
+    <ul>
+      <li>Capistrano安裝及設定</li>
+      <li>deploy流程</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="流程講解">流程講解</h2>
+
+<p>再設定之前，先進行流程的講解，
+這邊將主機分為Host(本機)、Git主機(github或bitbucket)、Server主機(production伺服器)來講解</p>
+
+<h3 id="deply流程">Deply流程</h3>
+
+<ol>
+  <li>在Host主機，將完成的專案(master branch) push上git主機</li>
+  <li>使用ssh連到Server主機，將剛剛上傳的master branch從git主機clone或pull下來</li>
+  <li>再回到Host主機，將yml檔透過ssh丟給Server。(因為有安全性問題，不透過git傳)</li>
+  <li>最後如果有調整一些設定值，我們還要至server主機重啟http server。</li>
+</ol>
+
+<p><img src="http://user-image.logdown.io/user/16703/blog/16012/post/776182/x6GFiFQcT2w50E1zvDMD_%E8%9E%A2%E5%B9%95%E5%BF%AB%E7%85%A7%202016-08-06%20%E4%B8%8B%E5%8D%882.03.14.png" alt="螢幕快照 2016-08-06 下午2.03.14.png" /></p>
+
+<p>雖然上述流程感覺不難，但是真正操作起來指令也是很繁瑣，秉持『工欲善其事，必先利其器』的原則，我們請出Capistrano這個自動化部署工具，來幫我們處理這些繁複卻一貫的作業。</p>
+
+<p>Capistrano的好處就是在於你只需要一個指令，就可以完成上述deploy的動作，甚至還可以客製化自己想要的指令，並且可以同時開啟多個Deploy狀態，並且同時部署至多台機器。</p>
+
+<h2 id="server部分設定">Server部分設定</h2>
+
+<p>請先連線至 <code class="language-plaintext highlighter-rouge">ssh root@xxx.xxx.xxx.xxx</code> 再開始以下動作</p>
+
+<h3 id="建立專案用資料庫">建立專案用資料庫</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mysql <span class="nt">-u</span> root <span class="nt">-p</span> 
+<span class="c">#=&gt; 輸入密碼1234</span>
+mysql <span class="o">&gt;</span> create database YOUR_DATABASE_NAME default character <span class="nb">set </span>utf8<span class="p">;</span>
+mysql <span class="o">&gt;</span> show databases<span class="p">;</span>
+<span class="c">#=&gt; 確認是否有建立了</span>
+mysql <span class="o">&gt;</span> <span class="nb">exit</span>
+</code></pre></div></div>
+
+<h3 id="設定-nginx-的-config-symlinks到你的專案">設定 Nginx 的 config symlinks到你的專案</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo rm</span> /etc/nginx/sites-enabled/default
+<span class="nb">sudo ln</span> <span class="nt">-nfs</span> <span class="s2">"/home/deploy/YOUR_PROJECT_NAME/current/config/nginx.conf"</span> <span class="s2">"/etc/nginx/sites-enabled/YOUR_PROJECT_NAME"</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>註：因為nginx.conf裡面有設定會include /etc/nginx/sites-enabled/中所有設定symlinks的檔案，所以我們以後每增加一個project，你都可以多設定一個symlinks來指定一個虛擬伺服器</p>
+</blockquote>
+
+<h3 id="新增deploy帳號">新增deploy帳號</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>adduser deploy
+<span class="c"># =&gt;設定密碼，其他資訊都enter跳過即可</span>
+<span class="nv">$ </span>gpasswd <span class="nt">-a</span> deploy <span class="nb">sudo</span>
+<span class="c"># =&gt; 將deploy加入sudo群組</span>
+</code></pre></div></div>
+
+<h3 id="關閉root遠端登入">關閉root遠端登入</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>vim /etc/ssh/sshd_config
+<span class="c">#=&gt; 找到 PermitRootLogin 將yes 改為no </span>
+<span class="nv">$ </span>service ssh restart
+</code></pre></div></div>
+
+<h3 id="建立server自動git-pull需要的金鑰">建立server自動git pull需要的金鑰</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ssh-keygen
+<span class="c">#=&gt; 建立金鑰</span>
+<span class="nv">$ </span><span class="nb">cat</span> ~/.ssh/id_rsa.pub
+<span class="c">#=&gt; 複製公鑰</span>
+</code></pre></div></div>
+
+<p>到 github 或 Bitbucket開一個新專案</p>
+
+<ul>
+  <li>github 到 <a href="https://github.com/settings/keys">SSH and GPG keys</a> 新增貼上</li>
+  <li>Bitbucket 到 專案 / Settings / Deployment keys 新增貼上</li>
+</ul>
+
+<h2 id="host部分設定">host部分設定</h2>
+
+<p>請輸入exit跳回自己電腦</p>
+
+<h3 id="新增git-origin位置並首次push">新增git origin位置，並首次push</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote add origin git@bitbucket.org:anxgang/kixerp.git
+git push <span class="nt">-u</span> origin <span class="nt">--all</span>
+</code></pre></div></div>
+
+<h3 id="設定deploy免輸入密碼登入">設定deploy免輸入密碼登入</h3>
+
+<p>執行此指令將本機公鑰複製到伺服器</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh deploy@xxx.xxx.xxx.xxx <span class="s1">'mkdir -p ~/.ssh;cat &gt;&gt; ~/.ssh/authorized_keys'</span> &lt; ~/.ssh/id_rsa.pub
+</code></pre></div></div>
+
+<h2 id="設定capistrano自動化部署">設定Capistrano自動化部署</h2>
+
+<h3 id="修改-gemfile">修改 Gemfile</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gemfile</span>
+<span class="o">-</span> <span class="n">gem</span> <span class="s1">'sqlite3'</span>
+<span class="o">+</span> <span class="n">gem</span> <span class="s1">'sqlite3'</span><span class="p">,</span> <span class="ss">group: :development</span>
+
+<span class="o">-</span> <span class="c1"># gem 'therubyracer', platforms: :ruby</span>
+<span class="o">+</span> <span class="n">gem</span> <span class="s1">'therubyracer'</span><span class="p">,</span> <span class="ss">platforms: :ruby</span>
+
+<span class="o">+</span> <span class="n">group</span> <span class="ss">:development</span> <span class="k">do</span>
+<span class="o">+</span>   <span class="n">gem</span> <span class="s1">'capistrano'</span><span class="p">,</span>         <span class="s1">'~&gt; 3.6.0'</span><span class="p">,</span> <span class="ss">require: </span><span class="kp">false</span>
+<span class="o">+</span>   <span class="n">gem</span> <span class="s1">'capistrano-rvm'</span><span class="p">,</span>     <span class="s1">'~&gt; 0.1'</span><span class="p">,</span>   <span class="ss">require: </span><span class="kp">false</span>
+<span class="o">+</span>   <span class="n">gem</span> <span class="s1">'capistrano-rails'</span><span class="p">,</span>   <span class="s1">'~&gt; 1.1.7'</span><span class="p">,</span> <span class="ss">require: </span><span class="kp">false</span>
+<span class="o">+</span>   <span class="n">gem</span> <span class="s1">'capistrano-bundler'</span><span class="p">,</span> <span class="s1">'~&gt; 1.1.4'</span><span class="p">,</span> <span class="ss">require: </span><span class="kp">false</span>
+<span class="o">+</span>   <span class="n">gem</span> <span class="s1">'capistrano3-puma'</span><span class="p">,</span>   <span class="s1">'~&gt; 1.2.1'</span><span class="p">,</span> <span class="ss">require: </span><span class="kp">false</span>
+<span class="o">+</span> <span class="k">end</span>
+
+<span class="o">+</span> <span class="n">group</span> <span class="ss">:production</span> <span class="k">do</span>
+<span class="o">+</span>   <span class="n">gem</span> <span class="s2">"mysql2"</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">install</span>
+<span class="nv">$ </span>cap <span class="nb">install</span>
+<span class="c"># =&gt; 會詢問要不要安裝額外的套件，選NO</span>
+</code></pre></div></div>
+
+<h3 id="修改-capfile">修改 Capfile</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Load DSL and set up stages</span>
+require <span class="s2">"capistrano/setup"</span>
+
+<span class="c"># Include default deployment tasks</span>
+require <span class="s2">"capistrano/deploy"</span>
+
+require <span class="s1">'capistrano/rails'</span>
+require <span class="s1">'capistrano/rvm'</span>
+require <span class="s1">'capistrano/bundler'</span>
+require <span class="s1">'capistrano/rails/assets'</span>
+require <span class="s1">'capistrano/rails/migrations'</span>
+require <span class="s1">'capistrano/puma'</span>
+
+<span class="c"># Load custom tasks from `lib/capistrano/tasks` if you have any defined</span>
+Dir.glob<span class="o">(</span><span class="s2">"lib/capistrano/tasks/*.rake"</span><span class="o">)</span>.each <span class="o">{</span> |r| import r <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="覆寫-configdeployrb">覆寫 config/deploy.rb</h3>
+
+<p>並設定deploy.rb</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] config/deploy.rb</span>
+<span class="c1"># config valid only for current version of Capistrano</span>
+
+<span class="n">set</span> <span class="ss">:repo_url</span><span class="p">,</span>        <span class="s1">'git@github.com:YOUR_USERNAME/YOUR_PROJECT_NAME.git'</span> <span class="c1"># 改成你的</span>
+<span class="n">set</span> <span class="ss">:application</span><span class="p">,</span>     <span class="s1">'YOUR_PROJECT_NAME'</span> <span class="c1"># 改成你的 appname</span>
+<span class="n">set</span> <span class="ss">:user</span><span class="p">,</span>            <span class="s1">'deploy'</span> <span class="c1"># 這個對應到我們剛剛增加的 user: deploy</span>
+<span class="n">set</span> <span class="ss">:puma_threads</span><span class="p">,</span>    <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
+<span class="n">set</span> <span class="ss">:puma_workers</span><span class="p">,</span>    <span class="mi">0</span>
+
+<span class="c1"># Don't change these unless you know what you're doing</span>
+<span class="n">set</span> <span class="ss">:pty</span><span class="p">,</span>             <span class="kp">true</span>
+<span class="n">set</span> <span class="ss">:use_sudo</span><span class="p">,</span>        <span class="kp">false</span>
+<span class="n">set</span> <span class="ss">:stage</span><span class="p">,</span>           <span class="ss">:production</span>
+<span class="n">set</span> <span class="ss">:deploy_via</span><span class="p">,</span>      <span class="ss">:remote_cache</span>
+<span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span>       <span class="s2">"/home/</span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:application</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">set</span> <span class="ss">:puma_bind</span><span class="p">,</span>       <span class="s2">"unix://</span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/tmp/sockets/</span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:application</span><span class="p">)</span><span class="si">}</span><span class="s2">-puma.sock"</span>
+<span class="n">set</span> <span class="ss">:puma_state</span><span class="p">,</span>      <span class="s2">"</span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/tmp/pids/puma.state"</span>
+<span class="n">set</span> <span class="ss">:puma_pid</span><span class="p">,</span>        <span class="s2">"</span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/tmp/pids/puma.pid"</span>
+<span class="n">set</span> <span class="ss">:puma_access_log</span><span class="p">,</span> <span class="s2">"</span><span class="si">#{</span><span class="n">release_path</span><span class="si">}</span><span class="s2">/log/puma.error.log"</span>
+<span class="n">set</span> <span class="ss">:puma_error_log</span><span class="p">,</span>  <span class="s2">"</span><span class="si">#{</span><span class="n">release_path</span><span class="si">}</span><span class="s2">/log/puma.access.log"</span>
+<span class="n">set</span> <span class="ss">:ssh_options</span><span class="p">,</span>     <span class="p">{</span> <span class="ss">forward_agent: </span><span class="kp">true</span><span class="p">,</span> <span class="ss">user: </span><span class="n">fetch</span><span class="p">(</span><span class="ss">:user</span><span class="p">),</span> <span class="ss">keys: </span><span class="sx">%w(~/.ssh/id_rsa.pub)</span> <span class="p">}</span>
+<span class="n">set</span> <span class="ss">:puma_preload_app</span><span class="p">,</span> <span class="kp">true</span>
+<span class="n">set</span> <span class="ss">:puma_worker_timeout</span><span class="p">,</span> <span class="kp">nil</span>
+<span class="n">set</span> <span class="ss">:puma_init_active_record</span><span class="p">,</span> <span class="kp">true</span>  <span class="c1"># Change to false when not using ActiveRecord</span>
+
+<span class="c1">## Defaults:</span>
+<span class="c1"># set :scm,           :git</span>
+<span class="c1"># set :branch,        :master</span>
+<span class="c1"># set :format,        :pretty</span>
+<span class="c1"># set :log_level,     :debug</span>
+<span class="c1"># set :keep_releases, 5</span>
+
+<span class="c1">## Linked Files &amp; Directories (Default None):</span>
+<span class="n">set</span> <span class="ss">:linked_files</span><span class="p">,</span> <span class="sx">%w{config/database.yml config/secrets.yml}</span>
+<span class="n">set</span> <span class="ss">:linked_dirs</span><span class="p">,</span>  <span class="sx">%w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}</span>
+
+<span class="n">namespace</span> <span class="ss">:puma</span> <span class="k">do</span>
+  <span class="n">desc</span> <span class="s1">'Create Directories for Puma Pids and Socket'</span>
+  <span class="n">task</span> <span class="ss">:make_dirs</span> <span class="k">do</span>
+    <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="ss">:app</span><span class="p">)</span> <span class="k">do</span>
+      <span class="n">execute</span> <span class="s2">"mkdir </span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/tmp/sockets -p"</span>
+      <span class="n">execute</span> <span class="s2">"mkdir </span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/tmp/pids -p"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">before</span> <span class="ss">:start</span><span class="p">,</span> <span class="ss">:make_dirs</span>
+<span class="k">end</span>
+
+<span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
+  <span class="n">desc</span> <span class="s2">"Make sure local git is in sync with remote."</span>
+  <span class="n">task</span> <span class="ss">:check_revision</span> <span class="k">do</span>
+    <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="ss">:app</span><span class="p">)</span> <span class="k">do</span>
+      <span class="k">unless</span> <span class="sb">`git rev-parse HEAD`</span> <span class="o">==</span> <span class="sb">`git rev-parse origin/master`</span>
+        <span class="nb">puts</span> <span class="s2">"WARNING: HEAD is not the same as origin/master"</span>
+        <span class="nb">puts</span> <span class="s2">"Run `git push` to sync changes."</span>
+        <span class="nb">exit</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">desc</span> <span class="s1">'Initial Deploy'</span>
+  <span class="n">task</span> <span class="ss">:initial</span> <span class="k">do</span>
+    <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="ss">:app</span><span class="p">)</span> <span class="k">do</span>
+      <span class="n">before</span> <span class="s1">'deploy:restart'</span><span class="p">,</span> <span class="s1">'puma:start'</span>
+      <span class="n">invoke</span> <span class="s1">'deploy'</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">desc</span> <span class="s1">'Restart application'</span>
+  <span class="n">task</span> <span class="ss">:restart</span> <span class="k">do</span>
+    <span class="n">on</span> <span class="n">roles</span><span class="p">(</span><span class="ss">:app</span><span class="p">),</span> <span class="ss">in: :sequence</span><span class="p">,</span> <span class="ss">wait: </span><span class="mi">5</span> <span class="k">do</span>
+      <span class="n">invoke</span> <span class="s1">'puma:restart'</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">desc</span> <span class="s1">'Upload to shared/config'</span>
+  <span class="n">task</span> <span class="ss">:upload</span> <span class="k">do</span>
+    <span class="n">on</span> <span class="n">roles</span> <span class="p">(</span><span class="ss">:app</span><span class="p">)</span> <span class="k">do</span>
+      <span class="n">upload!</span> <span class="s2">"config/database.yml"</span><span class="p">,</span> <span class="s2">"</span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/config/database.yml"</span>
+      <span class="n">upload!</span> <span class="s2">"config/secrets.yml"</span><span class="p">,</span>  <span class="s2">"</span><span class="si">#{</span><span class="n">shared_path</span><span class="si">}</span><span class="s2">/config/secrets.yml"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="n">before</span> <span class="ss">:starting</span><span class="p">,</span>  <span class="ss">:check_revision</span>
+  <span class="n">after</span>  <span class="ss">:finishing</span><span class="p">,</span> <span class="ss">:compile_assets</span>
+  <span class="n">after</span>  <span class="ss">:finishing</span><span class="p">,</span> <span class="ss">:cleanup</span>
+  <span class="n">after</span>  <span class="ss">:finishing</span><span class="p">,</span> <span class="ss">:restart</span>
+<span class="k">end</span>
+
+<span class="n">desc</span> <span class="s2">"Run rake db:seed on a remote server."</span>
+<span class="n">task</span> <span class="ss">:seed</span> <span class="k">do</span>
+  <span class="n">on</span> <span class="n">roles</span> <span class="p">(</span><span class="ss">:app</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">within</span> <span class="n">release_path</span> <span class="k">do</span>
+      <span class="n">with</span> <span class="ss">rails_env: </span><span class="n">fetch</span><span class="p">(</span><span class="ss">:rails_env</span><span class="p">)</span> <span class="k">do</span>
+       <span class="n">execute</span> <span class="ss">:rake</span><span class="p">,</span> <span class="s2">"db:seed"</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># ps aux | grep puma    # Get puma pid</span>
+<span class="c1"># kill -s SIGUSR2 pid   # Restart puma</span>
+<span class="c1"># kill -s SIGTERM pid   # Stop puma</span>
+</code></pre></div></div>
+
+<h3 id="修改-configdeployproductionrb">修改 config/deploy/production.rb</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">set</span> :stage, :production
+<span class="nb">set</span> :branch, :master
+
+role :app, %w<span class="o">(</span>deploy@xxx.xxx.xxx.xxx<span class="o">)</span>
+role :web, %w<span class="o">(</span>deploy@xxx.xxx.xxx.xxx<span class="o">)</span>
+role :db, %w<span class="o">(</span>deploy@xxx.xxx.xxx.xxx<span class="o">)</span>
+
+<span class="nb">set</span> :rails_env, <span class="s2">"production"</span>
+<span class="nb">set</span> :puma_env, <span class="s2">"production"</span>
+<span class="nb">set</span> :puma_config_file, <span class="s2">"#{shared_path}/config/puma.rb"</span>
+<span class="nb">set</span> :puma_conf, <span class="s2">"#{shared_path}/config/puma.rb"</span>
+</code></pre></div></div>
+
+<h3 id="修改-confignginxconf">修改 config/nginx.conf</h3>
+
+<p>在專案新增 config/nginx.conf</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// [path] config/nginx.conf</span>
+<span class="nx">upstream</span> <span class="nx">puma</span> <span class="p">{</span>
+  <span class="nx">server</span> <span class="nx">unix</span><span class="p">:</span><span class="c1">///home/deploy/YOUR_PROJECT_NAME/shared/tmp/sockets/KaohsiungRubbishTruck-puma.sock;</span>
+<span class="p">}</span>
+
+<span class="nx">server</span> <span class="p">{</span>
+  <span class="nx">listen</span> <span class="mi">80</span> <span class="nx">default_server</span> <span class="nx">deferred</span><span class="p">;</span>
+  <span class="err">#</span> <span class="nx">server_name</span> <span class="nx">example</span><span class="p">.</span><span class="nx">com</span><span class="p">;</span>
+
+  <span class="nx">root</span> <span class="o">/</span><span class="nx">home</span><span class="o">/</span><span class="nx">deploy</span><span class="o">/</span><span class="nx">YOUR_PROJECT_NAME</span><span class="o">/</span><span class="nx">current</span><span class="o">/</span><span class="kr">public</span><span class="p">;</span>
+  <span class="nx">access_log</span> <span class="o">/</span><span class="nx">home</span><span class="o">/</span><span class="nx">deploy</span><span class="o">/</span><span class="nx">YOUR_PROJECT_NAME</span><span class="o">/</span><span class="nx">current</span><span class="o">/</span><span class="nx">log</span><span class="o">/</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">access</span><span class="p">.</span><span class="nx">log</span><span class="p">;</span>
+  <span class="nx">error_log</span> <span class="o">/</span><span class="nx">home</span><span class="o">/</span><span class="nx">deploy</span><span class="o">/</span><span class="nx">YOUR_PROJECT_NAME</span><span class="o">/</span><span class="nx">current</span><span class="o">/</span><span class="nx">log</span><span class="o">/</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">error</span><span class="p">.</span><span class="nx">log</span> <span class="nx">info</span><span class="p">;</span>
+
+  <span class="nx">location</span> <span class="o">^~</span> <span class="sr">/assets/</span> <span class="p">{</span>
+    <span class="nx">gzip_static</span> <span class="nx">on</span><span class="p">;</span>
+    <span class="nx">expires</span> <span class="nx">max</span><span class="p">;</span>
+    <span class="nx">add_header</span> <span class="nx">Cache</span><span class="o">-</span><span class="nx">Control</span> <span class="kr">public</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">try_files</span> <span class="nx">$uri</span><span class="o">/</span><span class="nx">index</span><span class="p">.</span><span class="nx">html</span> <span class="nx">$uri</span> <span class="p">@</span><span class="nd">puma</span><span class="p">;</span>
+  <span class="nx">location</span> <span class="p">@</span><span class="nd">puma</span> <span class="p">{</span>
+    <span class="nx">proxy_set_header</span> <span class="nx">X</span><span class="o">-</span><span class="nx">Forwarded</span><span class="o">-</span><span class="nx">For</span> <span class="nx">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+    <span class="nx">proxy_set_header</span> <span class="nx">Host</span> <span class="nx">$http_host</span><span class="p">;</span>
+    <span class="nx">proxy_redirect</span> <span class="nx">off</span><span class="p">;</span>
+
+    <span class="nx">proxy_pass</span> <span class="na">http</span><span class="p">:</span><span class="c1">//puma;</span>
+  <span class="p">}</span>
+
+  <span class="nx">error_page</span> <span class="mi">500</span> <span class="mi">502</span> <span class="mi">503</span> <span class="mi">504</span> <span class="o">/</span><span class="mi">500</span><span class="p">.</span><span class="nx">html</span><span class="p">;</span>
+  <span class="nx">client_max_body_size</span> <span class="mi">10</span><span class="nx">M</span><span class="p">;</span>
+  <span class="nx">keepalive_timeout</span> <span class="mi">10</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="調整-gitignore">調整 .gitignore</h3>
+
+<h4 id="加入以下兩行">加入以下兩行</h4>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] .gitignore</span>
+<span class="sr">/config/</span><span class="n">database</span><span class="p">.</span><span class="nf">yml</span>
+<span class="sr">/config/se</span><span class="n">crets</span><span class="p">.</span><span class="nf">yml</span>
+</code></pre></div></div>
+
+<h4 id="複製">複製</h4>
+
+<ul>
+  <li>config/database.yml -&gt; config/database.yml.sample</li>
+  <li>config/secrets.yml -&gt; config/secrets.yml.sample</li>
+</ul>
+
+<h4 id="刪除">刪除</h4>
+
+<ul>
+  <li>config/database.yml</li>
+  <li>config/secrets.yml</li>
+</ul>
+
+<h3 id="將剛剛做的修改-commit-起來push-到遠端">將剛剛做的修改 commit 起來，push 到遠端</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"ready to deploy"</span>
+git push origin master
+</code></pre></div></div>
+
+<h3 id="修改-configdatabaseyml">修改 config/database.yml</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> production:
+-  &lt;&lt;: *default
+-  database: db/production.sqlite3
++  adapter: mysql2
++  encoding: utf8
++  database: YOUR_PROJECT_NAME
++  pool: 5
++  username: root
++  password: 1234
++  socket: /var/run/mysqld/mysqld.sock
+</code></pre></div></div>
+
+<h3 id="修改-configsecretsyml">修改 config/secrets.yml</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-  secret_key_base: &lt;%= ENV["SECRET_KEY_BASE"] %&gt;
++  secret_key_base: e4a98dd1063a6765xxxxxxx # 這一串從上面的 test 或是 development 複製過來即可
+</code></pre></div></div>
+
+<h3 id="首次-deploy">首次 deploy</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cap production deploy:check
+$ cap production deploy:upload
+#=&gt; 把 database.yml 跟 secrets.yml 丟到 Ubuntu（之後如果有更改也可以這樣丟）
+$ cap production deploy:initial
+#=&gt; ssh 登入，重開 nginx：$ sudo service nginx restart
+$ cap production seed 
+#=&gt; 有寫seed可以順便丟
+</code></pre></div></div>
+
+<p>其他指令可以這樣查</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cap -T
+</code></pre></div></div>
+
+<blockquote>
+  <p>如果用 Capistrano 的時候他還是叫你打密碼， 修正方法如下：</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eval `ssh-agent -s`
+ssh-add ~/.ssh/id_rsa
+</code></pre></div></div>
+
+<blockquote>
+  <p>如果你是用 zsh，請再做以下修改</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vi ~/.zshrc
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>plugins=(git ssh-agent) # 加上這一行
+</code></pre></div></div>
+
+<h3 id="normal-deploy">Normal deploy</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit <span class="nt">-m</span> <span class="s2">"commit message"</span>
+git push origin master
+cap production deploy
+</code></pre></div></div>
+
+<h3 id="查看網站是否deploy成功">查看網站是否Deploy成功</h3>
+
+<p>http:/xxx.xxx.xxx.xxx/</p>
+
+<p>若失敗的話，可以進入Server查看log</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh deploy@xxx.xxx.xxx.xxx
+<span class="nb">tail</span> <span class="nt">-f</span> /home/deploy/YOUR_PROJECT_NAME/current/log/production.log
+</code></pre></div></div>
+
+<h2 id="參考">參考</h2>
+
+<ol>
+  <li><a href="https://github.com/kakas/CapistranoDeployTest">kakas/CapistranoDeployTest</a></li>
+  <li><a href="http://courses.growthschool.com/courses/deploy-rails-project-to-linux-server">(Mini Course) Deploy Rails Project to Linux Server - Growth School</a></li>
+  <li><a href="https://www.digitalocean.com/community/tutorials/deploying-a-rails-app-on-ubuntu-14-04-with-capistrano-nginx-and-puma">Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-08-03T05:59:00+08:00">August 3, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BDigitalOcean%5D+%E4%BD%BF%E7%94%A8+Capistrano+Deploy+Rails+App+%28%E4%BA%8C%29%20https%3A%2F%2Fblog.anxgang.com%2Fdigitalocean-using-capistrano-deploy-rails-app-b%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fdigitalocean-using-capistrano-deploy-rails-app-b%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fdigitalocean-using-capistrano-deploy-rails-app-b%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/mysql-mac-environment-to-install-mysql/" class="pagination--pager" title="[MySQL] MAC環境MySQL安裝筆記
+">上一篇</a>
+    
+    
+      <a href="/rails-find-and-where-differences/" class="pagination--pager" title="[Rails] find 和 where 的差異
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-b/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/digitalocean-using-capistrano-deploy-rails-app-b"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

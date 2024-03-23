@@ -1,0 +1,1130 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Rails] Simple form 使用方式 - ANxGANG</title>
+<meta name="description" content="網站  https://github.com/plataformatec/simple_form  安裝  gem &#39;simple_form&#39;   bundle install   rails generate simple_form:install --bootstrap   基本使用方式  只要輸入 f.input，simple_form 會自動根據資料庫中該欄位的資料型態，判斷此 input 顯示的格式  &lt;%= simple_form_for @post do |f| %&gt; &lt;div class=&quot;form-group&quot;&gt;   &lt;%= f.input :username, label: &#39;Your username please&#39;, error: &#39;Username is mandatory, please specify one&#39; %&gt;   &lt;%= f.input :password, hint: &#39;No special characters.&#39; %&gt;   &lt;%= f.input :email, placeholder: &#39;user@domain.com&#39; %&gt;   &lt;%= f.input :remember_me, inline_label: &#39;Yes, remember me&#39; %&gt; &lt;/div&gt; &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submiting...&quot; } %&gt; &lt;% end %&gt;   若有錯誤，也可使用 as 手動調整欄位格式  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.input :username %&gt;   &lt;%= f.input :password %&gt;   &lt;%= f.input :description, as: :text %&gt;   &lt;%= f.input :accepts,     as: :radio_buttons %&gt;   &lt;%= f.button :submit %&gt; &lt;% end %&gt;   排版  為了排版，平常寫在後面的參數，也可以分開填寫 例如  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.input :username, label: &#39;username&#39;, hint: &#39;No special characters, please!&#39;, error: &#39;username&#39;, id: &#39;user_name_error&#39;, full_error: &#39;token&#39;  %&gt;   &lt;%= f.submit &#39;Save&#39; %&gt; &lt;% end %&gt;   可調整為：  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.label :username %&gt;   &lt;%= f.input_field :username %&gt;   &lt;%= f.hint &#39;No special characters, please!&#39; %&gt;   &lt;%= f.error :username, id: &#39;user_name_error&#39; %&gt;   &lt;%= f.full_error :token %&gt;   &lt;%= f.submit &#39;Save&#39; %&gt; &lt;% end %&gt;   疑難雜症  關閉label  label: false    備註hint  hint: &#39;文字&#39;   參考     https://github.com/plataformatec/simple_form   http://stackoverflow.com/questions/17479237/simple-form-blank-label">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Rails] Simple form 使用方式">
+<meta property="og:url" content="https://blog.anxgang.com/rails/rails-simple-form-used/">
+
+
+  <meta property="og:description" content="網站  https://github.com/plataformatec/simple_form  安裝  gem &#39;simple_form&#39;   bundle install   rails generate simple_form:install --bootstrap   基本使用方式  只要輸入 f.input，simple_form 會自動根據資料庫中該欄位的資料型態，判斷此 input 顯示的格式  &lt;%= simple_form_for @post do |f| %&gt; &lt;div class=&quot;form-group&quot;&gt;   &lt;%= f.input :username, label: &#39;Your username please&#39;, error: &#39;Username is mandatory, please specify one&#39; %&gt;   &lt;%= f.input :password, hint: &#39;No special characters.&#39; %&gt;   &lt;%= f.input :email, placeholder: &#39;user@domain.com&#39; %&gt;   &lt;%= f.input :remember_me, inline_label: &#39;Yes, remember me&#39; %&gt; &lt;/div&gt; &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submiting...&quot; } %&gt; &lt;% end %&gt;   若有錯誤，也可使用 as 手動調整欄位格式  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.input :username %&gt;   &lt;%= f.input :password %&gt;   &lt;%= f.input :description, as: :text %&gt;   &lt;%= f.input :accepts,     as: :radio_buttons %&gt;   &lt;%= f.button :submit %&gt; &lt;% end %&gt;   排版  為了排版，平常寫在後面的參數，也可以分開填寫 例如  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.input :username, label: &#39;username&#39;, hint: &#39;No special characters, please!&#39;, error: &#39;username&#39;, id: &#39;user_name_error&#39;, full_error: &#39;token&#39;  %&gt;   &lt;%= f.submit &#39;Save&#39; %&gt; &lt;% end %&gt;   可調整為：  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.label :username %&gt;   &lt;%= f.input_field :username %&gt;   &lt;%= f.hint &#39;No special characters, please!&#39; %&gt;   &lt;%= f.error :username, id: &#39;user_name_error&#39; %&gt;   &lt;%= f.full_error :token %&gt;   &lt;%= f.submit &#39;Save&#39; %&gt; &lt;% end %&gt;   疑難雜症  關閉label  label: false    備註hint  hint: &#39;文字&#39;   參考     https://github.com/plataformatec/simple_form   http://stackoverflow.com/questions/17479237/simple-form-blank-label">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Rails] Simple form 使用方式">
+  <meta name="twitter:description" content="網站  https://github.com/plataformatec/simple_form  安裝  gem &#39;simple_form&#39;   bundle install   rails generate simple_form:install --bootstrap   基本使用方式  只要輸入 f.input，simple_form 會自動根據資料庫中該欄位的資料型態，判斷此 input 顯示的格式  &lt;%= simple_form_for @post do |f| %&gt; &lt;div class=&quot;form-group&quot;&gt;   &lt;%= f.input :username, label: &#39;Your username please&#39;, error: &#39;Username is mandatory, please specify one&#39; %&gt;   &lt;%= f.input :password, hint: &#39;No special characters.&#39; %&gt;   &lt;%= f.input :email, placeholder: &#39;user@domain.com&#39; %&gt;   &lt;%= f.input :remember_me, inline_label: &#39;Yes, remember me&#39; %&gt; &lt;/div&gt; &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submiting...&quot; } %&gt; &lt;% end %&gt;   若有錯誤，也可使用 as 手動調整欄位格式  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.input :username %&gt;   &lt;%= f.input :password %&gt;   &lt;%= f.input :description, as: :text %&gt;   &lt;%= f.input :accepts,     as: :radio_buttons %&gt;   &lt;%= f.button :submit %&gt; &lt;% end %&gt;   排版  為了排版，平常寫在後面的參數，也可以分開填寫 例如  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.input :username, label: &#39;username&#39;, hint: &#39;No special characters, please!&#39;, error: &#39;username&#39;, id: &#39;user_name_error&#39;, full_error: &#39;token&#39;  %&gt;   &lt;%= f.submit &#39;Save&#39; %&gt; &lt;% end %&gt;   可調整為：  &lt;%= simple_form_for @user do |f| %&gt;   &lt;%= f.label :username %&gt;   &lt;%= f.input_field :username %&gt;   &lt;%= f.hint &#39;No special characters, please!&#39; %&gt;   &lt;%= f.error :username, id: &#39;user_name_error&#39; %&gt;   &lt;%= f.full_error :token %&gt;   &lt;%= f.submit &#39;Save&#39; %&gt; &lt;% end %&gt;   疑難雜症  關閉label  label: false    備註hint  hint: &#39;文字&#39;   參考     https://github.com/plataformatec/simple_form   http://stackoverflow.com/questions/17479237/simple-form-blank-label">
+  <meta name="twitter:url" content="https://blog.anxgang.com/rails/rails-simple-form-used/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-05-10T07:32:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/rails/rails-simple-form-used/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Rails] Simple form 使用方式">
+        
+        
+        <meta itemprop="description"
+            content="網站https://github.com/plataformatec/simple_form安裝gem &#39;simple_form&#39;bundle installrails generate simple_form:install --bootstrap基本使用方式只要輸入 f.input，simple_form 會自動根據資料庫中該欄位的資料型態，判斷此 input 顯示的格式&lt;%= simple_form_for @post do |f| %&gt;&lt;div class=&quot;form-group&quot;&gt;  &lt;%= f.input :username, label: &#39;Your username please&#39;, error: &#39;Username is mandatory, please specify one&#39; %&gt;  &lt;%= f.input :password, hint: &#39;No special characters.&#39; %&gt;  &lt;%= f.input :email, placeholder: &#39;user@domain.com&#39; %&gt;  &lt;%= f.input :remember_me, inline_label: &#39;Yes, remember me&#39; %&gt;&lt;/div&gt;&lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submiting...&quot; } %&gt;&lt;% end %&gt;若有錯誤，也可使用 as 手動調整欄位格式&lt;%= simple_form_for @user do |f| %&gt;  &lt;%= f.input :username %&gt;  &lt;%= f.input :password %&gt;  &lt;%= f.input :description, as: :text %&gt;  &lt;%= f.input :accepts,     as: :radio_buttons %&gt;  &lt;%= f.button :submit %&gt;&lt;% end %&gt;排版為了排版，平常寫在後面的參數，也可以分開填寫例如&lt;%= simple_form_for @user do |f| %&gt;  &lt;%= f.input :username, label: &#39;username&#39;, hint: &#39;No special characters, please!&#39;, error: &#39;username&#39;, id: &#39;user_name_error&#39;, full_error: &#39;token&#39;  %&gt;  &lt;%= f.submit &#39;Save&#39; %&gt;&lt;% end %&gt;可調整為：&lt;%= simple_form_for @user do |f| %&gt;  &lt;%= f.label :username %&gt;  &lt;%= f.input_field :username %&gt;  &lt;%= f.hint &#39;No special characters, please!&#39; %&gt;  &lt;%= f.error :username, id: &#39;user_name_error&#39; %&gt;  &lt;%= f.full_error :token %&gt;  &lt;%= f.submit &#39;Save&#39; %&gt;&lt;% end %&gt;疑難雜症關閉labellabel: false 備註hinthint: &#39;文字&#39;參考  https://github.com/plataformatec/simple_form  http://stackoverflow.com/questions/17479237/simple-form-blank-label">
+        
+        <meta itemprop="datePublished" content="2016-05-10T07:32:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/rails/rails-simple-form-used/" class="u-url"
+                        itemprop="url">[Rails] Simple form 使用方式
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-05-10T07:32:00+08:00">2016-05-10</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#網站">網站</a></li><li><a href="#安裝">安裝</a></li><li><a href="#基本使用方式">基本使用方式</a></li><li><a href="#排版">排版</a></li><li><a href="#疑難雜症">疑難雜症</a></li><li><a href="#參考">參考</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h2 id="網站">網站</h2>
+
+<p><a href="https://github.com/plataformatec/simple_form">https://github.com/plataformatec/simple_form</a></p>
+
+<h2 id="安裝">安裝</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gem</span> <span class="s1">'simple_form'</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate simple_form:install <span class="nt">--bootstrap</span>
+</code></pre></div></div>
+
+<h2 id="基本使用方式">基本使用方式</h2>
+
+<p>只要輸入 <code class="language-plaintext highlighter-rouge">f.input</code>，simple_form 會自動根據資料庫中該欄位的資料型態，判斷此 input 顯示的格式</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@post</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:username</span><span class="p">,</span> <span class="ss">label: </span><span class="s1">'Your username please'</span><span class="p">,</span> <span class="ss">error: </span><span class="s1">'Username is mandatory, please specify one'</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">hint: </span><span class="s1">'No special characters.'</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">placeholder: </span><span class="s1">'user@domain.com'</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:remember_me</span><span class="p">,</span> <span class="ss">inline_label: </span><span class="s1">'Yes, remember me'</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s2">"Submit"</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"btn btn-primary"</span><span class="p">,</span> <span class="ss">data: </span><span class="p">{</span> <span class="ss">disable_with: </span><span class="s2">"Submiting..."</span> <span class="p">}</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>若有錯誤，也可使用 <code class="language-plaintext highlighter-rouge">as</code> 手動調整欄位格式</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@user</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:username</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:password</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">as: :text</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:accepts</span><span class="p">,</span>     <span class="ss">as: :radio_buttons</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">button</span> <span class="ss">:submit</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h2 id="排版">排版</h2>
+
+<p>為了排版，平常寫在後面的參數，也可以分開填寫
+例如</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@user</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:username</span><span class="p">,</span> <span class="ss">label: </span><span class="s1">'username'</span><span class="p">,</span> <span class="ss">hint: </span><span class="s1">'No special characters, please!'</span><span class="p">,</span> <span class="ss">error: </span><span class="s1">'username'</span><span class="p">,</span> <span class="ss">id: </span><span class="s1">'user_name_error'</span><span class="p">,</span> <span class="ss">full_error: </span><span class="s1">'token'</span>  <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s1">'Save'</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<p>可調整為：</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@user</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">label</span> <span class="ss">:username</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input_field</span> <span class="ss">:username</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">hint</span> <span class="s1">'No special characters, please!'</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">error</span> <span class="ss">:username</span><span class="p">,</span> <span class="ss">id: </span><span class="s1">'user_name_error'</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">full_error</span> <span class="ss">:token</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s1">'Save'</span> <span class="cp">%&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h2 id="疑難雜症">疑難雜症</h2>
+
+<p>關閉label</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">label: </span><span class="kp">false</span> 
+</code></pre></div></div>
+
+<p>備註hint</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">hint: </span><span class="s1">'文字'</span>
+</code></pre></div></div>
+
+<h2 id="參考">參考</h2>
+
+<ol>
+  <li><a href="https://github.com/plataformatec/simple_form">https://github.com/plataformatec/simple_form</a></li>
+  <li><a href="http://stackoverflow.com/questions/17479237/simple-form-blank-label">http://stackoverflow.com/questions/17479237/simple-form-blank-label</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 標籤: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#gem" class="page__taxonomy-item p-category" rel="tag">gem</a><span class="sep">, </span>
+    
+      <a href="/tags/#rails" class="page__taxonomy-item p-category" rel="tag">rails</a><span class="sep">, </span>
+    
+      <a href="/tags/#view" class="page__taxonomy-item p-category" rel="tag">view</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 分類: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#rails" class="page__taxonomy-item p-category" rel="tag">Rails</a>
+    
+    </span>
+  </p>
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-05-10T07:32:00+08:00">May 10, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BRails%5D+Simple+form+%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F%20https%3A%2F%2Fblog.anxgang.com%2Frails%2Frails-simple-form-used%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Frails%2Frails-simple-form-used%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Frails%2Frails-simple-form-used%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/tool/tools-picture-generator/" class="pagination--pager" title="[Tools] 圖片生成器
+">上一篇</a>
+    
+    
+      <a href="/rails/rails-partial-usage/" class="pagination--pager" title="[Rails] Partial 用法
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/rails/rails-simple-form-used/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/rails/rails-simple-form-used"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

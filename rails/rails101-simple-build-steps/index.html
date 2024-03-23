@@ -1,0 +1,1748 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Guide] Rails101 簡易建立步驟 - ANxGANG</title>
+<meta name="description" content="[ Chapter 1. 環境安裝 ]  1-1 確認ruby版本  ruby -v   1-2 安裝 gem rails 4.2.0  gem install rails -v 4.2.0 --no-ri   1-3 建立一個新 Rails 專案 ( 版本 4.2.0 )  rails _4.2.0_ new rails101 -T   1-4 進入新建好的專案, 並建立 git 做版本控制  cd rails101 git init git add . git commit -m &quot;Initial Commit&quot;   [ Chapter 2. 建立基礎網站(僅架構) ]  2-1 建立一個討論版(group)  2-1.1 建立一個 controller: groups (要加s)  rails g controller groups   2-1.2 建立一個 Model: group (不加s)  rails g model group title:string description:text   2-1.3 將資料庫建立起來  rake db:migrate   2-1.4 設定 routes 並建立 groups/index 為首頁 ( 內容是 Hello World! )  # [path] config/routes.rb + root &#39;groups#index&#39; # 這行代表把 localhost:3000/groups 這個網址設成首頁 + resources :groups   這時候啟動 rails s 前往 http://localhost:3000/  2-2 建立必要頁面  2-2.1 設定 action ‘index’  # [path] app/controllers/groups_controller.rb + def index + end   2-2.2 設定 groups/index.html.erb  &lt;!-- [path] app/views/groups/index.html.erb --&gt; &lt;h1&gt;Hello World!&lt;/h1&gt;   2-3 套入前端套件 Bootstrap  2-3.1 安裝 gem ‘bootstrap-sass’    https://github.com/twbs/bootstrap-sass  # [path] Gemfile + gem &#39;bootstrap-sass&#39;   執行 bundle install  2-3.2 將 Bootstrap 的 CSS 套件裝進專案裡面  mv app/assets/stylesheets/application.css app/assets/stylesheets/application.css.scss   /* app/assets/stylesheets/application.css.scss */ + @import &quot;bootstrap-sprockets&quot;; + @import &quot;bootstrap&quot;;   重開 rails s  2-4 幫你的專案裝上 Navbar 跟 Footbar  2-4.1 新增兩檔案  &lt;!-- app/views/common/_navbar.html.erb --&gt; &lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;   &lt;div class=&quot;container-fluid&quot;&gt;     &lt;!-- Brand and toggle get grouped for better mobile display --&gt;     &lt;div class=&quot;navbar-header&quot;&gt;       &lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&gt;Rails 101&lt;/a&gt;     &lt;/div&gt;      &lt;!-- Collect the nav links, forms, and other content for toggling --&gt;     &lt;div class=&quot;collapse navbar-collapse&quot; id=&quot;bs-example-navbar-collapse-1&quot;&gt;       &lt;ul class=&quot;nav navbar-nav navbar-right&quot;&gt;         &lt;li&gt; &lt;%= link_to(&quot;登入&quot;, &#39;#&#39;) %&gt; &lt;/li&gt;       &lt;/ul&gt;     &lt;/div&gt;&lt;!-- /.navbar-collapse --&gt;   &lt;/div&gt;&lt;!-- /.container-fluid --&gt; &lt;/nav&gt;   &lt;!-- [path] app/views/common/_footer.html.erb--&gt; &lt;footer class=&quot;container&quot; style=&quot;margin-top: 100px;&quot;&gt;   &lt;p class=&quot;text-center&quot;&gt;Copyright ©2016 Rails101     &lt;br&gt;Design by &lt;a href=&quot;courses.growthschool.com/courses/rails-101/&quot; target=_new&gt;xdite&lt;/a&gt;   &lt;/p&gt; &lt;/footer&gt;   2-4.2 修改 app/views/layouts/application.html.erb  &lt;!-- [path] app/views/layouts/application.html.erb --&gt;  - &lt;%= yield %&gt; + &lt;div class=&quot;container-fluid&quot;&gt; +   &lt;%= render &quot;common/navbar&quot; %&gt; +   &lt;%= yield %&gt; + &lt;/div&gt; + &lt;%= render &quot;common/footer&quot; %&gt;   2-5 建立 notice_message  2-5.1 將 Boostrap 的 js 套件: alert 裝進專案裡面  // [path] app/assets/javascripts/application.js +//= require bootstrap/alert   2-5.2 建立 helper: notice_message  # [path] app/helpers/application_helper.rb + def notice_message +   alert_types = { notice: :success, alert: :danger } + +   close_button_options = { class: &quot;close&quot;, &quot;data-dismiss&quot; =&gt; &quot;alert&quot;, &quot;aria-hidden&quot; =&gt; true } +   close_button = content_tag(:button, &quot;×&quot;, close_button_options) + +   alerts = flash.map do |type, message| +     alert_content = close_button + message + +     alert_type = alert_types[type.to_sym] || type +     alert_class = &quot;alert alert-#{alert_type} alert-dismissable&quot; + +     content_tag(:div, alert_content, class: alert_class) +   end + +   alerts.join(&quot;\n&quot;).html_safe + end   2-5.3 把 notice_message 放進 application.html.erb 裡面  &lt;!-- [path] app/views/layouts/application.html.erb --&gt; &lt;div class=&quot;container-fluid&quot;&gt;   &lt;%= render &quot;common/navbar&quot; %&gt; + &lt;%= notice_message %&gt;   &lt;%= yield %&gt; &lt;/div&gt;   2-5.4 如何使用 notice_message 的功能  # [path] app/controllers/groups_controller.rb class GroupsController &lt; ApplicationController   def index   +  flash[:notice] = &quot;早安！你好！&quot;  +  flash[:warning] = &quot;這是 warning 訊息！&quot;   +  flash[:alert] = &quot;晚安！該睡了！&quot;   end end   [ Chapter 3. 手動實作出討論版的 CRUD 功能 ]  3-1 安裝 gem “simple_form”  參考：SimpleForm github  3-1.1 加入gem  # [path] gemfile + gem &quot;simple_form&quot;   bundle install   3-1.2 安裝 simple_form for bootstrap 的設定  rails generate simple_form:install --bootstrap   重開 rails s  3-2 可以總覽所有討論版 ( 建立 action index )  3-2.1 建立 action index  # [path] app/controllers/groups_controller.rb   def index +   @groups = Group.all   end   3-2.2 建立 index.html.erb  &lt;!-- [path] app/views/groups/index.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt;     &lt;%= link_to(&quot;New group&quot;, new_group_path, class: &quot;btn btn-primary pull-right&quot;) %&gt;   &lt;/div&gt;   &lt;table class=&quot;table table-hover&quot;&gt;     &lt;thead&gt;       &lt;tr&gt;         &lt;td&gt;#&lt;/td&gt;         &lt;td&gt;Title&lt;/td&gt;         &lt;td&gt;Description&lt;/td&gt;       &lt;/tr&gt;     &lt;/thead&gt;     &lt;tbody&gt;       &lt;% @groups.each do |group| %&gt;         &lt;tr&gt;           &lt;td&gt;#&lt;/td&gt;           &lt;td&gt;&lt;%= link_to(group.title, group_path(group)) %&gt;&lt;/td&gt;           &lt;td&gt;&lt;%= group.description %&gt;&lt;/td&gt;           &lt;td&gt;               &lt;%= link_to(&quot;Edit&quot;, edit_group_path(group), class: &quot;btn btn-sm btn-default&quot;)%&gt;               &lt;%= link_to(&quot;Delete&quot;, group_path(group),    class: &quot;btn btn-sm btn-default&quot;,                            method: :delete, data: { confirm: &quot;Are you sure?&quot; } )%&gt;           &lt;/td&gt;         &lt;/tr&gt;       &lt;% end %&gt;     &lt;/tbody&gt;   &lt;/table&gt; &lt;/div&gt;   3-2 可以新增討論版 ( 建立 action new, create )  3-2.1 action ‘new’  # [path] app/controllers/groups_controller.rb + def new +   @group = Group.new + end   3-2.2 erb ‘new’  &lt;!-- [path] app/views/groups/new.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;新增討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title, input_html: { class: &quot;form-control&quot;} %&gt;       &lt;%= f.input :description, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-2.3 action ‘create’  # [path] app/controllers/groups_controller.rb + def create +   @group = Group.create(group_params) + +   if @group.save +     redirect_to groups_path +   else +     render :new +   end + end    + private +  + def group_params  +   params.require(:group).permit(:title, :description) + end   3-3 可以瀏覽單一討論版 ( 建立 action show )  3-3.1 action show  # [path] app/controllers/groups_controller.rb + def show +   @group = Group.find(params[:id]) + end   &lt;!-- [path] app/views/groups/show.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt;     &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;   &lt;/div&gt;   &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;   &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt; &lt;/div&gt;   3-4 修改討論版與儲存已改的設定 ( 建立 action edit, update )  3-4.1 action edit  # [path] app/controllers/groups_controller.rb + def edit +  @group = Group.find(params[:id]) + end   &lt;!-- [path] app/views/groups/edit.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;修改討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title %&gt;       &lt;%= f.input :description %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-4.2 action update  # [path] app/controllers/groups_controller.rb + def update +   @group = Group.find(params[:id])  +   if @group.update(group_params) +     redirect_to groups_path, notice: &quot;修改討論版成功&quot; +   else +     render :edit +   end + end    &lt;!-- [path] app/views/groups/edit.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;修改討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title %&gt;       &lt;%= f.input :description %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-5 將討論版刪除 ( action destroy )  3-5.1 建立 action destroy  # [path] app/controllers/groups_controller.rb + def destroy +   @group = Group.find(params[:id]) +   @group.destroy +   redirect_to groups_path, alert: &quot;討論版已刪除&quot; + end   3-6 資料驗證: title 不能空白  # [path] app/models/group.rb + validates :title, presence: true   [ Chapter 4. 可以在討論版裡發表文章 ]  4-1 建立 post 相關的 controller, model 關聯 與 routing 設定  4-1.1 建立 Controller: posts (要加s)  rails g controller posts   4-1.2 建立 Model: post (不加s)  rails g model post content:text group_id:integer   4-1.3 將 post 的資料庫建立起來  rake db:migrate   4-2 建立 group 與 post 之間 model 的關聯性 (relationship)  # [path] app/models/group.rb + has_many :posts   # [path] app/models/post.rb + belongs_to :group   4-3 routing 設定  # [path] config/routes.rb - resources :groups + resources :groups do +   resources :posts + end   4-4 可以在 group 的 show 頁面顯示所擁有的 post  # [path] app/controllers/groups_controller.rb  def show     @group = Group.find(params[:id]) +   @posts = @group.posts   end   &lt;!-- [path] app/views/groups/show.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt; +   &lt;%= link_to(&quot;New Post&quot;, new_group_post_path(@group), class: &quot;btn btn-warning pull-right&quot;) %&gt;     &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;   &lt;/div&gt;   &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;   &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt;  + &lt;table class=&quot;table&quot;&gt; +   &lt;thead&gt; +     &lt;tr&gt; +       &lt;th&gt;文章&lt;/th&gt; +       &lt;th colspan=&quot;2&quot;&gt;&lt;/th&gt; +     &lt;/tr&gt; +   &lt;/thead&gt; +   &lt;tbody&gt; +     &lt;% @posts.each do |post| %&gt; +       &lt;tr&gt; +         &lt;td&gt;&lt;%= post.content %&gt;&lt;/td&gt; +         &lt;td&gt; +           &lt;%= link_to(&quot;Edit&quot;, edit_group_post_path(post.group, post), +                       class: &quot;btn btn-default btn-xs&quot;)%&gt; +           &lt;%= link_to(&quot;Delete&quot;, group_post_path(post.group, post), +                       class: &quot;btn btn-default btn-xs &quot;, method: :delete,  +                       data: { confirm: &quot;Are you sure?&quot; } )%&gt; +         &lt;/td&gt; +       &lt;/tr&gt; +     &lt;% end %&gt; +   &lt;/tbody&gt; + &lt;/table&gt; &lt;/div&gt;   4-5 可以在討論版裡新增 post ( action new, create )  4-5.1 action ‘new’  # [path] app/controllers/posts_controller.rb + def new +   @group = Group.find(params[:group_id]) +   @post = @group.posts.new + end   # [path] app/views/posts/new.html.erb &lt;h1 class=&quot;text-center&quot;&gt;新增文章&lt;/h1&gt;  &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;%= simple_form_for [@group,@post] do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;div class=&quot;form-actions&quot;&gt;       &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;     &lt;/div&gt;   &lt;% end %&gt; &lt;/div&gt;   4-5.2 action ‘create’  # [path] app/controllers/posts_controller.rb + def create +   @group = Group.find(params[:group_id]) +   @post = @group.posts.build(post_params)  +   if @post.save +     redirect_to group_path(@group), notice: &quot;新增文章成功！&quot; +   else +     render :new +   end + end  + private  + def post_params +   params.require(:post).permit(:content) + end   4-6 可以修改並更新 post ( action edit, update )  4-6.1 設定 action ‘edit’ 與 action ‘update’  # [path] app/controllers/posts_controller.rb + def edit +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id]) + end  +  def update +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id])  +   if @post.update(post_params) +     redirect_to group_path(@group), notice: &quot;文章修改成功！&quot; +   else +     render :edit +   end + end   &lt;!-- [path] app/views/posts/edit.html.erb --&gt; &lt;h1 class=&quot;text-center&quot;&gt;修改文章&lt;/h1&gt;  &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;%= simple_form_for [@group,@post] do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;div class=&quot;form-actions&quot;&gt;       &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;     &lt;/div&gt;   &lt;% end %&gt; &lt;/div&gt;   4-7 可以刪除 post ( action destroy )  4-7.1 action ‘destroy’  # [path] app/controllers/posts_controller.rb + def destroy +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id]) + +   @post.destroy +   redirect_to group_path(@group), alert: &quot;文章已刪除&quot; + end   4-8 資料驗證： post 必須要有內容才能儲存 / 新增  # [path] app/models/post.rb + validates :content, presence: true   4-9 用 before_action 來整理重複的程式碼  # [path] app/controllers/posts_controller.rb + before_action :find_group    private + def find_group +   @group = Group.find(params[:group_id]) + end   將所有@group = Group.find(params[:group_id])刪掉（new edit create update destory）      before_action 可以用 only,指定某些 action 執行: before_action :find_group, only: [:edit, :update] 或者使用 except,排除某些 action 不執行:   [ Chapter 5. 第五章：(1) 建立基本使用者功能 ]  5-1 安裝 gem “devise”    https://github.com/plataformatec/devise  # [path] gemfile gem &quot;devise&quot;, &quot;~&gt; 3.4.1&quot;   執行bundle install  5-2 設定 Devise  5-2.1 devise 安裝  rails g devise:install   5-2.2 建立 user 功能  rails g devise user  rake db:migrate   5-2.3 叫出(原本是隱藏的) devise views，以便未來可以客製化修改  rails g devise:views   5-2.4 重開rails server  rails s   [ Chapter 5. 第五章：(2) 客製化 devise =&gt; 新增一個 “name” 的欄位 ]  5-3 客製化欄位：name  5-3.1 客製化 devise =&gt; 新增一個 “name” 的欄位  rails g migration add_name_to_user   # [path] db/migrate/(一堆數字)_add_name_to_user.rb   def change +   add_column :users, :name, :string   end   rake db:migrate   5-4 客製化 devise 的 views =&gt; 註冊頁面新增 name 欄位  # [path] app/views/devise/registrations/new.html.erb   &lt;div class=&quot;form-inputs&quot;&gt;     &lt;%= f.input :email, required: true, autofocus: true %&gt; +   &lt;%= f.input :name,  required: true %&gt;     &lt;%= f.input :password, required: true, hint: (&quot;#{@minimum_password_length} characters minimum&quot; if @validatable) %&gt;     &lt;%= f.input :password_confirmation, required: true %&gt;   &lt;/div&gt;   5-5 加入 strong_parameters 與 devise 整合的 hack  # [path] app/controller/application_controller.rb + before_filter :configure_permitted_parameters, if: :devise_controller?  + protected  +  def configure_permitted_parameters +   devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) } +  end   5-6  navbar 上的 hi! email 改成 hi! name  # [path] app/views/common/_navbar.html.erb -           Hi!, &lt;%= current_user.email %&gt; +           Hi!, &lt;%= current_user.name %&gt;     5-7  新增 “帳號設定” 功能，並能修改自己帳號的 name  &lt;!-- [path] app/views/common/_navbar.html.erb --&gt;             &lt;ul class=&quot;dropdown-menu&quot;&gt; +             &lt;li&gt; &lt;%= link_to(&quot;帳號設定&quot;, edit_user_registration_path )%&gt;&lt;/li&gt;               &lt;li&gt; &lt;%= link_to(&quot;登出&quot;, destroy_user_session_path, method: :delete) %&gt; &lt;/li&gt;             &lt;/ul&gt;   # [path] app/controller/application_controller    def configure_permitted_parameters     devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) } +   devise_parameter_sanitizer.for(:account_update) { |u| u.permit(:name, :email, :password, :password_confirmation, :current_password) }    end   &lt;!-- [path] app/views/devise/registrations/edit.html.erb --&gt; +   &lt;%= f.input :name %&gt;">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Guide] Rails101 簡易建立步驟">
+<meta property="og:url" content="https://blog.anxgang.com/rails/rails101-simple-build-steps/">
+
+
+  <meta property="og:description" content="[ Chapter 1. 環境安裝 ]  1-1 確認ruby版本  ruby -v   1-2 安裝 gem rails 4.2.0  gem install rails -v 4.2.0 --no-ri   1-3 建立一個新 Rails 專案 ( 版本 4.2.0 )  rails _4.2.0_ new rails101 -T   1-4 進入新建好的專案, 並建立 git 做版本控制  cd rails101 git init git add . git commit -m &quot;Initial Commit&quot;   [ Chapter 2. 建立基礎網站(僅架構) ]  2-1 建立一個討論版(group)  2-1.1 建立一個 controller: groups (要加s)  rails g controller groups   2-1.2 建立一個 Model: group (不加s)  rails g model group title:string description:text   2-1.3 將資料庫建立起來  rake db:migrate   2-1.4 設定 routes 並建立 groups/index 為首頁 ( 內容是 Hello World! )  # [path] config/routes.rb + root &#39;groups#index&#39; # 這行代表把 localhost:3000/groups 這個網址設成首頁 + resources :groups   這時候啟動 rails s 前往 http://localhost:3000/  2-2 建立必要頁面  2-2.1 設定 action ‘index’  # [path] app/controllers/groups_controller.rb + def index + end   2-2.2 設定 groups/index.html.erb  &lt;!-- [path] app/views/groups/index.html.erb --&gt; &lt;h1&gt;Hello World!&lt;/h1&gt;   2-3 套入前端套件 Bootstrap  2-3.1 安裝 gem ‘bootstrap-sass’    https://github.com/twbs/bootstrap-sass  # [path] Gemfile + gem &#39;bootstrap-sass&#39;   執行 bundle install  2-3.2 將 Bootstrap 的 CSS 套件裝進專案裡面  mv app/assets/stylesheets/application.css app/assets/stylesheets/application.css.scss   /* app/assets/stylesheets/application.css.scss */ + @import &quot;bootstrap-sprockets&quot;; + @import &quot;bootstrap&quot;;   重開 rails s  2-4 幫你的專案裝上 Navbar 跟 Footbar  2-4.1 新增兩檔案  &lt;!-- app/views/common/_navbar.html.erb --&gt; &lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;   &lt;div class=&quot;container-fluid&quot;&gt;     &lt;!-- Brand and toggle get grouped for better mobile display --&gt;     &lt;div class=&quot;navbar-header&quot;&gt;       &lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&gt;Rails 101&lt;/a&gt;     &lt;/div&gt;      &lt;!-- Collect the nav links, forms, and other content for toggling --&gt;     &lt;div class=&quot;collapse navbar-collapse&quot; id=&quot;bs-example-navbar-collapse-1&quot;&gt;       &lt;ul class=&quot;nav navbar-nav navbar-right&quot;&gt;         &lt;li&gt; &lt;%= link_to(&quot;登入&quot;, &#39;#&#39;) %&gt; &lt;/li&gt;       &lt;/ul&gt;     &lt;/div&gt;&lt;!-- /.navbar-collapse --&gt;   &lt;/div&gt;&lt;!-- /.container-fluid --&gt; &lt;/nav&gt;   &lt;!-- [path] app/views/common/_footer.html.erb--&gt; &lt;footer class=&quot;container&quot; style=&quot;margin-top: 100px;&quot;&gt;   &lt;p class=&quot;text-center&quot;&gt;Copyright ©2016 Rails101     &lt;br&gt;Design by &lt;a href=&quot;courses.growthschool.com/courses/rails-101/&quot; target=_new&gt;xdite&lt;/a&gt;   &lt;/p&gt; &lt;/footer&gt;   2-4.2 修改 app/views/layouts/application.html.erb  &lt;!-- [path] app/views/layouts/application.html.erb --&gt;  - &lt;%= yield %&gt; + &lt;div class=&quot;container-fluid&quot;&gt; +   &lt;%= render &quot;common/navbar&quot; %&gt; +   &lt;%= yield %&gt; + &lt;/div&gt; + &lt;%= render &quot;common/footer&quot; %&gt;   2-5 建立 notice_message  2-5.1 將 Boostrap 的 js 套件: alert 裝進專案裡面  // [path] app/assets/javascripts/application.js +//= require bootstrap/alert   2-5.2 建立 helper: notice_message  # [path] app/helpers/application_helper.rb + def notice_message +   alert_types = { notice: :success, alert: :danger } + +   close_button_options = { class: &quot;close&quot;, &quot;data-dismiss&quot; =&gt; &quot;alert&quot;, &quot;aria-hidden&quot; =&gt; true } +   close_button = content_tag(:button, &quot;×&quot;, close_button_options) + +   alerts = flash.map do |type, message| +     alert_content = close_button + message + +     alert_type = alert_types[type.to_sym] || type +     alert_class = &quot;alert alert-#{alert_type} alert-dismissable&quot; + +     content_tag(:div, alert_content, class: alert_class) +   end + +   alerts.join(&quot;\n&quot;).html_safe + end   2-5.3 把 notice_message 放進 application.html.erb 裡面  &lt;!-- [path] app/views/layouts/application.html.erb --&gt; &lt;div class=&quot;container-fluid&quot;&gt;   &lt;%= render &quot;common/navbar&quot; %&gt; + &lt;%= notice_message %&gt;   &lt;%= yield %&gt; &lt;/div&gt;   2-5.4 如何使用 notice_message 的功能  # [path] app/controllers/groups_controller.rb class GroupsController &lt; ApplicationController   def index   +  flash[:notice] = &quot;早安！你好！&quot;  +  flash[:warning] = &quot;這是 warning 訊息！&quot;   +  flash[:alert] = &quot;晚安！該睡了！&quot;   end end   [ Chapter 3. 手動實作出討論版的 CRUD 功能 ]  3-1 安裝 gem “simple_form”  參考：SimpleForm github  3-1.1 加入gem  # [path] gemfile + gem &quot;simple_form&quot;   bundle install   3-1.2 安裝 simple_form for bootstrap 的設定  rails generate simple_form:install --bootstrap   重開 rails s  3-2 可以總覽所有討論版 ( 建立 action index )  3-2.1 建立 action index  # [path] app/controllers/groups_controller.rb   def index +   @groups = Group.all   end   3-2.2 建立 index.html.erb  &lt;!-- [path] app/views/groups/index.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt;     &lt;%= link_to(&quot;New group&quot;, new_group_path, class: &quot;btn btn-primary pull-right&quot;) %&gt;   &lt;/div&gt;   &lt;table class=&quot;table table-hover&quot;&gt;     &lt;thead&gt;       &lt;tr&gt;         &lt;td&gt;#&lt;/td&gt;         &lt;td&gt;Title&lt;/td&gt;         &lt;td&gt;Description&lt;/td&gt;       &lt;/tr&gt;     &lt;/thead&gt;     &lt;tbody&gt;       &lt;% @groups.each do |group| %&gt;         &lt;tr&gt;           &lt;td&gt;#&lt;/td&gt;           &lt;td&gt;&lt;%= link_to(group.title, group_path(group)) %&gt;&lt;/td&gt;           &lt;td&gt;&lt;%= group.description %&gt;&lt;/td&gt;           &lt;td&gt;               &lt;%= link_to(&quot;Edit&quot;, edit_group_path(group), class: &quot;btn btn-sm btn-default&quot;)%&gt;               &lt;%= link_to(&quot;Delete&quot;, group_path(group),    class: &quot;btn btn-sm btn-default&quot;,                            method: :delete, data: { confirm: &quot;Are you sure?&quot; } )%&gt;           &lt;/td&gt;         &lt;/tr&gt;       &lt;% end %&gt;     &lt;/tbody&gt;   &lt;/table&gt; &lt;/div&gt;   3-2 可以新增討論版 ( 建立 action new, create )  3-2.1 action ‘new’  # [path] app/controllers/groups_controller.rb + def new +   @group = Group.new + end   3-2.2 erb ‘new’  &lt;!-- [path] app/views/groups/new.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;新增討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title, input_html: { class: &quot;form-control&quot;} %&gt;       &lt;%= f.input :description, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-2.3 action ‘create’  # [path] app/controllers/groups_controller.rb + def create +   @group = Group.create(group_params) + +   if @group.save +     redirect_to groups_path +   else +     render :new +   end + end    + private +  + def group_params  +   params.require(:group).permit(:title, :description) + end   3-3 可以瀏覽單一討論版 ( 建立 action show )  3-3.1 action show  # [path] app/controllers/groups_controller.rb + def show +   @group = Group.find(params[:id]) + end   &lt;!-- [path] app/views/groups/show.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt;     &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;   &lt;/div&gt;   &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;   &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt; &lt;/div&gt;   3-4 修改討論版與儲存已改的設定 ( 建立 action edit, update )  3-4.1 action edit  # [path] app/controllers/groups_controller.rb + def edit +  @group = Group.find(params[:id]) + end   &lt;!-- [path] app/views/groups/edit.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;修改討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title %&gt;       &lt;%= f.input :description %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-4.2 action update  # [path] app/controllers/groups_controller.rb + def update +   @group = Group.find(params[:id])  +   if @group.update(group_params) +     redirect_to groups_path, notice: &quot;修改討論版成功&quot; +   else +     render :edit +   end + end    &lt;!-- [path] app/views/groups/edit.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;修改討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title %&gt;       &lt;%= f.input :description %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-5 將討論版刪除 ( action destroy )  3-5.1 建立 action destroy  # [path] app/controllers/groups_controller.rb + def destroy +   @group = Group.find(params[:id]) +   @group.destroy +   redirect_to groups_path, alert: &quot;討論版已刪除&quot; + end   3-6 資料驗證: title 不能空白  # [path] app/models/group.rb + validates :title, presence: true   [ Chapter 4. 可以在討論版裡發表文章 ]  4-1 建立 post 相關的 controller, model 關聯 與 routing 設定  4-1.1 建立 Controller: posts (要加s)  rails g controller posts   4-1.2 建立 Model: post (不加s)  rails g model post content:text group_id:integer   4-1.3 將 post 的資料庫建立起來  rake db:migrate   4-2 建立 group 與 post 之間 model 的關聯性 (relationship)  # [path] app/models/group.rb + has_many :posts   # [path] app/models/post.rb + belongs_to :group   4-3 routing 設定  # [path] config/routes.rb - resources :groups + resources :groups do +   resources :posts + end   4-4 可以在 group 的 show 頁面顯示所擁有的 post  # [path] app/controllers/groups_controller.rb  def show     @group = Group.find(params[:id]) +   @posts = @group.posts   end   &lt;!-- [path] app/views/groups/show.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt; +   &lt;%= link_to(&quot;New Post&quot;, new_group_post_path(@group), class: &quot;btn btn-warning pull-right&quot;) %&gt;     &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;   &lt;/div&gt;   &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;   &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt;  + &lt;table class=&quot;table&quot;&gt; +   &lt;thead&gt; +     &lt;tr&gt; +       &lt;th&gt;文章&lt;/th&gt; +       &lt;th colspan=&quot;2&quot;&gt;&lt;/th&gt; +     &lt;/tr&gt; +   &lt;/thead&gt; +   &lt;tbody&gt; +     &lt;% @posts.each do |post| %&gt; +       &lt;tr&gt; +         &lt;td&gt;&lt;%= post.content %&gt;&lt;/td&gt; +         &lt;td&gt; +           &lt;%= link_to(&quot;Edit&quot;, edit_group_post_path(post.group, post), +                       class: &quot;btn btn-default btn-xs&quot;)%&gt; +           &lt;%= link_to(&quot;Delete&quot;, group_post_path(post.group, post), +                       class: &quot;btn btn-default btn-xs &quot;, method: :delete,  +                       data: { confirm: &quot;Are you sure?&quot; } )%&gt; +         &lt;/td&gt; +       &lt;/tr&gt; +     &lt;% end %&gt; +   &lt;/tbody&gt; + &lt;/table&gt; &lt;/div&gt;   4-5 可以在討論版裡新增 post ( action new, create )  4-5.1 action ‘new’  # [path] app/controllers/posts_controller.rb + def new +   @group = Group.find(params[:group_id]) +   @post = @group.posts.new + end   # [path] app/views/posts/new.html.erb &lt;h1 class=&quot;text-center&quot;&gt;新增文章&lt;/h1&gt;  &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;%= simple_form_for [@group,@post] do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;div class=&quot;form-actions&quot;&gt;       &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;     &lt;/div&gt;   &lt;% end %&gt; &lt;/div&gt;   4-5.2 action ‘create’  # [path] app/controllers/posts_controller.rb + def create +   @group = Group.find(params[:group_id]) +   @post = @group.posts.build(post_params)  +   if @post.save +     redirect_to group_path(@group), notice: &quot;新增文章成功！&quot; +   else +     render :new +   end + end  + private  + def post_params +   params.require(:post).permit(:content) + end   4-6 可以修改並更新 post ( action edit, update )  4-6.1 設定 action ‘edit’ 與 action ‘update’  # [path] app/controllers/posts_controller.rb + def edit +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id]) + end  +  def update +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id])  +   if @post.update(post_params) +     redirect_to group_path(@group), notice: &quot;文章修改成功！&quot; +   else +     render :edit +   end + end   &lt;!-- [path] app/views/posts/edit.html.erb --&gt; &lt;h1 class=&quot;text-center&quot;&gt;修改文章&lt;/h1&gt;  &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;%= simple_form_for [@group,@post] do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;div class=&quot;form-actions&quot;&gt;       &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;     &lt;/div&gt;   &lt;% end %&gt; &lt;/div&gt;   4-7 可以刪除 post ( action destroy )  4-7.1 action ‘destroy’  # [path] app/controllers/posts_controller.rb + def destroy +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id]) + +   @post.destroy +   redirect_to group_path(@group), alert: &quot;文章已刪除&quot; + end   4-8 資料驗證： post 必須要有內容才能儲存 / 新增  # [path] app/models/post.rb + validates :content, presence: true   4-9 用 before_action 來整理重複的程式碼  # [path] app/controllers/posts_controller.rb + before_action :find_group    private + def find_group +   @group = Group.find(params[:group_id]) + end   將所有@group = Group.find(params[:group_id])刪掉（new edit create update destory）      before_action 可以用 only,指定某些 action 執行: before_action :find_group, only: [:edit, :update] 或者使用 except,排除某些 action 不執行:   [ Chapter 5. 第五章：(1) 建立基本使用者功能 ]  5-1 安裝 gem “devise”    https://github.com/plataformatec/devise  # [path] gemfile gem &quot;devise&quot;, &quot;~&gt; 3.4.1&quot;   執行bundle install  5-2 設定 Devise  5-2.1 devise 安裝  rails g devise:install   5-2.2 建立 user 功能  rails g devise user  rake db:migrate   5-2.3 叫出(原本是隱藏的) devise views，以便未來可以客製化修改  rails g devise:views   5-2.4 重開rails server  rails s   [ Chapter 5. 第五章：(2) 客製化 devise =&gt; 新增一個 “name” 的欄位 ]  5-3 客製化欄位：name  5-3.1 客製化 devise =&gt; 新增一個 “name” 的欄位  rails g migration add_name_to_user   # [path] db/migrate/(一堆數字)_add_name_to_user.rb   def change +   add_column :users, :name, :string   end   rake db:migrate   5-4 客製化 devise 的 views =&gt; 註冊頁面新增 name 欄位  # [path] app/views/devise/registrations/new.html.erb   &lt;div class=&quot;form-inputs&quot;&gt;     &lt;%= f.input :email, required: true, autofocus: true %&gt; +   &lt;%= f.input :name,  required: true %&gt;     &lt;%= f.input :password, required: true, hint: (&quot;#{@minimum_password_length} characters minimum&quot; if @validatable) %&gt;     &lt;%= f.input :password_confirmation, required: true %&gt;   &lt;/div&gt;   5-5 加入 strong_parameters 與 devise 整合的 hack  # [path] app/controller/application_controller.rb + before_filter :configure_permitted_parameters, if: :devise_controller?  + protected  +  def configure_permitted_parameters +   devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) } +  end   5-6  navbar 上的 hi! email 改成 hi! name  # [path] app/views/common/_navbar.html.erb -           Hi!, &lt;%= current_user.email %&gt; +           Hi!, &lt;%= current_user.name %&gt;     5-7  新增 “帳號設定” 功能，並能修改自己帳號的 name  &lt;!-- [path] app/views/common/_navbar.html.erb --&gt;             &lt;ul class=&quot;dropdown-menu&quot;&gt; +             &lt;li&gt; &lt;%= link_to(&quot;帳號設定&quot;, edit_user_registration_path )%&gt;&lt;/li&gt;               &lt;li&gt; &lt;%= link_to(&quot;登出&quot;, destroy_user_session_path, method: :delete) %&gt; &lt;/li&gt;             &lt;/ul&gt;   # [path] app/controller/application_controller    def configure_permitted_parameters     devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) } +   devise_parameter_sanitizer.for(:account_update) { |u| u.permit(:name, :email, :password, :password_confirmation, :current_password) }    end   &lt;!-- [path] app/views/devise/registrations/edit.html.erb --&gt; +   &lt;%= f.input :name %&gt;">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Guide] Rails101 簡易建立步驟">
+  <meta name="twitter:description" content="[ Chapter 1. 環境安裝 ]  1-1 確認ruby版本  ruby -v   1-2 安裝 gem rails 4.2.0  gem install rails -v 4.2.0 --no-ri   1-3 建立一個新 Rails 專案 ( 版本 4.2.0 )  rails _4.2.0_ new rails101 -T   1-4 進入新建好的專案, 並建立 git 做版本控制  cd rails101 git init git add . git commit -m &quot;Initial Commit&quot;   [ Chapter 2. 建立基礎網站(僅架構) ]  2-1 建立一個討論版(group)  2-1.1 建立一個 controller: groups (要加s)  rails g controller groups   2-1.2 建立一個 Model: group (不加s)  rails g model group title:string description:text   2-1.3 將資料庫建立起來  rake db:migrate   2-1.4 設定 routes 並建立 groups/index 為首頁 ( 內容是 Hello World! )  # [path] config/routes.rb + root &#39;groups#index&#39; # 這行代表把 localhost:3000/groups 這個網址設成首頁 + resources :groups   這時候啟動 rails s 前往 http://localhost:3000/  2-2 建立必要頁面  2-2.1 設定 action ‘index’  # [path] app/controllers/groups_controller.rb + def index + end   2-2.2 設定 groups/index.html.erb  &lt;!-- [path] app/views/groups/index.html.erb --&gt; &lt;h1&gt;Hello World!&lt;/h1&gt;   2-3 套入前端套件 Bootstrap  2-3.1 安裝 gem ‘bootstrap-sass’    https://github.com/twbs/bootstrap-sass  # [path] Gemfile + gem &#39;bootstrap-sass&#39;   執行 bundle install  2-3.2 將 Bootstrap 的 CSS 套件裝進專案裡面  mv app/assets/stylesheets/application.css app/assets/stylesheets/application.css.scss   /* app/assets/stylesheets/application.css.scss */ + @import &quot;bootstrap-sprockets&quot;; + @import &quot;bootstrap&quot;;   重開 rails s  2-4 幫你的專案裝上 Navbar 跟 Footbar  2-4.1 新增兩檔案  &lt;!-- app/views/common/_navbar.html.erb --&gt; &lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;   &lt;div class=&quot;container-fluid&quot;&gt;     &lt;!-- Brand and toggle get grouped for better mobile display --&gt;     &lt;div class=&quot;navbar-header&quot;&gt;       &lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&gt;Rails 101&lt;/a&gt;     &lt;/div&gt;      &lt;!-- Collect the nav links, forms, and other content for toggling --&gt;     &lt;div class=&quot;collapse navbar-collapse&quot; id=&quot;bs-example-navbar-collapse-1&quot;&gt;       &lt;ul class=&quot;nav navbar-nav navbar-right&quot;&gt;         &lt;li&gt; &lt;%= link_to(&quot;登入&quot;, &#39;#&#39;) %&gt; &lt;/li&gt;       &lt;/ul&gt;     &lt;/div&gt;&lt;!-- /.navbar-collapse --&gt;   &lt;/div&gt;&lt;!-- /.container-fluid --&gt; &lt;/nav&gt;   &lt;!-- [path] app/views/common/_footer.html.erb--&gt; &lt;footer class=&quot;container&quot; style=&quot;margin-top: 100px;&quot;&gt;   &lt;p class=&quot;text-center&quot;&gt;Copyright ©2016 Rails101     &lt;br&gt;Design by &lt;a href=&quot;courses.growthschool.com/courses/rails-101/&quot; target=_new&gt;xdite&lt;/a&gt;   &lt;/p&gt; &lt;/footer&gt;   2-4.2 修改 app/views/layouts/application.html.erb  &lt;!-- [path] app/views/layouts/application.html.erb --&gt;  - &lt;%= yield %&gt; + &lt;div class=&quot;container-fluid&quot;&gt; +   &lt;%= render &quot;common/navbar&quot; %&gt; +   &lt;%= yield %&gt; + &lt;/div&gt; + &lt;%= render &quot;common/footer&quot; %&gt;   2-5 建立 notice_message  2-5.1 將 Boostrap 的 js 套件: alert 裝進專案裡面  // [path] app/assets/javascripts/application.js +//= require bootstrap/alert   2-5.2 建立 helper: notice_message  # [path] app/helpers/application_helper.rb + def notice_message +   alert_types = { notice: :success, alert: :danger } + +   close_button_options = { class: &quot;close&quot;, &quot;data-dismiss&quot; =&gt; &quot;alert&quot;, &quot;aria-hidden&quot; =&gt; true } +   close_button = content_tag(:button, &quot;×&quot;, close_button_options) + +   alerts = flash.map do |type, message| +     alert_content = close_button + message + +     alert_type = alert_types[type.to_sym] || type +     alert_class = &quot;alert alert-#{alert_type} alert-dismissable&quot; + +     content_tag(:div, alert_content, class: alert_class) +   end + +   alerts.join(&quot;\n&quot;).html_safe + end   2-5.3 把 notice_message 放進 application.html.erb 裡面  &lt;!-- [path] app/views/layouts/application.html.erb --&gt; &lt;div class=&quot;container-fluid&quot;&gt;   &lt;%= render &quot;common/navbar&quot; %&gt; + &lt;%= notice_message %&gt;   &lt;%= yield %&gt; &lt;/div&gt;   2-5.4 如何使用 notice_message 的功能  # [path] app/controllers/groups_controller.rb class GroupsController &lt; ApplicationController   def index   +  flash[:notice] = &quot;早安！你好！&quot;  +  flash[:warning] = &quot;這是 warning 訊息！&quot;   +  flash[:alert] = &quot;晚安！該睡了！&quot;   end end   [ Chapter 3. 手動實作出討論版的 CRUD 功能 ]  3-1 安裝 gem “simple_form”  參考：SimpleForm github  3-1.1 加入gem  # [path] gemfile + gem &quot;simple_form&quot;   bundle install   3-1.2 安裝 simple_form for bootstrap 的設定  rails generate simple_form:install --bootstrap   重開 rails s  3-2 可以總覽所有討論版 ( 建立 action index )  3-2.1 建立 action index  # [path] app/controllers/groups_controller.rb   def index +   @groups = Group.all   end   3-2.2 建立 index.html.erb  &lt;!-- [path] app/views/groups/index.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt;     &lt;%= link_to(&quot;New group&quot;, new_group_path, class: &quot;btn btn-primary pull-right&quot;) %&gt;   &lt;/div&gt;   &lt;table class=&quot;table table-hover&quot;&gt;     &lt;thead&gt;       &lt;tr&gt;         &lt;td&gt;#&lt;/td&gt;         &lt;td&gt;Title&lt;/td&gt;         &lt;td&gt;Description&lt;/td&gt;       &lt;/tr&gt;     &lt;/thead&gt;     &lt;tbody&gt;       &lt;% @groups.each do |group| %&gt;         &lt;tr&gt;           &lt;td&gt;#&lt;/td&gt;           &lt;td&gt;&lt;%= link_to(group.title, group_path(group)) %&gt;&lt;/td&gt;           &lt;td&gt;&lt;%= group.description %&gt;&lt;/td&gt;           &lt;td&gt;               &lt;%= link_to(&quot;Edit&quot;, edit_group_path(group), class: &quot;btn btn-sm btn-default&quot;)%&gt;               &lt;%= link_to(&quot;Delete&quot;, group_path(group),    class: &quot;btn btn-sm btn-default&quot;,                            method: :delete, data: { confirm: &quot;Are you sure?&quot; } )%&gt;           &lt;/td&gt;         &lt;/tr&gt;       &lt;% end %&gt;     &lt;/tbody&gt;   &lt;/table&gt; &lt;/div&gt;   3-2 可以新增討論版 ( 建立 action new, create )  3-2.1 action ‘new’  # [path] app/controllers/groups_controller.rb + def new +   @group = Group.new + end   3-2.2 erb ‘new’  &lt;!-- [path] app/views/groups/new.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;新增討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title, input_html: { class: &quot;form-control&quot;} %&gt;       &lt;%= f.input :description, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-2.3 action ‘create’  # [path] app/controllers/groups_controller.rb + def create +   @group = Group.create(group_params) + +   if @group.save +     redirect_to groups_path +   else +     render :new +   end + end    + private +  + def group_params  +   params.require(:group).permit(:title, :description) + end   3-3 可以瀏覽單一討論版 ( 建立 action show )  3-3.1 action show  # [path] app/controllers/groups_controller.rb + def show +   @group = Group.find(params[:id]) + end   &lt;!-- [path] app/views/groups/show.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt;     &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;   &lt;/div&gt;   &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;   &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt; &lt;/div&gt;   3-4 修改討論版與儲存已改的設定 ( 建立 action edit, update )  3-4.1 action edit  # [path] app/controllers/groups_controller.rb + def edit +  @group = Group.find(params[:id]) + end   &lt;!-- [path] app/views/groups/edit.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;修改討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title %&gt;       &lt;%= f.input :description %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-4.2 action update  # [path] app/controllers/groups_controller.rb + def update +   @group = Group.find(params[:id])  +   if @group.update(group_params) +     redirect_to groups_path, notice: &quot;修改討論版成功&quot; +   else +     render :edit +   end + end    &lt;!-- [path] app/views/groups/edit.html.erb --&gt; &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;h1&gt;修改討論版&lt;/h1&gt;    &lt;hr&gt;   &lt;%= simple_form_for @group do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :title %&gt;       &lt;%= f.input :description %&gt;     &lt;/div&gt;     &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;   &lt;% end %&gt; &lt;/div&gt;   3-5 將討論版刪除 ( action destroy )  3-5.1 建立 action destroy  # [path] app/controllers/groups_controller.rb + def destroy +   @group = Group.find(params[:id]) +   @group.destroy +   redirect_to groups_path, alert: &quot;討論版已刪除&quot; + end   3-6 資料驗證: title 不能空白  # [path] app/models/group.rb + validates :title, presence: true   [ Chapter 4. 可以在討論版裡發表文章 ]  4-1 建立 post 相關的 controller, model 關聯 與 routing 設定  4-1.1 建立 Controller: posts (要加s)  rails g controller posts   4-1.2 建立 Model: post (不加s)  rails g model post content:text group_id:integer   4-1.3 將 post 的資料庫建立起來  rake db:migrate   4-2 建立 group 與 post 之間 model 的關聯性 (relationship)  # [path] app/models/group.rb + has_many :posts   # [path] app/models/post.rb + belongs_to :group   4-3 routing 設定  # [path] config/routes.rb - resources :groups + resources :groups do +   resources :posts + end   4-4 可以在 group 的 show 頁面顯示所擁有的 post  # [path] app/controllers/groups_controller.rb  def show     @group = Group.find(params[:id]) +   @posts = @group.posts   end   &lt;!-- [path] app/views/groups/show.html.erb --&gt; &lt;div class=&quot;col-md-12&quot;&gt;   &lt;div class=&quot;group&quot;&gt; +   &lt;%= link_to(&quot;New Post&quot;, new_group_post_path(@group), class: &quot;btn btn-warning pull-right&quot;) %&gt;     &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;   &lt;/div&gt;   &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;   &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt;  + &lt;table class=&quot;table&quot;&gt; +   &lt;thead&gt; +     &lt;tr&gt; +       &lt;th&gt;文章&lt;/th&gt; +       &lt;th colspan=&quot;2&quot;&gt;&lt;/th&gt; +     &lt;/tr&gt; +   &lt;/thead&gt; +   &lt;tbody&gt; +     &lt;% @posts.each do |post| %&gt; +       &lt;tr&gt; +         &lt;td&gt;&lt;%= post.content %&gt;&lt;/td&gt; +         &lt;td&gt; +           &lt;%= link_to(&quot;Edit&quot;, edit_group_post_path(post.group, post), +                       class: &quot;btn btn-default btn-xs&quot;)%&gt; +           &lt;%= link_to(&quot;Delete&quot;, group_post_path(post.group, post), +                       class: &quot;btn btn-default btn-xs &quot;, method: :delete,  +                       data: { confirm: &quot;Are you sure?&quot; } )%&gt; +         &lt;/td&gt; +       &lt;/tr&gt; +     &lt;% end %&gt; +   &lt;/tbody&gt; + &lt;/table&gt; &lt;/div&gt;   4-5 可以在討論版裡新增 post ( action new, create )  4-5.1 action ‘new’  # [path] app/controllers/posts_controller.rb + def new +   @group = Group.find(params[:group_id]) +   @post = @group.posts.new + end   # [path] app/views/posts/new.html.erb &lt;h1 class=&quot;text-center&quot;&gt;新增文章&lt;/h1&gt;  &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;%= simple_form_for [@group,@post] do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;div class=&quot;form-actions&quot;&gt;       &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;     &lt;/div&gt;   &lt;% end %&gt; &lt;/div&gt;   4-5.2 action ‘create’  # [path] app/controllers/posts_controller.rb + def create +   @group = Group.find(params[:group_id]) +   @post = @group.posts.build(post_params)  +   if @post.save +     redirect_to group_path(@group), notice: &quot;新增文章成功！&quot; +   else +     render :new +   end + end  + private  + def post_params +   params.require(:post).permit(:content) + end   4-6 可以修改並更新 post ( action edit, update )  4-6.1 設定 action ‘edit’ 與 action ‘update’  # [path] app/controllers/posts_controller.rb + def edit +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id]) + end  +  def update +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id])  +   if @post.update(post_params) +     redirect_to group_path(@group), notice: &quot;文章修改成功！&quot; +   else +     render :edit +   end + end   &lt;!-- [path] app/views/posts/edit.html.erb --&gt; &lt;h1 class=&quot;text-center&quot;&gt;修改文章&lt;/h1&gt;  &lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;   &lt;%= simple_form_for [@group,@post] do |f| %&gt;     &lt;div class=&quot;form-group&quot;&gt;       &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;     &lt;/div&gt;     &lt;div class=&quot;form-actions&quot;&gt;       &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;     &lt;/div&gt;   &lt;% end %&gt; &lt;/div&gt;   4-7 可以刪除 post ( action destroy )  4-7.1 action ‘destroy’  # [path] app/controllers/posts_controller.rb + def destroy +   @group = Group.find(params[:group_id]) +   @post = @group.posts.find(params[:id]) + +   @post.destroy +   redirect_to group_path(@group), alert: &quot;文章已刪除&quot; + end   4-8 資料驗證： post 必須要有內容才能儲存 / 新增  # [path] app/models/post.rb + validates :content, presence: true   4-9 用 before_action 來整理重複的程式碼  # [path] app/controllers/posts_controller.rb + before_action :find_group    private + def find_group +   @group = Group.find(params[:group_id]) + end   將所有@group = Group.find(params[:group_id])刪掉（new edit create update destory）      before_action 可以用 only,指定某些 action 執行: before_action :find_group, only: [:edit, :update] 或者使用 except,排除某些 action 不執行:   [ Chapter 5. 第五章：(1) 建立基本使用者功能 ]  5-1 安裝 gem “devise”    https://github.com/plataformatec/devise  # [path] gemfile gem &quot;devise&quot;, &quot;~&gt; 3.4.1&quot;   執行bundle install  5-2 設定 Devise  5-2.1 devise 安裝  rails g devise:install   5-2.2 建立 user 功能  rails g devise user  rake db:migrate   5-2.3 叫出(原本是隱藏的) devise views，以便未來可以客製化修改  rails g devise:views   5-2.4 重開rails server  rails s   [ Chapter 5. 第五章：(2) 客製化 devise =&gt; 新增一個 “name” 的欄位 ]  5-3 客製化欄位：name  5-3.1 客製化 devise =&gt; 新增一個 “name” 的欄位  rails g migration add_name_to_user   # [path] db/migrate/(一堆數字)_add_name_to_user.rb   def change +   add_column :users, :name, :string   end   rake db:migrate   5-4 客製化 devise 的 views =&gt; 註冊頁面新增 name 欄位  # [path] app/views/devise/registrations/new.html.erb   &lt;div class=&quot;form-inputs&quot;&gt;     &lt;%= f.input :email, required: true, autofocus: true %&gt; +   &lt;%= f.input :name,  required: true %&gt;     &lt;%= f.input :password, required: true, hint: (&quot;#{@minimum_password_length} characters minimum&quot; if @validatable) %&gt;     &lt;%= f.input :password_confirmation, required: true %&gt;   &lt;/div&gt;   5-5 加入 strong_parameters 與 devise 整合的 hack  # [path] app/controller/application_controller.rb + before_filter :configure_permitted_parameters, if: :devise_controller?  + protected  +  def configure_permitted_parameters +   devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) } +  end   5-6  navbar 上的 hi! email 改成 hi! name  # [path] app/views/common/_navbar.html.erb -           Hi!, &lt;%= current_user.email %&gt; +           Hi!, &lt;%= current_user.name %&gt;     5-7  新增 “帳號設定” 功能，並能修改自己帳號的 name  &lt;!-- [path] app/views/common/_navbar.html.erb --&gt;             &lt;ul class=&quot;dropdown-menu&quot;&gt; +             &lt;li&gt; &lt;%= link_to(&quot;帳號設定&quot;, edit_user_registration_path )%&gt;&lt;/li&gt;               &lt;li&gt; &lt;%= link_to(&quot;登出&quot;, destroy_user_session_path, method: :delete) %&gt; &lt;/li&gt;             &lt;/ul&gt;   # [path] app/controller/application_controller    def configure_permitted_parameters     devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) } +   devise_parameter_sanitizer.for(:account_update) { |u| u.permit(:name, :email, :password, :password_confirmation, :current_password) }    end   &lt;!-- [path] app/views/devise/registrations/edit.html.erb --&gt; +   &lt;%= f.input :name %&gt;">
+  <meta name="twitter:url" content="https://blog.anxgang.com/rails/rails101-simple-build-steps/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-04-06T02:35:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/rails/rails101-simple-build-steps/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Guide] Rails101 簡易建立步驟">
+        
+        
+        <meta itemprop="description"
+            content="[ Chapter 1. 環境安裝 ]1-1 確認ruby版本ruby -v1-2 安裝 gem rails 4.2.0gem install rails -v 4.2.0 --no-ri1-3 建立一個新 Rails 專案 ( 版本 4.2.0 )rails _4.2.0_ new rails101 -T1-4 進入新建好的專案, 並建立 git 做版本控制cd rails101git initgit add .git commit -m &quot;Initial Commit&quot;[ Chapter 2. 建立基礎網站(僅架構) ]2-1 建立一個討論版(group)2-1.1 建立一個 controller: groups (要加s)rails g controller groups2-1.2 建立一個 Model: group (不加s)rails g model group title:string description:text2-1.3 將資料庫建立起來rake db:migrate2-1.4 設定 routes 並建立 groups/index 為首頁 ( 內容是 Hello World! )# [path] config/routes.rb+ root &#39;groups#index&#39; # 這行代表把 localhost:3000/groups 這個網址設成首頁+ resources :groups這時候啟動 rails s 前往 http://localhost:3000/2-2 建立必要頁面2-2.1 設定 action ‘index’# [path] app/controllers/groups_controller.rb+ def index+ end2-2.2 設定 groups/index.html.erb&lt;!-- [path] app/views/groups/index.html.erb --&gt;&lt;h1&gt;Hello World!&lt;/h1&gt;2-3 套入前端套件 Bootstrap2-3.1 安裝 gem ‘bootstrap-sass’https://github.com/twbs/bootstrap-sass# [path] Gemfile+ gem &#39;bootstrap-sass&#39;執行 bundle install2-3.2 將 Bootstrap 的 CSS 套件裝進專案裡面mv app/assets/stylesheets/application.css app/assets/stylesheets/application.css.scss/* app/assets/stylesheets/application.css.scss */+ @import &quot;bootstrap-sprockets&quot;;+ @import &quot;bootstrap&quot;;重開 rails s2-4 幫你的專案裝上 Navbar 跟 Footbar2-4.1 新增兩檔案&lt;!-- app/views/common/_navbar.html.erb --&gt;&lt;nav class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;&gt;  &lt;div class=&quot;container-fluid&quot;&gt;    &lt;!-- Brand and toggle get grouped for better mobile display --&gt;    &lt;div class=&quot;navbar-header&quot;&gt;      &lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&gt;Rails 101&lt;/a&gt;    &lt;/div&gt;    &lt;!-- Collect the nav links, forms, and other content for toggling --&gt;    &lt;div class=&quot;collapse navbar-collapse&quot; id=&quot;bs-example-navbar-collapse-1&quot;&gt;      &lt;ul class=&quot;nav navbar-nav navbar-right&quot;&gt;        &lt;li&gt; &lt;%= link_to(&quot;登入&quot;, &#39;#&#39;) %&gt; &lt;/li&gt;      &lt;/ul&gt;    &lt;/div&gt;&lt;!-- /.navbar-collapse --&gt;  &lt;/div&gt;&lt;!-- /.container-fluid --&gt;&lt;/nav&gt;&lt;!-- [path] app/views/common/_footer.html.erb--&gt;&lt;footer class=&quot;container&quot; style=&quot;margin-top: 100px;&quot;&gt;  &lt;p class=&quot;text-center&quot;&gt;Copyright ©2016 Rails101    &lt;br&gt;Design by &lt;a href=&quot;courses.growthschool.com/courses/rails-101/&quot; target=_new&gt;xdite&lt;/a&gt;  &lt;/p&gt;&lt;/footer&gt;2-4.2 修改 app/views/layouts/application.html.erb&lt;!-- [path] app/views/layouts/application.html.erb --&gt; - &lt;%= yield %&gt;+ &lt;div class=&quot;container-fluid&quot;&gt;+   &lt;%= render &quot;common/navbar&quot; %&gt;+   &lt;%= yield %&gt;+ &lt;/div&gt;+ &lt;%= render &quot;common/footer&quot; %&gt;2-5 建立 notice_message2-5.1 將 Boostrap 的 js 套件: alert 裝進專案裡面// [path] app/assets/javascripts/application.js+//= require bootstrap/alert2-5.2 建立 helper: notice_message# [path] app/helpers/application_helper.rb+ def notice_message+   alert_types = { notice: :success, alert: :danger }++   close_button_options = { class: &quot;close&quot;, &quot;data-dismiss&quot; =&gt; &quot;alert&quot;, &quot;aria-hidden&quot; =&gt; true }+   close_button = content_tag(:button, &quot;×&quot;, close_button_options)++   alerts = flash.map do |type, message|+     alert_content = close_button + message++     alert_type = alert_types[type.to_sym] || type+     alert_class = &quot;alert alert-#{alert_type} alert-dismissable&quot;++     content_tag(:div, alert_content, class: alert_class)+   end++   alerts.join(&quot;\n&quot;).html_safe+ end2-5.3 把 notice_message 放進 application.html.erb 裡面&lt;!-- [path] app/views/layouts/application.html.erb --&gt;&lt;div class=&quot;container-fluid&quot;&gt;  &lt;%= render &quot;common/navbar&quot; %&gt;+ &lt;%= notice_message %&gt;  &lt;%= yield %&gt;&lt;/div&gt;2-5.4 如何使用 notice_message 的功能# [path] app/controllers/groups_controller.rbclass GroupsController &lt; ApplicationController  def index  +  flash[:notice] = &quot;早安！你好！&quot; +  flash[:warning] = &quot;這是 warning 訊息！&quot;  +  flash[:alert] = &quot;晚安！該睡了！&quot;  endend[ Chapter 3. 手動實作出討論版的 CRUD 功能 ]3-1 安裝 gem “simple_form”參考：SimpleForm github3-1.1 加入gem# [path] gemfile+ gem &quot;simple_form&quot;bundle install3-1.2 安裝 simple_form for bootstrap 的設定rails generate simple_form:install --bootstrap重開 rails s3-2 可以總覽所有討論版 ( 建立 action index )3-2.1 建立 action index# [path] app/controllers/groups_controller.rb  def index+   @groups = Group.all  end3-2.2 建立 index.html.erb&lt;!-- [path] app/views/groups/index.html.erb --&gt;&lt;div class=&quot;col-md-12&quot;&gt;  &lt;div class=&quot;group&quot;&gt;    &lt;%= link_to(&quot;New group&quot;, new_group_path, class: &quot;btn btn-primary pull-right&quot;) %&gt;  &lt;/div&gt;  &lt;table class=&quot;table table-hover&quot;&gt;    &lt;thead&gt;      &lt;tr&gt;        &lt;td&gt;#&lt;/td&gt;        &lt;td&gt;Title&lt;/td&gt;        &lt;td&gt;Description&lt;/td&gt;      &lt;/tr&gt;    &lt;/thead&gt;    &lt;tbody&gt;      &lt;% @groups.each do |group| %&gt;        &lt;tr&gt;          &lt;td&gt;#&lt;/td&gt;          &lt;td&gt;&lt;%= link_to(group.title, group_path(group)) %&gt;&lt;/td&gt;          &lt;td&gt;&lt;%= group.description %&gt;&lt;/td&gt;          &lt;td&gt;              &lt;%= link_to(&quot;Edit&quot;, edit_group_path(group), class: &quot;btn btn-sm btn-default&quot;)%&gt;              &lt;%= link_to(&quot;Delete&quot;, group_path(group),    class: &quot;btn btn-sm btn-default&quot;,                           method: :delete, data: { confirm: &quot;Are you sure?&quot; } )%&gt;          &lt;/td&gt;        &lt;/tr&gt;      &lt;% end %&gt;    &lt;/tbody&gt;  &lt;/table&gt;&lt;/div&gt;3-2 可以新增討論版 ( 建立 action new, create )3-2.1 action ‘new’# [path] app/controllers/groups_controller.rb+ def new+   @group = Group.new+ end3-2.2 erb ‘new’&lt;!-- [path] app/views/groups/new.html.erb --&gt;&lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;  &lt;h1&gt;新增討論版&lt;/h1&gt;  &lt;hr&gt;  &lt;%= simple_form_for @group do |f| %&gt;    &lt;div class=&quot;form-group&quot;&gt;      &lt;%= f.input :title, input_html: { class: &quot;form-control&quot;} %&gt;      &lt;%= f.input :description, input_html: { class: &quot;form-control&quot;} %&gt;    &lt;/div&gt;    &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;  &lt;% end %&gt;&lt;/div&gt;3-2.3 action ‘create’# [path] app/controllers/groups_controller.rb+ def create+   @group = Group.create(group_params)++   if @group.save+     redirect_to groups_path+   else+     render :new+   end+ end  + private+ + def group_params +   params.require(:group).permit(:title, :description)+ end3-3 可以瀏覽單一討論版 ( 建立 action show )3-3.1 action show# [path] app/controllers/groups_controller.rb+ def show+   @group = Group.find(params[:id])+ end&lt;!-- [path] app/views/groups/show.html.erb --&gt;&lt;div class=&quot;col-md-12&quot;&gt;  &lt;div class=&quot;group&quot;&gt;    &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;  &lt;/div&gt;  &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;  &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt;&lt;/div&gt;3-4 修改討論版與儲存已改的設定 ( 建立 action edit, update )3-4.1 action edit# [path] app/controllers/groups_controller.rb+ def edit+  @group = Group.find(params[:id])+ end&lt;!-- [path] app/views/groups/edit.html.erb --&gt;&lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;  &lt;h1&gt;修改討論版&lt;/h1&gt;  &lt;hr&gt;  &lt;%= simple_form_for @group do |f| %&gt;    &lt;div class=&quot;form-group&quot;&gt;      &lt;%= f.input :title %&gt;      &lt;%= f.input :description %&gt;    &lt;/div&gt;    &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;  &lt;% end %&gt;&lt;/div&gt;3-4.2 action update# [path] app/controllers/groups_controller.rb+ def update+   @group = Group.find(params[:id])+   if @group.update(group_params)+     redirect_to groups_path, notice: &quot;修改討論版成功&quot;+   else+     render :edit+   end+ end&lt;!-- [path] app/views/groups/edit.html.erb --&gt;&lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;  &lt;h1&gt;修改討論版&lt;/h1&gt;  &lt;hr&gt;  &lt;%= simple_form_for @group do |f| %&gt;    &lt;div class=&quot;form-group&quot;&gt;      &lt;%= f.input :title %&gt;      &lt;%= f.input :description %&gt;    &lt;/div&gt;    &lt;%= f.submit &quot;Submit&quot;, class: &quot;btn btn-primary&quot;, data: { disable_with: &quot;Submitting...&quot; } %&gt;  &lt;% end %&gt;&lt;/div&gt;3-5 將討論版刪除 ( action destroy )3-5.1 建立 action destroy# [path] app/controllers/groups_controller.rb+ def destroy+   @group = Group.find(params[:id])+   @group.destroy+   redirect_to groups_path, alert: &quot;討論版已刪除&quot;+ end3-6 資料驗證: title 不能空白# [path] app/models/group.rb+ validates :title, presence: true[ Chapter 4. 可以在討論版裡發表文章 ]4-1 建立 post 相關的 controller, model 關聯 與 routing 設定4-1.1 建立 Controller: posts (要加s)rails g controller posts4-1.2 建立 Model: post (不加s)rails g model post content:text group_id:integer4-1.3 將 post 的資料庫建立起來rake db:migrate4-2 建立 group 與 post 之間 model 的關聯性 (relationship)# [path] app/models/group.rb+ has_many :posts# [path] app/models/post.rb+ belongs_to :group4-3 routing 設定# [path] config/routes.rb- resources :groups+ resources :groups do+   resources :posts+ end4-4 可以在 group 的 show 頁面顯示所擁有的 post# [path] app/controllers/groups_controller.rb def show    @group = Group.find(params[:id])+   @posts = @group.posts  end&lt;!-- [path] app/views/groups/show.html.erb --&gt;&lt;div class=&quot;col-md-12&quot;&gt;  &lt;div class=&quot;group&quot;&gt;+   &lt;%= link_to(&quot;New Post&quot;, new_group_post_path(@group), class: &quot;btn btn-warning pull-right&quot;) %&gt;    &lt;%= link_to(&quot;Edit&quot;, edit_group_path(@group), class: &quot;btn btn-primary pull-right&quot;)%&gt;  &lt;/div&gt;  &lt;h2&gt;&lt;%= @group.title %&gt;&lt;/h2&gt;  &lt;p&gt;&lt;%= @group.description %&gt;&lt;/p&gt;+ &lt;table class=&quot;table&quot;&gt;+   &lt;thead&gt;+     &lt;tr&gt;+       &lt;th&gt;文章&lt;/th&gt;+       &lt;th colspan=&quot;2&quot;&gt;&lt;/th&gt;+     &lt;/tr&gt;+   &lt;/thead&gt;+   &lt;tbody&gt;+     &lt;% @posts.each do |post| %&gt;+       &lt;tr&gt;+         &lt;td&gt;&lt;%= post.content %&gt;&lt;/td&gt;+         &lt;td&gt;+           &lt;%= link_to(&quot;Edit&quot;, edit_group_post_path(post.group, post),+                       class: &quot;btn btn-default btn-xs&quot;)%&gt;+           &lt;%= link_to(&quot;Delete&quot;, group_post_path(post.group, post),+                       class: &quot;btn btn-default btn-xs &quot;, method: :delete, +                       data: { confirm: &quot;Are you sure?&quot; } )%&gt;+         &lt;/td&gt;+       &lt;/tr&gt;+     &lt;% end %&gt;+   &lt;/tbody&gt;+ &lt;/table&gt;&lt;/div&gt;4-5 可以在討論版裡新增 post ( action new, create )4-5.1 action ‘new’# [path] app/controllers/posts_controller.rb+ def new+   @group = Group.find(params[:group_id])+   @post = @group.posts.new+ end# [path] app/views/posts/new.html.erb&lt;h1 class=&quot;text-center&quot;&gt;新增文章&lt;/h1&gt;&lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;  &lt;%= simple_form_for [@group,@post] do |f| %&gt;    &lt;div class=&quot;form-group&quot;&gt;      &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;    &lt;/div&gt;    &lt;div class=&quot;form-actions&quot;&gt;      &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;    &lt;/div&gt;  &lt;% end %&gt;&lt;/div&gt;4-5.2 action ‘create’# [path] app/controllers/posts_controller.rb+ def create+   @group = Group.find(params[:group_id])+   @post = @group.posts.build(post_params)+   if @post.save+     redirect_to group_path(@group), notice: &quot;新增文章成功！&quot;+   else+     render :new+   end+ end+ private+ def post_params+   params.require(:post).permit(:content)+ end4-6 可以修改並更新 post ( action edit, update )4-6.1 設定 action ‘edit’ 與 action ‘update’# [path] app/controllers/posts_controller.rb+ def edit+   @group = Group.find(params[:group_id])+   @post = @group.posts.find(params[:id])+ end+  def update+   @group = Group.find(params[:group_id])+   @post = @group.posts.find(params[:id])+   if @post.update(post_params)+     redirect_to group_path(@group), notice: &quot;文章修改成功！&quot;+   else+     render :edit+   end+ end&lt;!-- [path] app/views/posts/edit.html.erb --&gt;&lt;h1 class=&quot;text-center&quot;&gt;修改文章&lt;/h1&gt;&lt;div class=&quot;col-md-4 col-md-offset-4&quot;&gt;  &lt;%= simple_form_for [@group,@post] do |f| %&gt;    &lt;div class=&quot;form-group&quot;&gt;      &lt;%= f.input :content, input_html: { class: &quot;form-control&quot;} %&gt;    &lt;/div&gt;    &lt;div class=&quot;form-actions&quot;&gt;      &lt;%= f.submit &quot;Submit&quot;, disable_with: &quot;Submiting...&quot;, class: &quot;btn btn-primary&quot;%&gt;    &lt;/div&gt;  &lt;% end %&gt;&lt;/div&gt;4-7 可以刪除 post ( action destroy )4-7.1 action ‘destroy’# [path] app/controllers/posts_controller.rb+ def destroy+   @group = Group.find(params[:group_id])+   @post = @group.posts.find(params[:id])++   @post.destroy+   redirect_to group_path(@group), alert: &quot;文章已刪除&quot;+ end4-8 資料驗證： post 必須要有內容才能儲存 / 新增# [path] app/models/post.rb+ validates :content, presence: true4-9 用 before_action 來整理重複的程式碼# [path] app/controllers/posts_controller.rb+ before_action :find_group  private+ def find_group+   @group = Group.find(params[:group_id])+ end將所有@group = Group.find(params[:group_id])刪掉（new edit create update destory）  before_action 可以用 only,指定某些 action 執行:before_action :find_group, only: [:edit, :update]或者使用 except,排除某些 action 不執行:[ Chapter 5. 第五章：(1) 建立基本使用者功能 ]5-1 安裝 gem “devise”https://github.com/plataformatec/devise# [path] gemfilegem &quot;devise&quot;, &quot;~&gt; 3.4.1&quot;執行bundle install5-2 設定 Devise5-2.1 devise 安裝rails g devise:install5-2.2 建立 user 功能rails g devise userrake db:migrate5-2.3 叫出(原本是隱藏的) devise views，以便未來可以客製化修改rails g devise:views5-2.4 重開rails serverrails s[ Chapter 5. 第五章：(2) 客製化 devise =&gt; 新增一個 “name” 的欄位 ]5-3 客製化欄位：name5-3.1 客製化 devise =&gt; 新增一個 “name” 的欄位rails g migration add_name_to_user# [path] db/migrate/(一堆數字)_add_name_to_user.rb  def change+   add_column :users, :name, :string  endrake db:migrate5-4 客製化 devise 的 views =&gt; 註冊頁面新增 name 欄位# [path] app/views/devise/registrations/new.html.erb  &lt;div class=&quot;form-inputs&quot;&gt;    &lt;%= f.input :email, required: true, autofocus: true %&gt;+   &lt;%= f.input :name,  required: true %&gt;    &lt;%= f.input :password, required: true, hint: (&quot;#{@minimum_password_length} characters minimum&quot; if @validatable) %&gt;    &lt;%= f.input :password_confirmation, required: true %&gt;  &lt;/div&gt;5-5 加入 strong_parameters 與 devise 整合的 hack# [path] app/controller/application_controller.rb+ before_filter :configure_permitted_parameters, if: :devise_controller?+ protected+  def configure_permitted_parameters+   devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) }+  end5-6  navbar 上的 hi! email 改成 hi! name# [path] app/views/common/_navbar.html.erb-           Hi!, &lt;%= current_user.email %&gt;+           Hi!, &lt;%= current_user.name %&gt;  5-7  新增 “帳號設定” 功能，並能修改自己帳號的 name&lt;!-- [path] app/views/common/_navbar.html.erb --&gt;            &lt;ul class=&quot;dropdown-menu&quot;&gt;+             &lt;li&gt; &lt;%= link_to(&quot;帳號設定&quot;, edit_user_registration_path )%&gt;&lt;/li&gt;              &lt;li&gt; &lt;%= link_to(&quot;登出&quot;, destroy_user_session_path, method: :delete) %&gt; &lt;/li&gt;            &lt;/ul&gt;# [path] app/controller/application_controller   def configure_permitted_parameters    devise_parameter_sanitizer.for(:sign_up) { |u| u.permit(:name, :email, :password, :password_confirmation) }+   devise_parameter_sanitizer.for(:account_update) { |u| u.permit(:name, :email, :password, :password_confirmation, :current_password) }   end&lt;!-- [path] app/views/devise/registrations/edit.html.erb --&gt;+   &lt;%= f.input :name %&gt;">
+        
+        <meta itemprop="datePublished" content="2016-04-06T02:35:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/rails/rails101-simple-build-steps/" class="u-url"
+                        itemprop="url">[Guide] Rails101 簡易建立步驟
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-04-06T02:35:00+08:00">2016-04-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          8 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#-chapter-1-環境安裝-">[ Chapter 1. 環境安裝 ]</a><ul><li><a href="#1-1-確認ruby版本">1-1 確認ruby版本</a></li><li><a href="#1-2-安裝-gem-rails-420">1-2 安裝 gem rails 4.2.0</a></li><li><a href="#1-3-建立一個新-rails-專案--版本-420-">1-3 建立一個新 Rails 專案 ( 版本 4.2.0 )</a></li><li><a href="#1-4-進入新建好的專案-並建立-git-做版本控制">1-4 進入新建好的專案, 並建立 git 做版本控制</a></li></ul></li><li><a href="#-chapter-2-建立基礎網站僅架構-">[ Chapter 2. 建立基礎網站(僅架構) ]</a><ul><li><a href="#2-1-建立一個討論版group">2-1 建立一個討論版(group)</a><ul><li><a href="#2-11-建立一個-controller-groups-要加s">2-1.1 建立一個 controller: groups (要加s)</a></li><li><a href="#2-12-建立一個-model-group-不加s">2-1.2 建立一個 Model: group (不加s)</a></li><li><a href="#2-13-將資料庫建立起來">2-1.3 將資料庫建立起來</a></li><li><a href="#2-14-設定-routes-並建立-groupsindex-為首頁--內容是-hello-world-">2-1.4 設定 routes 並建立 groups/index 為首頁 ( 內容是 Hello World! )</a></li></ul></li><li><a href="#2-2-建立必要頁面">2-2 建立必要頁面</a><ul><li><a href="#2-21-設定-action-index">2-2.1 設定 action ‘index’</a></li><li><a href="#2-22-設定-groupsindexhtmlerb">2-2.2 設定 groups/index.html.erb</a></li></ul></li><li><a href="#2-3-套入前端套件-bootstrap">2-3 套入前端套件 Bootstrap</a><ul><li><a href="#2-31-安裝-gem-bootstrap-sass">2-3.1 安裝 gem ‘bootstrap-sass’</a></li><li><a href="#2-32-將-bootstrap-的-css-套件裝進專案裡面">2-3.2 將 Bootstrap 的 CSS 套件裝進專案裡面</a></li></ul></li><li><a href="#2-4-幫你的專案裝上-navbar-跟-footbar">2-4 幫你的專案裝上 Navbar 跟 Footbar</a><ul><li><a href="#2-41-新增兩檔案">2-4.1 新增兩檔案</a></li><li><a href="#2-42-修改-appviewslayoutsapplicationhtmlerb">2-4.2 修改 app/views/layouts/application.html.erb</a></li></ul></li><li><a href="#2-5-建立-notice_message">2-5 建立 notice_message</a><ul><li><a href="#2-51-將-boostrap-的-js-套件-alert-裝進專案裡面">2-5.1 將 Boostrap 的 js 套件: alert 裝進專案裡面</a></li><li><a href="#2-52-建立-helper-notice_message">2-5.2 建立 helper: notice_message</a></li><li><a href="#2-53-把-notice_message-放進-applicationhtmlerb-裡面">2-5.3 把 notice_message 放進 application.html.erb 裡面</a></li><li><a href="#2-54-如何使用-notice_message-的功能">2-5.4 如何使用 notice_message 的功能</a></li></ul></li></ul></li><li><a href="#-chapter-3-手動實作出討論版的-crud-功能-">[ Chapter 3. 手動實作出討論版的 CRUD 功能 ]</a><ul><li><a href="#3-1-安裝-gem-simple_form">3-1 安裝 gem “simple_form”</a><ul><li><a href="#3-11-加入gem">3-1.1 加入gem</a></li><li><a href="#3-12-安裝-simple_form-for-bootstrap-的設定">3-1.2 安裝 simple_form for bootstrap 的設定</a></li></ul></li><li><a href="#3-2-可以總覽所有討論版--建立-action-index-">3-2 可以總覽所有討論版 ( 建立 action index )</a><ul><li><a href="#3-21-建立-action-index">3-2.1 建立 action index</a></li><li><a href="#3-22-建立-indexhtmlerb">3-2.2 建立 index.html.erb</a></li></ul></li><li><a href="#3-2-可以新增討論版--建立-action-new-create-">3-2 可以新增討論版 ( 建立 action new, create )</a><ul><li><a href="#3-21-action-new">3-2.1 action ‘new’</a></li><li><a href="#3-22-erb-new">3-2.2 erb ‘new’</a></li><li><a href="#3-23-action-create">3-2.3 action ‘create’</a></li></ul></li><li><a href="#3-3-可以瀏覽單一討論版--建立-action-show-">3-3 可以瀏覽單一討論版 ( 建立 action show )</a><ul><li><a href="#3-31-action-show">3-3.1 action show</a></li></ul></li><li><a href="#3-4-修改討論版與儲存已改的設定--建立-action-edit-update-">3-4 修改討論版與儲存已改的設定 ( 建立 action edit, update )</a><ul><li><a href="#3-41-action-edit">3-4.1 action edit</a></li><li><a href="#3-42-action-update">3-4.2 action update</a></li></ul></li><li><a href="#3-5-將討論版刪除--action-destroy-">3-5 將討論版刪除 ( action destroy )</a><ul><li><a href="#3-51-建立-action-destroy">3-5.1 建立 action destroy</a></li></ul></li><li><a href="#3-6-資料驗證-title-不能空白">3-6 資料驗證: title 不能空白</a></li></ul></li><li><a href="#-chapter-4-可以在討論版裡發表文章-">[ Chapter 4. 可以在討論版裡發表文章 ]</a><ul><li><a href="#4-1-建立-post-相關的-controller-model-關聯-與-routing-設定">4-1 建立 post 相關的 controller, model 關聯 與 routing 設定</a><ul><li><a href="#4-11-建立-controller-posts-要加s">4-1.1 建立 Controller: posts (要加s)</a></li><li><a href="#4-12-建立-model-post-不加s">4-1.2 建立 Model: post (不加s)</a></li><li><a href="#4-13-將-post-的資料庫建立起來">4-1.3 將 post 的資料庫建立起來</a></li></ul></li><li><a href="#4-2-建立-group-與-post-之間-model-的關聯性-relationship">4-2 建立 group 與 post 之間 model 的關聯性 (relationship)</a></li><li><a href="#4-3-routing-設定">4-3 routing 設定</a></li><li><a href="#4-4-可以在-group-的-show-頁面顯示所擁有的-post">4-4 可以在 group 的 show 頁面顯示所擁有的 post</a></li><li><a href="#4-5-可以在討論版裡新增-post--action-new-create-">4-5 可以在討論版裡新增 post ( action new, create )</a><ul><li><a href="#4-51-action-new">4-5.1 action ‘new’</a></li><li><a href="#4-52-action-create">4-5.2 action ‘create’</a></li></ul></li><li><a href="#4-6-可以修改並更新-post--action-edit-update-">4-6 可以修改並更新 post ( action edit, update )</a><ul><li><a href="#4-61-設定-action-edit-與-action-update">4-6.1 設定 action ‘edit’ 與 action ‘update’</a></li></ul></li><li><a href="#4-7-可以刪除-post--action-destroy-">4-7 可以刪除 post ( action destroy )</a><ul><li><a href="#4-71-action-destroy">4-7.1 action ‘destroy’</a></li></ul></li><li><a href="#4-8-資料驗證-post-必須要有內容才能儲存--新增">4-8 資料驗證： post 必須要有內容才能儲存 / 新增</a></li><li><a href="#4-9-用-before_action-來整理重複的程式碼">4-9 用 before_action 來整理重複的程式碼</a></li></ul></li><li><a href="#-chapter-5-第五章1-建立基本使用者功能-">[ Chapter 5. 第五章：(1) 建立基本使用者功能 ]</a><ul><li><a href="#5-1-安裝-gem-devise">5-1 安裝 gem “devise”</a></li><li><a href="#5-2-設定-devise">5-2 設定 Devise</a><ul><li><a href="#5-21-devise-安裝">5-2.1 devise 安裝</a></li><li><a href="#5-22-建立-user-功能">5-2.2 建立 user 功能</a></li><li><a href="#5-23-叫出原本是隱藏的-devise-views以便未來可以客製化修改">5-2.3 叫出(原本是隱藏的) devise views，以便未來可以客製化修改</a></li><li><a href="#5-24-重開rails-server">5-2.4 重開rails server</a></li></ul></li></ul></li><li><a href="#-chapter-5-第五章2-客製化-devise--新增一個-name-的欄位-">[ Chapter 5. 第五章：(2) 客製化 devise =&gt; 新增一個 “name” 的欄位 ]</a><ul><li><a href="#5-3-客製化欄位name">5-3 客製化欄位：name</a><ul><li><a href="#5-31-客製化-devise--新增一個-name-的欄位">5-3.1 客製化 devise =&gt; 新增一個 “name” 的欄位</a></li></ul></li><li><a href="#5-4-客製化-devise-的-views--註冊頁面新增-name-欄位">5-4 客製化 devise 的 views =&gt; 註冊頁面新增 name 欄位</a></li><li><a href="#5-5-加入-strong_parameters-與-devise-整合的-hack">5-5 加入 strong_parameters 與 devise 整合的 hack</a></li><li><a href="#5-6--navbar-上的-hi-email-改成-hi-name">5-6  navbar 上的 hi! email 改成 hi! name</a></li><li><a href="#5-7--新增-帳號設定-功能並能修改自己帳號的-name">5-7  新增 “帳號設定” 功能，並能修改自己帳號的 name</a></li></ul></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="-chapter-1-環境安裝-">[ Chapter 1. 環境安裝 ]</h1>
+
+<h2 id="1-1-確認ruby版本">1-1 確認ruby版本</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby <span class="nt">-v</span>
+</code></pre></div></div>
+
+<h2 id="1-2-安裝-gem-rails-420">1-2 安裝 gem rails 4.2.0</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install </span>rails <span class="nt">-v</span> 4.2.0 <span class="nt">--no-ri</span>
+</code></pre></div></div>
+
+<h2 id="1-3-建立一個新-rails-專案--版本-420-">1-3 建立一個新 Rails 專案 ( 版本 4.2.0 )</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails _4.2.0_ new rails101 <span class="nt">-T</span>
+</code></pre></div></div>
+
+<h2 id="1-4-進入新建好的專案-並建立-git-做版本控制">1-4 進入新建好的專案, 並建立 git 做版本控制</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>rails101
+git init
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"Initial Commit"</span>
+</code></pre></div></div>
+
+<h1 id="-chapter-2-建立基礎網站僅架構-">[ Chapter 2. 建立基礎網站(僅架構) ]</h1>
+
+<h2 id="2-1-建立一個討論版group">2-1 建立一個討論版(group)</h2>
+
+<h3 id="2-11-建立一個-controller-groups-要加s">2-1.1 建立一個 controller: groups (要加s)</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g controller <span class="nb">groups</span>
+</code></pre></div></div>
+
+<h3 id="2-12-建立一個-model-group-不加s">2-1.2 建立一個 Model: group (不加s)</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g model group title:string description:text
+</code></pre></div></div>
+
+<h3 id="2-13-將資料庫建立起來">2-1.3 將資料庫建立起來</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rake db:migrate
+</code></pre></div></div>
+
+<h3 id="2-14-設定-routes-並建立-groupsindex-為首頁--內容是-hello-world-">2-1.4 設定 routes 並建立 groups/index 為首頁 ( 內容是 Hello World! )</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] config/routes.rb</span>
+<span class="o">+</span> <span class="n">root</span> <span class="s1">'groups#index'</span> <span class="c1"># 這行代表把 localhost:3000/groups 這個網址設成首頁</span>
+<span class="o">+</span> <span class="n">resources</span> <span class="ss">:groups</span>
+</code></pre></div></div>
+
+<p>這時候啟動 <code class="language-plaintext highlighter-rouge">rails s</code> 前往 <a href="http://localhost:3000/" target="_blank">http://localhost:3000/</a></p>
+
+<h2 id="2-2-建立必要頁面">2-2 建立必要頁面</h2>
+
+<h3 id="2-21-設定-action-index">2-2.1 設定 action ‘index’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">index</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="2-22-設定-groupsindexhtmlerb">2-2.2 設定 groups/index.html.erb</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/index.html.erb --&gt;</span>
+<span class="nt">&lt;h1&gt;</span>Hello World!<span class="nt">&lt;/h1&gt;</span>
+</code></pre></div></div>
+
+<h2 id="2-3-套入前端套件-bootstrap">2-3 套入前端套件 Bootstrap</h2>
+
+<h3 id="2-31-安裝-gem-bootstrap-sass">2-3.1 安裝 gem ‘bootstrap-sass’</h3>
+<blockquote>
+
+</blockquote>
+<p><a href="https://github.com/twbs/bootstrap-sass">https://github.com/twbs/bootstrap-sass</a></p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] Gemfile</span>
+<span class="o">+</span> <span class="n">gem</span> <span class="s1">'bootstrap-sass'</span>
+</code></pre></div></div>
+
+<p>執行 <code class="language-plaintext highlighter-rouge">bundle install</code></p>
+
+<h3 id="2-32-將-bootstrap-的-css-套件裝進專案裡面">2-3.2 將 Bootstrap 的 CSS 套件裝進專案裡面</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mv </span>app/assets/stylesheets/application.css app/assets/stylesheets/application.css.scss
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* app/assets/stylesheets/application.css.scss */</span>
+<span class="o">+</span> <span class="k">@import</span> <span class="s1">"bootstrap-sprockets"</span><span class="p">;</span>
+<span class="o">+</span> <span class="k">@import</span> <span class="s1">"bootstrap"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>重開 <code class="language-plaintext highlighter-rouge">rails s</code></p>
+
+<h2 id="2-4-幫你的專案裝上-navbar-跟-footbar">2-4 幫你的專案裝上 Navbar 跟 Footbar</h2>
+
+<h3 id="2-41-新增兩檔案">2-4.1 新增兩檔案</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- app/views/common/_navbar.html.erb --&gt;</span>
+<span class="nt">&lt;nav</span> <span class="na">class=</span><span class="s">"navbar navbar-default"</span> <span class="na">role=</span><span class="s">"navigation"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container-fluid"</span><span class="nt">&gt;</span>
+    <span class="c">&lt;!-- Brand and toggle get grouped for better mobile display --&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"navbar-header"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">"navbar-brand"</span> <span class="na">href=</span><span class="s">"/"</span><span class="nt">&gt;</span>Rails 101<span class="nt">&lt;/a&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+
+    <span class="c">&lt;!-- Collect the nav links, forms, and other content for toggling --&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"collapse navbar-collapse"</span> <span class="na">id=</span><span class="s">"bs-example-navbar-collapse-1"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"nav navbar-nav navbar-right"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;li&gt;</span> <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"登入"</span><span class="p">,</span> <span class="s1">'#'</span><span class="p">)</span> <span class="cp">%&gt;</span> <span class="nt">&lt;/li&gt;</span>
+      <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/div&gt;</span><span class="c">&lt;!-- /.navbar-collapse --&gt;</span>
+  <span class="nt">&lt;/div&gt;</span><span class="c">&lt;!-- /.container-fluid --&gt;</span>
+<span class="nt">&lt;/nav&gt;</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/common/_footer.html.erb--&gt;</span>
+<span class="nt">&lt;footer</span> <span class="na">class=</span><span class="s">"container"</span> <span class="na">style=</span><span class="s">"margin-top: 100px;"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"text-center"</span><span class="nt">&gt;</span>Copyright ©2016 Rails101
+    <span class="nt">&lt;br&gt;</span>Design by <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"courses.growthschool.com/courses/rails-101/"</span> <span class="na">target=</span><span class="s">_new</span><span class="nt">&gt;</span>xdite<span class="nt">&lt;/a&gt;</span>
+  <span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/footer&gt;</span>
+</code></pre></div></div>
+
+<h3 id="2-42-修改-appviewslayoutsapplicationhtmlerb">2-4.2 修改 app/views/layouts/application.html.erb</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/layouts/application.html.erb --&gt;</span> 
+- <span class="cp">&lt;%=</span> <span class="k">yield</span> <span class="cp">%&gt;</span>
++ <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container-fluid"</span><span class="nt">&gt;</span>
++   <span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s2">"common/navbar"</span> <span class="cp">%&gt;</span>
++   <span class="cp">&lt;%=</span> <span class="k">yield</span> <span class="cp">%&gt;</span>
++ <span class="nt">&lt;/div&gt;</span>
++ <span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s2">"common/footer"</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h2 id="2-5-建立-notice_message">2-5 建立 notice_message</h2>
+
+<h3 id="2-51-將-boostrap-的-js-套件-alert-裝進專案裡面">2-5.1 將 Boostrap 的 js 套件: alert 裝進專案裡面</h3>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// [path] app/assets/javascripts/application.js</span>
+<span class="o">+</span><span class="c1">//= require bootstrap/alert</span>
+</code></pre></div></div>
+
+<h3 id="2-52-建立-helper-notice_message">2-5.2 建立 helper: notice_message</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/helpers/application_helper.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">notice_message</span>
+<span class="o">+</span>   <span class="n">alert_types</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">notice: :success</span><span class="p">,</span> <span class="ss">alert: :danger</span> <span class="p">}</span>
+<span class="o">+</span>
+<span class="o">+</span>   <span class="n">close_button_options</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">class: </span><span class="s2">"close"</span><span class="p">,</span> <span class="s2">"data-dismiss"</span> <span class="o">=&gt;</span> <span class="s2">"alert"</span><span class="p">,</span> <span class="s2">"aria-hidden"</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="p">}</span>
+<span class="o">+</span>   <span class="n">close_button</span> <span class="o">=</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:button</span><span class="p">,</span> <span class="s2">"×"</span><span class="p">,</span> <span class="n">close_button_options</span><span class="p">)</span>
+<span class="o">+</span>
+<span class="o">+</span>   <span class="n">alerts</span> <span class="o">=</span> <span class="n">flash</span><span class="p">.</span><span class="nf">map</span> <span class="k">do</span> <span class="o">|</span><span class="n">type</span><span class="p">,</span> <span class="n">message</span><span class="o">|</span>
+<span class="o">+</span>     <span class="n">alert_content</span> <span class="o">=</span> <span class="n">close_button</span> <span class="o">+</span> <span class="n">message</span>
+<span class="o">+</span>
+<span class="o">+</span>     <span class="n">alert_type</span> <span class="o">=</span> <span class="n">alert_types</span><span class="p">[</span><span class="n">type</span><span class="p">.</span><span class="nf">to_sym</span><span class="p">]</span> <span class="o">||</span> <span class="n">type</span>
+<span class="o">+</span>     <span class="n">alert_class</span> <span class="o">=</span> <span class="s2">"alert alert-</span><span class="si">#{</span><span class="n">alert_type</span><span class="si">}</span><span class="s2"> alert-dismissable"</span>
+<span class="o">+</span>
+<span class="o">+</span>     <span class="n">content_tag</span><span class="p">(</span><span class="ss">:div</span><span class="p">,</span> <span class="n">alert_content</span><span class="p">,</span> <span class="ss">class: </span><span class="n">alert_class</span><span class="p">)</span>
+<span class="o">+</span>   <span class="k">end</span>
+<span class="o">+</span>
+<span class="o">+</span>   <span class="n">alerts</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">).</span><span class="nf">html_safe</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="2-53-把-notice_message-放進-applicationhtmlerb-裡面">2-5.3 把 notice_message 放進 application.html.erb 裡面</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/layouts/application.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container-fluid"</span><span class="nt">&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">render</span> <span class="s2">"common/navbar"</span> <span class="cp">%&gt;</span>
++ <span class="cp">&lt;%=</span> <span class="n">notice_message</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="k">yield</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h3 id="2-54-如何使用-notice_message-的功能">2-5.4 如何使用 notice_message 的功能</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="k">class</span> <span class="nc">GroupsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="k">def</span> <span class="nf">index</span>
+  <span class="o">+</span>  <span class="n">flash</span><span class="p">[</span><span class="ss">:notice</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"早安！你好！"</span>
+ <span class="o">+</span>  <span class="n">flash</span><span class="p">[</span><span class="ss">:warning</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"這是 warning 訊息！"</span>
+  <span class="o">+</span>  <span class="n">flash</span><span class="p">[</span><span class="ss">:alert</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"晚安！該睡了！"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="-chapter-3-手動實作出討論版的-crud-功能-">[ Chapter 3. 手動實作出討論版的 CRUD 功能 ]</h1>
+
+<h2 id="3-1-安裝-gem-simple_form">3-1 安裝 gem “simple_form”</h2>
+
+<p>參考：<a href="https://github.com/plataformatec/simple_form">SimpleForm github</a></p>
+
+<h3 id="3-11-加入gem">3-1.1 加入gem</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gemfile</span>
+<span class="o">+</span> <span class="n">gem</span> <span class="s2">"simple_form"</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<h3 id="3-12-安裝-simple_form-for-bootstrap-的設定">3-1.2 安裝 simple_form for bootstrap 的設定</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate simple_form:install <span class="nt">--bootstrap</span>
+</code></pre></div></div>
+
+<p>重開 <code class="language-plaintext highlighter-rouge">rails s</code></p>
+
+<h2 id="3-2-可以總覽所有討論版--建立-action-index-">3-2 可以總覽所有討論版 ( 建立 action index )</h2>
+
+<h3 id="3-21-建立-action-index">3-2.1 建立 action index</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+  <span class="k">def</span> <span class="nf">index</span>
+<span class="o">+</span>   <span class="vi">@groups</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">all</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="3-22-建立-indexhtmlerb">3-2.2 建立 index.html.erb</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/index.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-12"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"group"</span><span class="nt">&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"New group"</span><span class="p">,</span> <span class="n">new_group_path</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"btn btn-primary pull-right"</span><span class="p">)</span> <span class="cp">%&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"table table-hover"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;thead&gt;</span>
+      <span class="nt">&lt;tr&gt;</span>
+        <span class="nt">&lt;td&gt;</span>#<span class="nt">&lt;/td&gt;</span>
+        <span class="nt">&lt;td&gt;</span>Title<span class="nt">&lt;/td&gt;</span>
+        <span class="nt">&lt;td&gt;</span>Description<span class="nt">&lt;/td&gt;</span>
+      <span class="nt">&lt;/tr&gt;</span>
+    <span class="nt">&lt;/thead&gt;</span>
+    <span class="nt">&lt;tbody&gt;</span>
+      <span class="cp">&lt;%</span> <span class="vi">@groups</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">group</span><span class="o">|</span> <span class="cp">%&gt;</span>
+        <span class="nt">&lt;tr&gt;</span>
+          <span class="nt">&lt;td&gt;</span>#<span class="nt">&lt;/td&gt;</span>
+          <span class="nt">&lt;td&gt;</span><span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="n">group</span><span class="p">.</span><span class="nf">title</span><span class="p">,</span> <span class="n">group_path</span><span class="p">(</span><span class="n">group</span><span class="p">))</span> <span class="cp">%&gt;</span><span class="nt">&lt;/td&gt;</span>
+          <span class="nt">&lt;td&gt;</span><span class="cp">&lt;%=</span> <span class="n">group</span><span class="p">.</span><span class="nf">description</span> <span class="cp">%&gt;</span><span class="nt">&lt;/td&gt;</span>
+          <span class="nt">&lt;td&gt;</span>
+              <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"Edit"</span><span class="p">,</span> <span class="n">edit_group_path</span><span class="p">(</span><span class="n">group</span><span class="p">),</span> <span class="ss">class: </span><span class="s2">"btn btn-sm btn-default"</span><span class="p">)</span><span class="cp">%&gt;</span>
+              <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"Delete"</span><span class="p">,</span> <span class="n">group_path</span><span class="p">(</span><span class="n">group</span><span class="p">),</span>    <span class="ss">class: </span><span class="s2">"btn btn-sm btn-default"</span><span class="p">,</span> 
+                          <span class="ss">method: :delete</span><span class="p">,</span> <span class="ss">data: </span><span class="p">{</span> <span class="ss">confirm: </span><span class="s2">"Are you sure?"</span> <span class="p">}</span> <span class="p">)</span><span class="cp">%&gt;</span>
+          <span class="nt">&lt;/td&gt;</span>
+        <span class="nt">&lt;/tr&gt;</span>
+      <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/tbody&gt;</span>
+  <span class="nt">&lt;/table&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="3-2-可以新增討論版--建立-action-new-create-">3-2 可以新增討論版 ( 建立 action new, create )</h2>
+
+<h3 id="3-21-action-new">3-2.1 action ‘new’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">new</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">new</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="3-22-erb-new">3-2.2 erb ‘new’</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/new.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-4 col-md-offset-4"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>新增討論版<span class="nt">&lt;/h1&gt;</span>
+
+  <span class="nt">&lt;hr&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@group</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">input_html: </span><span class="p">{</span> <span class="ss">class: </span><span class="s2">"form-control"</span><span class="p">}</span> <span class="cp">%&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">input_html: </span><span class="p">{</span> <span class="ss">class: </span><span class="s2">"form-control"</span><span class="p">}</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s2">"Submit"</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"btn btn-primary"</span><span class="p">,</span> <span class="ss">data: </span><span class="p">{</span> <span class="ss">disable_with: </span><span class="s2">"Submitting..."</span> <span class="p">}</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h3 id="3-23-action-create">3-2.3 action ‘create’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">create</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">group_params</span><span class="p">)</span>
+<span class="o">+</span>
+<span class="o">+</span>   <span class="k">if</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">save</span>
+<span class="o">+</span>     <span class="n">redirect_to</span> <span class="n">groups_path</span>
+<span class="o">+</span>   <span class="k">else</span>
+<span class="o">+</span>     <span class="n">render</span> <span class="ss">:new</span>
+<span class="o">+</span>   <span class="k">end</span>
+<span class="o">+</span> <span class="k">end</span>
+  
+<span class="o">+</span> <span class="kp">private</span>
+<span class="o">+</span> 
+<span class="o">+</span> <span class="k">def</span> <span class="nf">group_params</span> 
+<span class="o">+</span>   <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:group</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:description</span><span class="p">)</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="3-3-可以瀏覽單一討論版--建立-action-show-">3-3 可以瀏覽單一討論版 ( 建立 action show )</h2>
+
+<h3 id="3-31-action-show">3-3.1 action show</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">show</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/show.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-12"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"group"</span><span class="nt">&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"Edit"</span><span class="p">,</span> <span class="n">edit_group_path</span><span class="p">(</span><span class="vi">@group</span><span class="p">),</span> <span class="ss">class: </span><span class="s2">"btn btn-primary pull-right"</span><span class="p">)</span><span class="cp">%&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;h2&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">title</span> <span class="cp">%&gt;</span><span class="nt">&lt;/h2&gt;</span>
+  <span class="nt">&lt;p&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">description</span> <span class="cp">%&gt;</span><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="3-4-修改討論版與儲存已改的設定--建立-action-edit-update-">3-4 修改討論版與儲存已改的設定 ( 建立 action edit, update )</h2>
+
+<h3 id="3-41-action-edit">3-4.1 action edit</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">edit</span>
+<span class="o">+</span>  <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/edit.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-4 col-md-offset-4"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>修改討論版<span class="nt">&lt;/h1&gt;</span>
+
+  <span class="nt">&lt;hr&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@group</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:title</span> <span class="cp">%&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:description</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s2">"Submit"</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"btn btn-primary"</span><span class="p">,</span> <span class="ss">data: </span><span class="p">{</span> <span class="ss">disable_with: </span><span class="s2">"Submitting..."</span> <span class="p">}</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h3 id="3-42-action-update">3-4.2 action update</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">update</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+
+<span class="o">+</span>   <span class="k">if</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">group_params</span><span class="p">)</span>
+<span class="o">+</span>     <span class="n">redirect_to</span> <span class="n">groups_path</span><span class="p">,</span> <span class="ss">notice: </span><span class="s2">"修改討論版成功"</span>
+<span class="o">+</span>   <span class="k">else</span>
+<span class="o">+</span>     <span class="n">render</span> <span class="ss">:edit</span>
+<span class="o">+</span>   <span class="k">end</span>
+<span class="o">+</span> <span class="k">end</span>
+
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/edit.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-4 col-md-offset-4"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>修改討論版<span class="nt">&lt;/h1&gt;</span>
+
+  <span class="nt">&lt;hr&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="vi">@group</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:title</span> <span class="cp">%&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:description</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s2">"Submit"</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"btn btn-primary"</span><span class="p">,</span> <span class="ss">data: </span><span class="p">{</span> <span class="ss">disable_with: </span><span class="s2">"Submitting..."</span> <span class="p">}</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="3-5-將討論版刪除--action-destroy-">3-5 將討論版刪除 ( action destroy )</h2>
+
+<h3 id="3-51-建立-action-destroy">3-5.1 建立 action destroy</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">destroy</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@group</span><span class="p">.</span><span class="nf">destroy</span>
+<span class="o">+</span>   <span class="n">redirect_to</span> <span class="n">groups_path</span><span class="p">,</span> <span class="ss">alert: </span><span class="s2">"討論版已刪除"</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="3-6-資料驗證-title-不能空白">3-6 資料驗證: title 不能空白</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/models/group.rb</span>
+<span class="o">+</span> <span class="n">validates</span> <span class="ss">:title</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+</code></pre></div></div>
+
+<h1 id="-chapter-4-可以在討論版裡發表文章-">[ Chapter 4. 可以在討論版裡發表文章 ]</h1>
+
+<h2 id="4-1-建立-post-相關的-controller-model-關聯-與-routing-設定">4-1 建立 post 相關的 controller, model 關聯 與 routing 設定</h2>
+
+<h3 id="4-11-建立-controller-posts-要加s">4-1.1 建立 Controller: posts (要加s)</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g controller posts
+</code></pre></div></div>
+
+<h3 id="4-12-建立-model-post-不加s">4-1.2 建立 Model: post (不加s)</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g model post content:text group_id:integer
+</code></pre></div></div>
+
+<h3 id="4-13-將-post-的資料庫建立起來">4-1.3 將 post 的資料庫建立起來</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rake db:migrate
+</code></pre></div></div>
+
+<h2 id="4-2-建立-group-與-post-之間-model-的關聯性-relationship">4-2 建立 group 與 post 之間 model 的關聯性 (relationship)</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/models/group.rb</span>
+<span class="o">+</span> <span class="n">has_many</span> <span class="ss">:posts</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/models/post.rb</span>
+<span class="o">+</span> <span class="n">belongs_to</span> <span class="ss">:group</span>
+</code></pre></div></div>
+
+<h2 id="4-3-routing-設定">4-3 routing 設定</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] config/routes.rb</span>
+<span class="o">-</span> <span class="n">resources</span> <span class="ss">:groups</span>
+<span class="o">+</span> <span class="n">resources</span> <span class="ss">:groups</span> <span class="k">do</span>
+<span class="o">+</span>   <span class="n">resources</span> <span class="ss">:posts</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="4-4-可以在-group-的-show-頁面顯示所擁有的-post">4-4 可以在 group 的 show 頁面顯示所擁有的 post</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/groups_controller.rb</span>
+ <span class="k">def</span> <span class="nf">show</span>
+    <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@posts</span> <span class="o">=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">posts</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/groups/show.html.erb --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-12"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"group"</span><span class="nt">&gt;</span>
++   <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"New Post"</span><span class="p">,</span> <span class="n">new_group_post_path</span><span class="p">(</span><span class="vi">@group</span><span class="p">),</span> <span class="ss">class: </span><span class="s2">"btn btn-warning pull-right"</span><span class="p">)</span> <span class="cp">%&gt;</span>
+    <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"Edit"</span><span class="p">,</span> <span class="n">edit_group_path</span><span class="p">(</span><span class="vi">@group</span><span class="p">),</span> <span class="ss">class: </span><span class="s2">"btn btn-primary pull-right"</span><span class="p">)</span><span class="cp">%&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;h2&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">title</span> <span class="cp">%&gt;</span><span class="nt">&lt;/h2&gt;</span>
+  <span class="nt">&lt;p&gt;</span><span class="cp">&lt;%=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">description</span> <span class="cp">%&gt;</span><span class="nt">&lt;/p&gt;</span>
+
++ <span class="nt">&lt;table</span> <span class="na">class=</span><span class="s">"table"</span><span class="nt">&gt;</span>
++   <span class="nt">&lt;thead&gt;</span>
++     <span class="nt">&lt;tr&gt;</span>
++       <span class="nt">&lt;th&gt;</span>文章<span class="nt">&lt;/th&gt;</span>
++       <span class="nt">&lt;th</span> <span class="na">colspan=</span><span class="s">"2"</span><span class="nt">&gt;&lt;/th&gt;</span>
++     <span class="nt">&lt;/tr&gt;</span>
++   <span class="nt">&lt;/thead&gt;</span>
++   <span class="nt">&lt;tbody&gt;</span>
++     <span class="cp">&lt;%</span> <span class="vi">@posts</span><span class="p">.</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="cp">%&gt;</span>
++       <span class="nt">&lt;tr&gt;</span>
++         <span class="nt">&lt;td&gt;</span><span class="cp">&lt;%=</span> <span class="n">post</span><span class="p">.</span><span class="nf">content</span> <span class="cp">%&gt;</span><span class="nt">&lt;/td&gt;</span>
++         <span class="nt">&lt;td&gt;</span>
++           <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"Edit"</span><span class="p">,</span> <span class="n">edit_group_post_path</span><span class="p">(</span><span class="n">post</span><span class="p">.</span><span class="nf">group</span><span class="p">,</span> <span class="n">post</span><span class="p">),</span>
+<span class="o">+</span>                       <span class="ss">class: </span><span class="s2">"btn btn-default btn-xs"</span><span class="p">)</span><span class="cp">%&gt;</span>
++           <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"Delete"</span><span class="p">,</span> <span class="n">group_post_path</span><span class="p">(</span><span class="n">post</span><span class="p">.</span><span class="nf">group</span><span class="p">,</span> <span class="n">post</span><span class="p">),</span>
+<span class="o">+</span>                       <span class="ss">class: </span><span class="s2">"btn btn-default btn-xs "</span><span class="p">,</span> <span class="ss">method: :delete</span><span class="p">,</span> 
+<span class="o">+</span>                       <span class="ss">data: </span><span class="p">{</span> <span class="ss">confirm: </span><span class="s2">"Are you sure?"</span> <span class="p">}</span> <span class="p">)</span><span class="cp">%&gt;</span>
++         <span class="nt">&lt;/td&gt;</span>
++       <span class="nt">&lt;/tr&gt;</span>
++     <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
++   <span class="nt">&lt;/tbody&gt;</span>
++ <span class="nt">&lt;/table&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="4-5-可以在討論版裡新增-post--action-new-create-">4-5 可以在討論版裡新增 post ( action new, create )</h2>
+
+<h3 id="4-51-action-new">4-5.1 action ‘new’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/posts_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">new</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:group_id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@post</span> <span class="o">=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">posts</span><span class="p">.</span><span class="nf">new</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/views/posts/new.html.erb</span>
+<span class="o">&lt;</span><span class="n">h1</span> <span class="k">class</span><span class="o">=</span><span class="s2">"text-center"</span><span class="o">&gt;</span><span class="err">新增文章</span><span class="o">&lt;</span><span class="sr">/h1&gt;
+
+&lt;div class="col-md-4 col-md-offset-4"&gt;
+  &lt;%= simple_form_for [@group,@post] do |f| %&gt;
+    &lt;div class="form-group"&gt;
+      &lt;%= f.input :content, input_html: { class: "form-control"} %&gt;
+    &lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"form-actions"</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="sx">%= f.submit "Submit", disable_with: "Submiting...", class: "btn btn-primary"%&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+&lt;/div&gt;
+</span></code></pre></div></div>
+
+<h3 id="4-52-action-create">4-5.2 action ‘create’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/posts_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">create</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:group_id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@post</span> <span class="o">=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">posts</span><span class="p">.</span><span class="nf">build</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+
+<span class="o">+</span>   <span class="k">if</span> <span class="vi">@post</span><span class="p">.</span><span class="nf">save</span>
+<span class="o">+</span>     <span class="n">redirect_to</span> <span class="n">group_path</span><span class="p">(</span><span class="vi">@group</span><span class="p">),</span> <span class="ss">notice: </span><span class="s2">"新增文章成功！"</span>
+<span class="o">+</span>   <span class="k">else</span>
+<span class="o">+</span>     <span class="n">render</span> <span class="ss">:new</span>
+<span class="o">+</span>   <span class="k">end</span>
+<span class="o">+</span> <span class="k">end</span>
+
+<span class="o">+</span> <span class="kp">private</span>
+
+<span class="o">+</span> <span class="k">def</span> <span class="nf">post_params</span>
+<span class="o">+</span>   <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:post</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:content</span><span class="p">)</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="4-6-可以修改並更新-post--action-edit-update-">4-6 可以修改並更新 post ( action edit, update )</h2>
+
+<h3 id="4-61-設定-action-edit-與-action-update">4-6.1 設定 action ‘edit’ 與 action ‘update’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/posts_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">edit</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:group_id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@post</span> <span class="o">=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">posts</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="o">+</span> <span class="k">end</span>
+
+<span class="o">+</span>  <span class="k">def</span> <span class="nf">update</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:group_id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@post</span> <span class="o">=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">posts</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+
+<span class="o">+</span>   <span class="k">if</span> <span class="vi">@post</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+<span class="o">+</span>     <span class="n">redirect_to</span> <span class="n">group_path</span><span class="p">(</span><span class="vi">@group</span><span class="p">),</span> <span class="ss">notice: </span><span class="s2">"文章修改成功！"</span>
+<span class="o">+</span>   <span class="k">else</span>
+<span class="o">+</span>     <span class="n">render</span> <span class="ss">:edit</span>
+<span class="o">+</span>   <span class="k">end</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/posts/edit.html.erb --&gt;</span>
+<span class="nt">&lt;h1</span> <span class="na">class=</span><span class="s">"text-center"</span><span class="nt">&gt;</span>修改文章<span class="nt">&lt;/h1&gt;</span>
+
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-md-4 col-md-offset-4"</span><span class="nt">&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">simple_form_for</span> <span class="p">[</span><span class="vi">@group</span><span class="p">,</span><span class="vi">@post</span><span class="p">]</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:content</span><span class="p">,</span> <span class="ss">input_html: </span><span class="p">{</span> <span class="ss">class: </span><span class="s2">"form-control"</span><span class="p">}</span> <span class="cp">%&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-actions"</span><span class="nt">&gt;</span>
+      <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">submit</span> <span class="s2">"Submit"</span><span class="p">,</span> <span class="ss">disable_with: </span><span class="s2">"Submiting..."</span><span class="p">,</span> <span class="ss">class: </span><span class="s2">"btn btn-primary"</span><span class="cp">%&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h2 id="4-7-可以刪除-post--action-destroy-">4-7 可以刪除 post ( action destroy )</h2>
+
+<h3 id="4-71-action-destroy">4-7.1 action ‘destroy’</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/posts_controller.rb</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">destroy</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:group_id</span><span class="p">])</span>
+<span class="o">+</span>   <span class="vi">@post</span> <span class="o">=</span> <span class="vi">@group</span><span class="p">.</span><span class="nf">posts</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">])</span>
+<span class="o">+</span>
+<span class="o">+</span>   <span class="vi">@post</span><span class="p">.</span><span class="nf">destroy</span>
+<span class="o">+</span>   <span class="n">redirect_to</span> <span class="n">group_path</span><span class="p">(</span><span class="vi">@group</span><span class="p">),</span> <span class="ss">alert: </span><span class="s2">"文章已刪除"</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="4-8-資料驗證-post-必須要有內容才能儲存--新增">4-8 資料驗證： post 必須要有內容才能儲存 / 新增</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/models/post.rb</span>
+<span class="o">+</span> <span class="n">validates</span> <span class="ss">:content</span><span class="p">,</span> <span class="ss">presence: </span><span class="kp">true</span>
+</code></pre></div></div>
+
+<h2 id="4-9-用-before_action-來整理重複的程式碼">4-9 用 before_action 來整理重複的程式碼</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controllers/posts_controller.rb</span>
+<span class="o">+</span> <span class="n">before_action</span> <span class="ss">:find_group</span>
+
+  <span class="kp">private</span>
+<span class="o">+</span> <span class="k">def</span> <span class="nf">find_group</span>
+<span class="o">+</span>   <span class="vi">@group</span> <span class="o">=</span> <span class="no">Group</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:group_id</span><span class="p">])</span>
+<span class="o">+</span> <span class="k">end</span>
+</code></pre></div></div>
+
+<p>將所有<code class="language-plaintext highlighter-rouge">@group = Group.find(params[:group_id])</code>刪掉（new edit create update destory）</p>
+
+<blockquote>
+
+  <p>before_action 可以用 only,指定某些 action 執行:
+<code class="language-plaintext highlighter-rouge">before_action :find_group, only: [:edit, :update]</code>
+或者使用 except,排除某些 action 不執行:</p>
+</blockquote>
+
+<h1 id="-chapter-5-第五章1-建立基本使用者功能-">[ Chapter 5. 第五章：(1) 建立基本使用者功能 ]</h1>
+
+<h2 id="5-1-安裝-gem-devise">5-1 安裝 gem “devise”</h2>
+<blockquote>
+
+</blockquote>
+<p><a href="https://github.com/plataformatec/devise">https://github.com/plataformatec/devise</a></p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gemfile</span>
+<span class="n">gem</span> <span class="s2">"devise"</span><span class="p">,</span> <span class="s2">"~&gt; 3.4.1"</span>
+</code></pre></div></div>
+
+<p>執行<code class="language-plaintext highlighter-rouge">bundle install</code></p>
+
+<h2 id="5-2-設定-devise">5-2 設定 Devise</h2>
+
+<h3 id="5-21-devise-安裝">5-2.1 devise 安裝</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g devise:install
+</code></pre></div></div>
+
+<h3 id="5-22-建立-user-功能">5-2.2 建立 user 功能</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g devise user
+</code></pre></div></div>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rake db:migrate
+</code></pre></div></div>
+
+<h3 id="5-23-叫出原本是隱藏的-devise-views以便未來可以客製化修改">5-2.3 叫出(原本是隱藏的) devise views，以便未來可以客製化修改</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g devise:views
+</code></pre></div></div>
+
+<h3 id="5-24-重開rails-server">5-2.4 重開rails server</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails s
+</code></pre></div></div>
+
+<h1 id="-chapter-5-第五章2-客製化-devise--新增一個-name-的欄位-">[ Chapter 5. 第五章：(2) 客製化 devise =&gt; 新增一個 “name” 的欄位 ]</h1>
+
+<h2 id="5-3-客製化欄位name">5-3 客製化欄位：name</h2>
+
+<h3 id="5-31-客製化-devise--新增一個-name-的欄位">5-3.1 客製化 devise =&gt; 新增一個 “name” 的欄位</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g migration add_name_to_user
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] db/migrate/(一堆數字)_add_name_to_user.rb</span>
+  <span class="k">def</span> <span class="nf">change</span>
+<span class="o">+</span>   <span class="n">add_column</span> <span class="ss">:users</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:string</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rake db:migrate
+</code></pre></div></div>
+
+<h2 id="5-4-客製化-devise-的-views--註冊頁面新增-name-欄位">5-4 客製化 devise 的 views =&gt; 註冊頁面新增 name 欄位</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/views/devise/registrations/new.html.erb</span>
+  <span class="o">&lt;</span><span class="n">div</span> <span class="k">class</span><span class="o">=</span><span class="s2">"form-inputs"</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= f.input :email, required: true, autofocus: true %&gt;
++   &lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:name</span><span class="p">,</span>  <span class="ss">required: </span><span class="kp">true</span> <span class="sx">%&gt;
+    &lt;%= f.input :password, required: true, hint: ("</span><span class="si">#{</span><span class="vi">@minimum_password_length</span><span class="si">}</span><span class="sx"> characters minimum" if @validatable) %&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= f.input :password_confirmation, required: true %&gt;
+  &lt;/div&gt;
+</span></code></pre></div></div>
+
+<h2 id="5-5-加入-strong_parameters-與-devise-整合的-hack">5-5 加入 strong_parameters 與 devise 整合的 hack</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controller/application_controller.rb</span>
+<span class="o">+</span> <span class="n">before_filter</span> <span class="ss">:configure_permitted_parameters</span><span class="p">,</span> <span class="ss">if: :devise_controller?</span>
+
+<span class="o">+</span> <span class="kp">protected</span>
+
+<span class="o">+</span>  <span class="k">def</span> <span class="nf">configure_permitted_parameters</span>
+<span class="o">+</span>   <span class="n">devise_parameter_sanitizer</span><span class="p">.</span><span class="nf">for</span><span class="p">(</span><span class="ss">:sign_up</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="p">)</span> <span class="p">}</span>
+<span class="o">+</span>  <span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="5-6--navbar-上的-hi-email-改成-hi-name">5-6  navbar 上的 hi! email 改成 hi! name</h2>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/views/common/_navbar.html.erb</span>
+<span class="o">-</span>           <span class="no">Hi</span><span class="o">!</span><span class="p">,</span> <span class="o">&lt;</span><span class="sx">%= current_user.email %&gt;
++           Hi!, &lt;%=</span> <span class="n">current_user</span><span class="p">.</span><span class="nf">name</span> <span class="sx">%&gt;  
+</span></code></pre></div></div>
+
+<h2 id="5-7--新增-帳號設定-功能並能修改自己帳號的-name">5-7  新增 “帳號設定” 功能，並能修改自己帳號的 name</h2>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/common/_navbar.html.erb --&gt;</span>
+            <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"dropdown-menu"</span><span class="nt">&gt;</span>
++             <span class="nt">&lt;li&gt;</span> <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"帳號設定"</span><span class="p">,</span> <span class="n">edit_user_registration_path</span> <span class="p">)</span><span class="cp">%&gt;</span><span class="nt">&lt;/li&gt;</span>
+              <span class="nt">&lt;li&gt;</span> <span class="cp">&lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">"登出"</span><span class="p">,</span> <span class="n">destroy_user_session_path</span><span class="p">,</span> <span class="ss">method: :delete</span><span class="p">)</span> <span class="cp">%&gt;</span> <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;/ul&gt;</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] app/controller/application_controller</span>
+   <span class="k">def</span> <span class="nf">configure_permitted_parameters</span>
+    <span class="n">devise_parameter_sanitizer</span><span class="p">.</span><span class="nf">for</span><span class="p">(</span><span class="ss">:sign_up</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="p">)</span> <span class="p">}</span>
+<span class="o">+</span>   <span class="n">devise_parameter_sanitizer</span><span class="p">.</span><span class="nf">for</span><span class="p">(</span><span class="ss">:account_update</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="p">.</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:email</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:password_confirmation</span><span class="p">,</span> <span class="ss">:current_password</span><span class="p">)</span> <span class="p">}</span>
+   <span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] app/views/devise/registrations/edit.html.erb --&gt;</span>
++   <span class="cp">&lt;%=</span> <span class="n">f</span><span class="p">.</span><span class="nf">input</span> <span class="ss">:name</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 標籤: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#guide" class="page__taxonomy-item p-category" rel="tag">guide</a><span class="sep">, </span>
+    
+      <a href="/tags/#rails" class="page__taxonomy-item p-category" rel="tag">rails</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 分類: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#rails" class="page__taxonomy-item p-category" rel="tag">Rails</a>
+    
+    </span>
+  </p>
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-04-06T02:35:00+08:00">April 6, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BGuide%5D+Rails101+%E7%B0%A1%E6%98%93%E5%BB%BA%E7%AB%8B%E6%AD%A5%E9%A9%9F%20https%3A%2F%2Fblog.anxgang.com%2Frails%2Frails101-simple-build-steps%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Frails%2Frails101-simple-build-steps%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Frails%2Frails101-simple-build-steps%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/rails/note-about-route-links-and-assets/" class="pagination--pager" title="[Note] about route links and assets
+">上一篇</a>
+    
+    
+      <a href="/editor/tools-rails-development-tools/" class="pagination--pager" title="[Tools] Atom snippets
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/rails/rails101-simple-build-steps/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/rails/rails101-simple-build-steps"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

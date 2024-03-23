@@ -1,0 +1,1214 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Rails] 10分鐘內使用HTML模板產生PDF - ANxGANG</title>
+<meta name="description" content="[Rails] 10分鐘內使用HTML模板產生PDF     原文出處 How to Generate PDFs with HTML templates in 10 minutes with Rails   前言  為您的Web程式產生PDF並非你想像中的那麼困難。  有很多方法可以做到這一點，還有另一個好用gem，叫做Prawn，但是為了今天的教學，我將介紹另一個流行的gem，叫做wicked_pdf。  WickedPDF使用wkhtmltopdf，它允許您直接從HTML產生PDF，而不必遵守DSL。  此方式能夠更快速的達到想要的效果。  安裝步驟  Step 1: 安裝 wkhtmltopdf 和 wicked_pdf gem # [path] gemfile gem &#39;wicked_pdf&#39; gem &#39;wkhtmltopdf-binary&#39;   Step 2: 執行 Generator rails generate wicked_pdf   接下來，假設你不是透過Gemfile安裝wkhtmltopdf的binary檔案，你需要確保wicked_pdf知道在哪裡找到它們。  # [path] config/initializers/wicked_pdf.rb WickedPdf.config = {   #:wkhtmltopdf =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39;,   #:layout =&gt; &quot;pdf.html&quot;,   #:exe_path =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39; }   如果你沒有寫清楚，你可能會得到一個“Bad wkhtmltopdf’s path”的錯誤訊息。  OK你已經準備好了！現在有2個方式可以使用wicked_pdf。    從controller render。   從自建的library render。   &lt; I &gt; 從controller render  要使用它從controller呈現pdf，您需要做的是在controller方法中新增以下內容。  讓我們以發票應用為例，當用戶訪問/invoices/1時，您想產生一份pdf發票。  首先，將以下程式新增到invoices_controller.rb (或使用其他controller)  我會解釋一下每個參數是什麼意思，但請記住將它們替換為您自己的相關數據！  # [path] invoices_controller.rb   def show      @invoice = Invoice.find params[:id]      respond_to do |format|       format.pdf do         render pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:invoice =&gt; @invoice}       end     end   end     pdf: “file_name_of_your_choice” 這行表示即將輸出的pdf名稱    template: “invoices/show.pdf.erb” 這行表示使用views/invoices/show.pdf.erb當作模板    locals: {:invoice =&gt; @invoice} 這行表示將把@invoice傳入模板中   那麼什麼是invoices/show.pdf.erb？  &lt;!-- [path] show.pdf.erb --&gt; &lt;!-- app/views/invoices/show.pdf.erb --&gt;  &lt;h1&gt;&lt;%= invoice.title %&gt;&lt;/h1&gt; &lt;p&gt;&lt;%= invoice.description %&gt;&lt;/p&gt; &lt;p&gt;&lt;%= invoice.amount %&gt;&lt;/p&gt;   就像一般的htm.erb一樣，你可以使用pdf.erb，它會把它渲染到你的pdf。  如果您注意到上述程式碼，我們增加了本地參數。就像渲染部分一樣，這將允許您在view中使用您的變數。  這就是全部了。當用戶訪問/invoices/1時，就會產出一個pdf。  &lt; II &gt;從自建的library render  可能有些情況下您想要取得pdf代碼。你不一定要用它作為view的替代顯示。  在這種情況下，您將需要外部渲染您的pdf。  例如，讓我說我有一個外部庫將生成PDF，我想使用生成的PDF作為電子郵件附件。  我們該怎麼做？  首先，讓我們創建一個庫和一個類的方法。  # /lib/pdf_generator/bot.rb  module PdfGenerator   class Bot     def self.receipt(payment_details)     end   end end   好的，現在可以增加程式碼。  所以，如果你在前面的例子中注意到，我們正在使用  ActionController render PDF：…。  # invoices_controller.rb def show  ..    render pdf: &quot;file_name_of_your_choice&quot;,  .. end   該PDF PARAMS是非常重要的。這告訴Rails應用程序使用WickedPDF的渲染方法來解析和創建PDF。  問題是，你不能調用ActionController外的渲染，那麼我們如何從外部的圖形庫渲染？  很簡單，我們把ActionController帶出來並使用render_to_string方法  # in bot.rb .. class Bot   def self.receipt(payment_details)     # 先宣告一個ActionController     ac = ActionController::Base.new      # 然後，我們可以複製之前的範例的輸出方式。     pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:myvariable =&gt; variable}   end end ..      進階說明 如果想要使用Application Helpers, 你可能會發現你的helpers無法在你的templates中使用。 解決方式，請以ApplicationController.new取代ActionController::Base.new。這樣就可以了！   但等等，這不是只是一個字串嗎？字串有多有用？  那麼現在你可以建立一個臨時文件來存儲pdf。  # in bot.rb ..     pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:myvariable =&gt; variable}          # lets create a Tempfile which we will use to generate an actual file to be     # attached to an e-mail     tempfile = Tempfile.new &quot;anynamehere.pdf&quot;     tempfile.binmode     tempfile.write pdf     tempfile.close     tempfile ..   所以現在PdfGenerator::Bot.receipt接收一個對象，將其解析成一個視圖，並返回產生一個漂亮的臨時文件PDF。  使用該tempfile，您可以附加到郵件程式中。  例如：  # example_mailer.rb def payment_details(details)   attachments[&quot;anyfilenametoo.pdf&quot;] = File.read(PdfGenerator::Bot.receipt(details).path)   mail(subject: .....) end   希望這可以幫助到大家！  參考         http://dchua.com/2014/10/30/generate-pdfs-with-html-templates-in-rails/">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Rails] 10分鐘內使用HTML模板產生PDF">
+<meta property="og:url" content="https://blog.anxgang.com/rails-within-10-minutes-using-a-html-template-pdf/">
+
+
+  <meta property="og:description" content="[Rails] 10分鐘內使用HTML模板產生PDF     原文出處 How to Generate PDFs with HTML templates in 10 minutes with Rails   前言  為您的Web程式產生PDF並非你想像中的那麼困難。  有很多方法可以做到這一點，還有另一個好用gem，叫做Prawn，但是為了今天的教學，我將介紹另一個流行的gem，叫做wicked_pdf。  WickedPDF使用wkhtmltopdf，它允許您直接從HTML產生PDF，而不必遵守DSL。  此方式能夠更快速的達到想要的效果。  安裝步驟  Step 1: 安裝 wkhtmltopdf 和 wicked_pdf gem # [path] gemfile gem &#39;wicked_pdf&#39; gem &#39;wkhtmltopdf-binary&#39;   Step 2: 執行 Generator rails generate wicked_pdf   接下來，假設你不是透過Gemfile安裝wkhtmltopdf的binary檔案，你需要確保wicked_pdf知道在哪裡找到它們。  # [path] config/initializers/wicked_pdf.rb WickedPdf.config = {   #:wkhtmltopdf =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39;,   #:layout =&gt; &quot;pdf.html&quot;,   #:exe_path =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39; }   如果你沒有寫清楚，你可能會得到一個“Bad wkhtmltopdf’s path”的錯誤訊息。  OK你已經準備好了！現在有2個方式可以使用wicked_pdf。    從controller render。   從自建的library render。   &lt; I &gt; 從controller render  要使用它從controller呈現pdf，您需要做的是在controller方法中新增以下內容。  讓我們以發票應用為例，當用戶訪問/invoices/1時，您想產生一份pdf發票。  首先，將以下程式新增到invoices_controller.rb (或使用其他controller)  我會解釋一下每個參數是什麼意思，但請記住將它們替換為您自己的相關數據！  # [path] invoices_controller.rb   def show      @invoice = Invoice.find params[:id]      respond_to do |format|       format.pdf do         render pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:invoice =&gt; @invoice}       end     end   end     pdf: “file_name_of_your_choice” 這行表示即將輸出的pdf名稱    template: “invoices/show.pdf.erb” 這行表示使用views/invoices/show.pdf.erb當作模板    locals: {:invoice =&gt; @invoice} 這行表示將把@invoice傳入模板中   那麼什麼是invoices/show.pdf.erb？  &lt;!-- [path] show.pdf.erb --&gt; &lt;!-- app/views/invoices/show.pdf.erb --&gt;  &lt;h1&gt;&lt;%= invoice.title %&gt;&lt;/h1&gt; &lt;p&gt;&lt;%= invoice.description %&gt;&lt;/p&gt; &lt;p&gt;&lt;%= invoice.amount %&gt;&lt;/p&gt;   就像一般的htm.erb一樣，你可以使用pdf.erb，它會把它渲染到你的pdf。  如果您注意到上述程式碼，我們增加了本地參數。就像渲染部分一樣，這將允許您在view中使用您的變數。  這就是全部了。當用戶訪問/invoices/1時，就會產出一個pdf。  &lt; II &gt;從自建的library render  可能有些情況下您想要取得pdf代碼。你不一定要用它作為view的替代顯示。  在這種情況下，您將需要外部渲染您的pdf。  例如，讓我說我有一個外部庫將生成PDF，我想使用生成的PDF作為電子郵件附件。  我們該怎麼做？  首先，讓我們創建一個庫和一個類的方法。  # /lib/pdf_generator/bot.rb  module PdfGenerator   class Bot     def self.receipt(payment_details)     end   end end   好的，現在可以增加程式碼。  所以，如果你在前面的例子中注意到，我們正在使用  ActionController render PDF：…。  # invoices_controller.rb def show  ..    render pdf: &quot;file_name_of_your_choice&quot;,  .. end   該PDF PARAMS是非常重要的。這告訴Rails應用程序使用WickedPDF的渲染方法來解析和創建PDF。  問題是，你不能調用ActionController外的渲染，那麼我們如何從外部的圖形庫渲染？  很簡單，我們把ActionController帶出來並使用render_to_string方法  # in bot.rb .. class Bot   def self.receipt(payment_details)     # 先宣告一個ActionController     ac = ActionController::Base.new      # 然後，我們可以複製之前的範例的輸出方式。     pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:myvariable =&gt; variable}   end end ..      進階說明 如果想要使用Application Helpers, 你可能會發現你的helpers無法在你的templates中使用。 解決方式，請以ApplicationController.new取代ActionController::Base.new。這樣就可以了！   但等等，這不是只是一個字串嗎？字串有多有用？  那麼現在你可以建立一個臨時文件來存儲pdf。  # in bot.rb ..     pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:myvariable =&gt; variable}          # lets create a Tempfile which we will use to generate an actual file to be     # attached to an e-mail     tempfile = Tempfile.new &quot;anynamehere.pdf&quot;     tempfile.binmode     tempfile.write pdf     tempfile.close     tempfile ..   所以現在PdfGenerator::Bot.receipt接收一個對象，將其解析成一個視圖，並返回產生一個漂亮的臨時文件PDF。  使用該tempfile，您可以附加到郵件程式中。  例如：  # example_mailer.rb def payment_details(details)   attachments[&quot;anyfilenametoo.pdf&quot;] = File.read(PdfGenerator::Bot.receipt(details).path)   mail(subject: .....) end   希望這可以幫助到大家！  參考         http://dchua.com/2014/10/30/generate-pdfs-with-html-templates-in-rails/">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Rails] 10分鐘內使用HTML模板產生PDF">
+  <meta name="twitter:description" content="[Rails] 10分鐘內使用HTML模板產生PDF     原文出處 How to Generate PDFs with HTML templates in 10 minutes with Rails   前言  為您的Web程式產生PDF並非你想像中的那麼困難。  有很多方法可以做到這一點，還有另一個好用gem，叫做Prawn，但是為了今天的教學，我將介紹另一個流行的gem，叫做wicked_pdf。  WickedPDF使用wkhtmltopdf，它允許您直接從HTML產生PDF，而不必遵守DSL。  此方式能夠更快速的達到想要的效果。  安裝步驟  Step 1: 安裝 wkhtmltopdf 和 wicked_pdf gem # [path] gemfile gem &#39;wicked_pdf&#39; gem &#39;wkhtmltopdf-binary&#39;   Step 2: 執行 Generator rails generate wicked_pdf   接下來，假設你不是透過Gemfile安裝wkhtmltopdf的binary檔案，你需要確保wicked_pdf知道在哪裡找到它們。  # [path] config/initializers/wicked_pdf.rb WickedPdf.config = {   #:wkhtmltopdf =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39;,   #:layout =&gt; &quot;pdf.html&quot;,   #:exe_path =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39; }   如果你沒有寫清楚，你可能會得到一個“Bad wkhtmltopdf’s path”的錯誤訊息。  OK你已經準備好了！現在有2個方式可以使用wicked_pdf。    從controller render。   從自建的library render。   &lt; I &gt; 從controller render  要使用它從controller呈現pdf，您需要做的是在controller方法中新增以下內容。  讓我們以發票應用為例，當用戶訪問/invoices/1時，您想產生一份pdf發票。  首先，將以下程式新增到invoices_controller.rb (或使用其他controller)  我會解釋一下每個參數是什麼意思，但請記住將它們替換為您自己的相關數據！  # [path] invoices_controller.rb   def show      @invoice = Invoice.find params[:id]      respond_to do |format|       format.pdf do         render pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:invoice =&gt; @invoice}       end     end   end     pdf: “file_name_of_your_choice” 這行表示即將輸出的pdf名稱    template: “invoices/show.pdf.erb” 這行表示使用views/invoices/show.pdf.erb當作模板    locals: {:invoice =&gt; @invoice} 這行表示將把@invoice傳入模板中   那麼什麼是invoices/show.pdf.erb？  &lt;!-- [path] show.pdf.erb --&gt; &lt;!-- app/views/invoices/show.pdf.erb --&gt;  &lt;h1&gt;&lt;%= invoice.title %&gt;&lt;/h1&gt; &lt;p&gt;&lt;%= invoice.description %&gt;&lt;/p&gt; &lt;p&gt;&lt;%= invoice.amount %&gt;&lt;/p&gt;   就像一般的htm.erb一樣，你可以使用pdf.erb，它會把它渲染到你的pdf。  如果您注意到上述程式碼，我們增加了本地參數。就像渲染部分一樣，這將允許您在view中使用您的變數。  這就是全部了。當用戶訪問/invoices/1時，就會產出一個pdf。  &lt; II &gt;從自建的library render  可能有些情況下您想要取得pdf代碼。你不一定要用它作為view的替代顯示。  在這種情況下，您將需要外部渲染您的pdf。  例如，讓我說我有一個外部庫將生成PDF，我想使用生成的PDF作為電子郵件附件。  我們該怎麼做？  首先，讓我們創建一個庫和一個類的方法。  # /lib/pdf_generator/bot.rb  module PdfGenerator   class Bot     def self.receipt(payment_details)     end   end end   好的，現在可以增加程式碼。  所以，如果你在前面的例子中注意到，我們正在使用  ActionController render PDF：…。  # invoices_controller.rb def show  ..    render pdf: &quot;file_name_of_your_choice&quot;,  .. end   該PDF PARAMS是非常重要的。這告訴Rails應用程序使用WickedPDF的渲染方法來解析和創建PDF。  問題是，你不能調用ActionController外的渲染，那麼我們如何從外部的圖形庫渲染？  很簡單，我們把ActionController帶出來並使用render_to_string方法  # in bot.rb .. class Bot   def self.receipt(payment_details)     # 先宣告一個ActionController     ac = ActionController::Base.new      # 然後，我們可以複製之前的範例的輸出方式。     pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:myvariable =&gt; variable}   end end ..      進階說明 如果想要使用Application Helpers, 你可能會發現你的helpers無法在你的templates中使用。 解決方式，請以ApplicationController.new取代ActionController::Base.new。這樣就可以了！   但等等，這不是只是一個字串嗎？字串有多有用？  那麼現在你可以建立一個臨時文件來存儲pdf。  # in bot.rb ..     pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,                template: &quot;invoices/show.pdf.erb&quot;,                locals: {:myvariable =&gt; variable}          # lets create a Tempfile which we will use to generate an actual file to be     # attached to an e-mail     tempfile = Tempfile.new &quot;anynamehere.pdf&quot;     tempfile.binmode     tempfile.write pdf     tempfile.close     tempfile ..   所以現在PdfGenerator::Bot.receipt接收一個對象，將其解析成一個視圖，並返回產生一個漂亮的臨時文件PDF。  使用該tempfile，您可以附加到郵件程式中。  例如：  # example_mailer.rb def payment_details(details)   attachments[&quot;anyfilenametoo.pdf&quot;] = File.read(PdfGenerator::Bot.receipt(details).path)   mail(subject: .....) end   希望這可以幫助到大家！  參考         http://dchua.com/2014/10/30/generate-pdfs-with-html-templates-in-rails/">
+  <meta name="twitter:url" content="https://blog.anxgang.com/rails-within-10-minutes-using-a-html-template-pdf/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-08-08T02:11:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/rails-within-10-minutes-using-a-html-template-pdf/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Rails] 10分鐘內使用HTML模板產生PDF">
+        
+        
+        <meta itemprop="description"
+            content="[Rails] 10分鐘內使用HTML模板產生PDF  原文出處 How to Generate PDFs with HTML templates in 10 minutes with Rails前言為您的Web程式產生PDF並非你想像中的那麼困難。有很多方法可以做到這一點，還有另一個好用gem，叫做Prawn，但是為了今天的教學，我將介紹另一個流行的gem，叫做wicked_pdf。WickedPDF使用wkhtmltopdf，它允許您直接從HTML產生PDF，而不必遵守DSL。此方式能夠更快速的達到想要的效果。安裝步驟Step 1: 安裝 wkhtmltopdf 和 wicked_pdf gem# [path] gemfilegem &#39;wicked_pdf&#39;gem &#39;wkhtmltopdf-binary&#39;Step 2: 執行 Generatorrails generate wicked_pdf接下來，假設你不是透過Gemfile安裝wkhtmltopdf的binary檔案，你需要確保wicked_pdf知道在哪裡找到它們。# [path] config/initializers/wicked_pdf.rbWickedPdf.config = {  #:wkhtmltopdf =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39;,  #:layout =&gt; &quot;pdf.html&quot;,  #:exe_path =&gt; &#39;/usr/local/bin/wkhtmltopdf&#39;}如果你沒有寫清楚，你可能會得到一個“Bad wkhtmltopdf’s path”的錯誤訊息。OK你已經準備好了！現在有2個方式可以使用wicked_pdf。  從controller render。  從自建的library render。&lt; I &gt; 從controller render要使用它從controller呈現pdf，您需要做的是在controller方法中新增以下內容。讓我們以發票應用為例，當用戶訪問/invoices/1時，您想產生一份pdf發票。首先，將以下程式新增到invoices_controller.rb (或使用其他controller)我會解釋一下每個參數是什麼意思，但請記住將它們替換為您自己的相關數據！# [path] invoices_controller.rb  def show    @invoice = Invoice.find params[:id]    respond_to do |format|      format.pdf do        render pdf: &quot;file_name_of_your_choice&quot;,               template: &quot;invoices/show.pdf.erb&quot;,               locals: {:invoice =&gt; @invoice}      end    end  end  pdf: “file_name_of_your_choice”這行表示即將輸出的pdf名稱  template: “invoices/show.pdf.erb”這行表示使用views/invoices/show.pdf.erb當作模板  locals: {:invoice =&gt; @invoice}這行表示將把@invoice傳入模板中那麼什麼是invoices/show.pdf.erb？&lt;!-- [path] show.pdf.erb --&gt;&lt;!-- app/views/invoices/show.pdf.erb --&gt;&lt;h1&gt;&lt;%= invoice.title %&gt;&lt;/h1&gt;&lt;p&gt;&lt;%= invoice.description %&gt;&lt;/p&gt;&lt;p&gt;&lt;%= invoice.amount %&gt;&lt;/p&gt;就像一般的htm.erb一樣，你可以使用pdf.erb，它會把它渲染到你的pdf。如果您注意到上述程式碼，我們增加了本地參數。就像渲染部分一樣，這將允許您在view中使用您的變數。這就是全部了。當用戶訪問/invoices/1時，就會產出一個pdf。&lt; II &gt;從自建的library render可能有些情況下您想要取得pdf代碼。你不一定要用它作為view的替代顯示。在這種情況下，您將需要外部渲染您的pdf。例如，讓我說我有一個外部庫將生成PDF，我想使用生成的PDF作為電子郵件附件。我們該怎麼做？首先，讓我們創建一個庫和一個類的方法。# /lib/pdf_generator/bot.rbmodule PdfGenerator  class Bot    def self.receipt(payment_details)    end  endend好的，現在可以增加程式碼。所以，如果你在前面的例子中注意到，我們正在使用 ActionController render PDF：…。# invoices_controller.rbdef show ..   render pdf: &quot;file_name_of_your_choice&quot;, ..end該PDF PARAMS是非常重要的。這告訴Rails應用程序使用WickedPDF的渲染方法來解析和創建PDF。問題是，你不能調用ActionController外的渲染，那麼我們如何從外部的圖形庫渲染？很簡單，我們把ActionController帶出來並使用render_to_string方法# in bot.rb..class Bot  def self.receipt(payment_details)    # 先宣告一個ActionController    ac = ActionController::Base.new    # 然後，我們可以複製之前的範例的輸出方式。    pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,               template: &quot;invoices/show.pdf.erb&quot;,               locals: {:myvariable =&gt; variable}  endend..  進階說明如果想要使用Application Helpers, 你可能會發現你的helpers無法在你的templates中使用。 解決方式，請以ApplicationController.new取代ActionController::Base.new。這樣就可以了！但等等，這不是只是一個字串嗎？字串有多有用？那麼現在你可以建立一個臨時文件來存儲pdf。# in bot.rb..    pdf = ac.render_to_string pdf: &quot;file_name_of_your_choice&quot;,               template: &quot;invoices/show.pdf.erb&quot;,               locals: {:myvariable =&gt; variable}        # lets create a Tempfile which we will use to generate an actual file to be    # attached to an e-mail    tempfile = Tempfile.new &quot;anynamehere.pdf&quot;    tempfile.binmode    tempfile.write pdf    tempfile.close    tempfile..所以現在PdfGenerator::Bot.receipt接收一個對象，將其解析成一個視圖，並返回產生一個漂亮的臨時文件PDF。使用該tempfile，您可以附加到郵件程式中。例如：# example_mailer.rbdef payment_details(details)  attachments[&quot;anyfilenametoo.pdf&quot;] = File.read(PdfGenerator::Bot.receipt(details).path)  mail(subject: .....)end希望這可以幫助到大家！參考      http://dchua.com/2014/10/30/generate-pdfs-with-html-templates-in-rails/  ">
+        
+        <meta itemprop="datePublished" content="2017-08-08T02:11:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/rails-within-10-minutes-using-a-html-template-pdf/" class="u-url"
+                        itemprop="url">[Rails] 10分鐘內使用HTML模板產生PDF
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2017-08-08T02:11:00+08:00">2017-08-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#rails-10分鐘內使用html模板產生pdf">[Rails] 10分鐘內使用HTML模板產生PDF</a><ul><li><a href="#前言">前言</a></li><li><a href="#安裝步驟">安裝步驟</a><ul><li><a href="#step-1-安裝-wkhtmltopdf-和-wicked_pdf-gem">Step 1: 安裝 wkhtmltopdf 和 wicked_pdf gem</a></li><li><a href="#step-2-執行-generator">Step 2: 執行 Generator</a></li></ul></li></ul></li></ul></li><li><a href="#-i--從controller-render">&lt; I &gt; 從controller render</a></li><li><a href="#-ii-從自建的library-render">&lt; II &gt;從自建的library render</a></li></ul></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="rails-10分鐘內使用html模板產生pdf">[Rails] 10分鐘內使用HTML模板產生PDF</h1>
+
+<blockquote>
+  <p>原文出處 <a href="http://dchua.com/2014/10/30/generate-pdfs-with-html-templates-in-rails/">How to Generate PDFs with HTML templates in 10 minutes with Rails</a></p>
+</blockquote>
+
+<h2 id="前言">前言</h2>
+
+<p>為您的Web程式產生PDF並非你想像中的那麼困難。</p>
+
+<p>有很多方法可以做到這一點，還有另一個好用gem，叫做Prawn，但是為了今天的教學，我將介紹另一個流行的gem，叫做wicked_pdf。</p>
+
+<p>WickedPDF使用wkhtmltopdf，它允許您直接從HTML產生PDF，而不必遵守DSL。</p>
+
+<p>此方式能夠更快速的達到想要的效果。</p>
+
+<h2 id="安裝步驟">安裝步驟</h2>
+
+<h5 id="step-1-安裝-wkhtmltopdf-和-wicked_pdf-gem">Step 1: 安裝 wkhtmltopdf 和 wicked_pdf gem</h5>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] gemfile</span>
+<span class="n">gem</span> <span class="s1">'wicked_pdf'</span>
+<span class="n">gem</span> <span class="s1">'wkhtmltopdf-binary'</span>
+</code></pre></div></div>
+
+<h5 id="step-2-執行-generator">Step 2: 執行 Generator</h5>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails generate wicked_pdf
+</code></pre></div></div>
+
+<p>接下來，假設你不是透過Gemfile安裝wkhtmltopdf的binary檔案，你需要確保wicked_pdf知道在哪裡找到它們。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] config/initializers/wicked_pdf.rb</span>
+<span class="no">WickedPdf</span><span class="p">.</span><span class="nf">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1">#:wkhtmltopdf =&gt; '/usr/local/bin/wkhtmltopdf',</span>
+  <span class="c1">#:layout =&gt; "pdf.html",</span>
+  <span class="c1">#:exe_path =&gt; '/usr/local/bin/wkhtmltopdf'</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>如果你沒有寫清楚，你可能會得到一個“Bad wkhtmltopdf’s path”的錯誤訊息。</p>
+
+<p>OK你已經準備好了！現在有2個方式可以使用wicked_pdf。</p>
+<ol>
+  <li>從controller render。</li>
+  <li>從自建的library render。</li>
+</ol>
+
+<h2 id="-i--從controller-render">&lt; I &gt; 從controller render</h2>
+
+<p>要使用它從controller呈現pdf，您需要做的是在controller方法中新增以下內容。</p>
+
+<p>讓我們以發票應用為例，當用戶訪問<code class="language-plaintext highlighter-rouge">/invoices/1</code>時，您想產生一份pdf發票。</p>
+
+<p>首先，將以下程式新增到invoices_controller.rb (或使用其他controller)</p>
+
+<p>我會解釋一下每個參數是什麼意思，但請記住將它們替換為您自己的相關數據！</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] invoices_controller.rb</span>
+  <span class="k">def</span> <span class="nf">show</span>
+
+    <span class="vi">@invoice</span> <span class="o">=</span> <span class="no">Invoice</span><span class="p">.</span><span class="nf">find</span> <span class="n">params</span><span class="p">[</span><span class="ss">:id</span><span class="p">]</span>
+
+    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+      <span class="nb">format</span><span class="p">.</span><span class="nf">pdf</span> <span class="k">do</span>
+        <span class="n">render</span> <span class="ss">pdf: </span><span class="s2">"file_name_of_your_choice"</span><span class="p">,</span>
+               <span class="ss">template: </span><span class="s2">"invoices/show.pdf.erb"</span><span class="p">,</span>
+               <span class="ss">locals: </span><span class="p">{</span><span class="ss">:invoice</span> <span class="o">=&gt;</span> <span class="vi">@invoice</span><span class="p">}</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+<blockquote>
+  <p>pdf: “file_name_of_your_choice”
+這行表示即將輸出的pdf名稱</p>
+
+  <p>template: “invoices/show.pdf.erb”
+這行表示使用views/invoices/show.pdf.erb當作模板</p>
+
+  <p>locals: {:invoice =&gt; @invoice}
+這行表示將把@invoice傳入模板中</p>
+</blockquote>
+
+<p>那麼什麼是<code class="language-plaintext highlighter-rouge">invoices/show.pdf.erb</code>？</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- [path] show.pdf.erb --&gt;</span>
+<span class="c">&lt;!-- app/views/invoices/show.pdf.erb --&gt;</span>
+
+<span class="nt">&lt;h1&gt;</span><span class="cp">&lt;%=</span> <span class="n">invoice</span><span class="p">.</span><span class="nf">title</span> <span class="cp">%&gt;</span><span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;p&gt;</span><span class="cp">&lt;%=</span> <span class="n">invoice</span><span class="p">.</span><span class="nf">description</span> <span class="cp">%&gt;</span><span class="nt">&lt;/p&gt;</span>
+<span class="nt">&lt;p&gt;</span><span class="cp">&lt;%=</span> <span class="n">invoice</span><span class="p">.</span><span class="nf">amount</span> <span class="cp">%&gt;</span><span class="nt">&lt;/p&gt;</span>
+</code></pre></div></div>
+
+<p>就像一般的htm.erb一樣，你可以使用pdf.erb，它會把它渲染到你的pdf。</p>
+
+<p>如果您注意到上述程式碼，我們增加了本地參數。就像渲染部分一樣，這將允許您在view中使用您的變數。</p>
+
+<p>這就是全部了。當用戶訪問/invoices/1時，就會產出一個pdf。</p>
+
+<h2 id="-ii-從自建的library-render">&lt; II &gt;從自建的library render</h2>
+
+<p>可能有些情況下您想要取得pdf代碼。你不一定要用它作為view的替代顯示。</p>
+
+<p>在這種情況下，您將需要外部渲染您的pdf。</p>
+
+<p>例如，讓我說我有一個外部庫將生成PDF，我想使用生成的PDF作為電子郵件附件。</p>
+
+<p>我們該怎麼做？</p>
+
+<p>首先，讓我們創建一個庫和一個類的方法。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># /lib/pdf_generator/bot.rb</span>
+
+<span class="k">module</span> <span class="nn">PdfGenerator</span>
+  <span class="k">class</span> <span class="nc">Bot</span>
+    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">receipt</span><span class="p">(</span><span class="n">payment_details</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>好的，現在可以增加程式碼。</p>
+
+<p>所以，如果你在前面的例子中注意到，我們正在使用 
+ActionController render PDF：…。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># invoices_controller.rb</span>
+<span class="k">def</span> <span class="nf">show</span>
+ <span class="o">..</span>
+   <span class="n">render</span> <span class="ss">pdf: </span><span class="s2">"file_name_of_your_choice"</span><span class="p">,</span>
+ <span class="o">..</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>該PDF PARAMS是非常重要的。這告訴Rails應用程序使用WickedPDF的渲染方法來解析和創建PDF。</p>
+
+<p>問題是，你不能調用ActionController外的渲染，那麼我們如何從外部的圖形庫渲染？</p>
+
+<p>很簡單，我們把ActionController帶出來並使用render_to_string方法</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># in bot.rb</span>
+<span class="o">..</span>
+<span class="k">class</span> <span class="nc">Bot</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">receipt</span><span class="p">(</span><span class="n">payment_details</span><span class="p">)</span>
+    <span class="c1"># 先宣告一個ActionController</span>
+    <span class="n">ac</span> <span class="o">=</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span><span class="p">.</span><span class="nf">new</span>
+
+    <span class="c1"># 然後，我們可以複製之前的範例的輸出方式。</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">ac</span><span class="p">.</span><span class="nf">render_to_string</span> <span class="ss">pdf: </span><span class="s2">"file_name_of_your_choice"</span><span class="p">,</span>
+               <span class="ss">template: </span><span class="s2">"invoices/show.pdf.erb"</span><span class="p">,</span>
+               <span class="ss">locals: </span><span class="p">{</span><span class="ss">:myvariable</span> <span class="o">=&gt;</span> <span class="n">variable</span><span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="o">..</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>進階說明
+如果想要使用Application Helpers, 你可能會發現你的helpers無法在你的templates中使用。 解決方式，請以ApplicationController.new取代ActionController::Base.new。這樣就可以了！</p>
+</blockquote>
+
+<p>但等等，這不是只是一個字串嗎？字串有多有用？</p>
+
+<p>那麼現在你可以建立一個臨時文件來存儲pdf。</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># in bot.rb</span>
+<span class="o">..</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">ac</span><span class="p">.</span><span class="nf">render_to_string</span> <span class="ss">pdf: </span><span class="s2">"file_name_of_your_choice"</span><span class="p">,</span>
+               <span class="ss">template: </span><span class="s2">"invoices/show.pdf.erb"</span><span class="p">,</span>
+               <span class="ss">locals: </span><span class="p">{</span><span class="ss">:myvariable</span> <span class="o">=&gt;</span> <span class="n">variable</span><span class="p">}</span>
+    
+    <span class="c1"># lets create a Tempfile which we will use to generate an actual file to be</span>
+    <span class="c1"># attached to an e-mail</span>
+    <span class="n">tempfile</span> <span class="o">=</span> <span class="no">Tempfile</span><span class="p">.</span><span class="nf">new</span> <span class="s2">"anynamehere.pdf"</span>
+    <span class="n">tempfile</span><span class="p">.</span><span class="nf">binmode</span>
+    <span class="n">tempfile</span><span class="p">.</span><span class="nf">write</span> <span class="n">pdf</span>
+    <span class="n">tempfile</span><span class="p">.</span><span class="nf">close</span>
+    <span class="n">tempfile</span>
+<span class="o">..</span>
+</code></pre></div></div>
+
+<p>所以現在PdfGenerator::Bot.receipt接收一個對象，將其解析成一個視圖，並返回產生一個漂亮的臨時文件PDF。</p>
+
+<p>使用該tempfile，您可以附加到郵件程式中。</p>
+
+<p>例如：</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># example_mailer.rb</span>
+<span class="k">def</span> <span class="nf">payment_details</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+  <span class="n">attachments</span><span class="p">[</span><span class="s2">"anyfilenametoo.pdf"</span><span class="p">]</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="no">PdfGenerator</span><span class="o">::</span><span class="no">Bot</span><span class="p">.</span><span class="nf">receipt</span><span class="p">(</span><span class="n">details</span><span class="p">).</span><span class="nf">path</span><span class="p">)</span>
+  <span class="n">mail</span><span class="p">(</span><span class="ss">subject: </span><span class="o">.....</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>希望這可以幫助到大家！</p>
+
+<p>參考</p>
+<blockquote>
+  <ol>
+    <li>http://dchua.com/2014/10/30/generate-pdfs-with-html-templates-in-rails/</li>
+  </ol>
+</blockquote>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2017-08-08T02:11:00+08:00">August 8, 2017</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BRails%5D+10%E5%88%86%E9%90%98%E5%85%A7%E4%BD%BF%E7%94%A8HTML%E6%A8%A1%E6%9D%BF%E7%94%A2%E7%94%9FPDF%20https%3A%2F%2Fblog.anxgang.com%2Frails-within-10-minutes-using-a-html-template-pdf%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Frails-within-10-minutes-using-a-html-template-pdf%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Frails-within-10-minutes-using-a-html-template-pdf%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/liunx-use-smb-shared-printers-print-things/" class="pagination--pager" title="[Liunx] 透過windows的印表機列印
+">上一篇</a>
+    
+    
+      <a href="/rails-dynamic-nested-cocoon-form-use/" class="pagination--pager" title="[Rails] Cocoon動態Nested Form使用方式
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/rails-within-10-minutes-using-a-html-template-pdf/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/rails-within-10-minutes-using-a-html-template-pdf"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

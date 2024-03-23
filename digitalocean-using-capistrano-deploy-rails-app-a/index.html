@@ -1,0 +1,1140 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[DigitalOcean] 使用 Capistrano Deploy Rails App (一) - ANxGANG</title>
+<meta name="description" content="本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0   前言  本文將使用 Capistrano Deploy Rails App 至 DigitalOcean VPS上。使用的資料庫及伺服器如下：     MySQL   Nginx   Puma      本文參考kakas的文章 簡化為一鍵安裝版本，若需要請自行察看詳細安裝步驟。   優惠碼 COUPON  (以下兩項不能重複拿，如果第一個沒資格，就用第二個）          免費拿$35鎂 點此(codeanywhere)照步驟做 ，但不保證成功，因為我的帳號已註冊不符合資格無法測試           免費拿$10鎂 點此(DigitalOcean)註冊。這個是推薦連結(你拿$10，我也拿)，請幫助老殘窮      開機器     註冊好並登入後，按 Create Droplet   選 Ubuntu 14.04 x64   選 $10/mo 的機器   地區選新加坡（Singapore）   把你本機的公鑰加到 digital ocean（不一定要做，但建議）            $ cat ~/.ssh/id_rsa.pub 即可查到本機的公鑰           選 1 個 Droplet   設定一個好記的名字   等機器開一下   開完會有機器的IP，先複製起來備用，安裝會用到   完成   安裝步驟     登入伺服器   $ ssh root@xxx.xxx.xxx.xxx # 首次登入會要求驗證加入該server公鑰，請輸入`yes`即可(如果跳出再重連一次）      一鍵安裝   sudo apt-get -y update;sudo apt-get -y upgrade;sudo apt-get -y autoremove;sudo echo &quot;Asia/Taipei&quot; &gt; /etc/timezone; sudo dpkg-reconfigure -f noninteractive tzdata;sudo locale-gen zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password password 1234&#39;;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password_again password 1234&#39;;sudo apt-get -y install mysql-server mysql-common mysql-client libmysqlclient-dev;sudo apt-get -y install build-essential git-core curl libssl-dev libreadline5 libreadline-gplv2-dev zlib1g zlib1g-dev libmysqlclient-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libffi-dev git;sudo \curl -sSL https://get.rvm.io | bash;source /etc/profile.d/rvm.sh;rvm install 2.3.0;sudo apt-get -y install imagemagick;sudo apt-get -y install curl git-core nginx;gem install rails -v &#39;5.0.0&#39; -V --no-ri --no-rdoc;gem install bundler -V --no-ri --no-rdoc;      安裝項目         apt-get 站台/套件更新     設定時區 “Asia/Taipei”     安裝語系 zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8     安裝mysql 預設帳密root/1234     安裝常用套件(git、ssl、curl..等)     安裝rvm     安裝ruby 2.3.0     安裝rails 5.0.0     安裝 bundler     安裝nginx 最新版 (目前1.4.6)         驗證   $ date # Wed Aug  2 10:05:17 CST 2016 檢查時間(區) $ rvm list # =* ruby-2.3.0 [ x86_64 ] $ ruby -v # ruby 2.3.0p0 $ rails -v # Rails 5.0.0 $ nginx -v # nginx version: nginx/1.4.6 (Ubuntu) $ mysql -u root -p # 輸入預設密碼1234，出現`mysql&gt;`就是成功了，可以輸入`exit`跳出      若驗證有部分項目失敗    可參考kakas的文章 進行部分項目的安裝      至此環境安裝結束      接續下篇 DigitalOcean - 使用 Capistrano Deploy Rails App (二)      參考     kakas/CapistranoDeployTest   (Mini Course) Deploy Rails Project to Linux Server - Growth School   Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[DigitalOcean] 使用 Capistrano Deploy Rails App (一)">
+<meta property="og:url" content="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-a/">
+
+
+  <meta property="og:description" content="本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0   前言  本文將使用 Capistrano Deploy Rails App 至 DigitalOcean VPS上。使用的資料庫及伺服器如下：     MySQL   Nginx   Puma      本文參考kakas的文章 簡化為一鍵安裝版本，若需要請自行察看詳細安裝步驟。   優惠碼 COUPON  (以下兩項不能重複拿，如果第一個沒資格，就用第二個）          免費拿$35鎂 點此(codeanywhere)照步驟做 ，但不保證成功，因為我的帳號已註冊不符合資格無法測試           免費拿$10鎂 點此(DigitalOcean)註冊。這個是推薦連結(你拿$10，我也拿)，請幫助老殘窮      開機器     註冊好並登入後，按 Create Droplet   選 Ubuntu 14.04 x64   選 $10/mo 的機器   地區選新加坡（Singapore）   把你本機的公鑰加到 digital ocean（不一定要做，但建議）            $ cat ~/.ssh/id_rsa.pub 即可查到本機的公鑰           選 1 個 Droplet   設定一個好記的名字   等機器開一下   開完會有機器的IP，先複製起來備用，安裝會用到   完成   安裝步驟     登入伺服器   $ ssh root@xxx.xxx.xxx.xxx # 首次登入會要求驗證加入該server公鑰，請輸入`yes`即可(如果跳出再重連一次）      一鍵安裝   sudo apt-get -y update;sudo apt-get -y upgrade;sudo apt-get -y autoremove;sudo echo &quot;Asia/Taipei&quot; &gt; /etc/timezone; sudo dpkg-reconfigure -f noninteractive tzdata;sudo locale-gen zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password password 1234&#39;;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password_again password 1234&#39;;sudo apt-get -y install mysql-server mysql-common mysql-client libmysqlclient-dev;sudo apt-get -y install build-essential git-core curl libssl-dev libreadline5 libreadline-gplv2-dev zlib1g zlib1g-dev libmysqlclient-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libffi-dev git;sudo \curl -sSL https://get.rvm.io | bash;source /etc/profile.d/rvm.sh;rvm install 2.3.0;sudo apt-get -y install imagemagick;sudo apt-get -y install curl git-core nginx;gem install rails -v &#39;5.0.0&#39; -V --no-ri --no-rdoc;gem install bundler -V --no-ri --no-rdoc;      安裝項目         apt-get 站台/套件更新     設定時區 “Asia/Taipei”     安裝語系 zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8     安裝mysql 預設帳密root/1234     安裝常用套件(git、ssl、curl..等)     安裝rvm     安裝ruby 2.3.0     安裝rails 5.0.0     安裝 bundler     安裝nginx 最新版 (目前1.4.6)         驗證   $ date # Wed Aug  2 10:05:17 CST 2016 檢查時間(區) $ rvm list # =* ruby-2.3.0 [ x86_64 ] $ ruby -v # ruby 2.3.0p0 $ rails -v # Rails 5.0.0 $ nginx -v # nginx version: nginx/1.4.6 (Ubuntu) $ mysql -u root -p # 輸入預設密碼1234，出現`mysql&gt;`就是成功了，可以輸入`exit`跳出      若驗證有部分項目失敗    可參考kakas的文章 進行部分項目的安裝      至此環境安裝結束      接續下篇 DigitalOcean - 使用 Capistrano Deploy Rails App (二)      參考     kakas/CapistranoDeployTest   (Mini Course) Deploy Rails Project to Linux Server - Growth School   Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[DigitalOcean] 使用 Capistrano Deploy Rails App (一)">
+  <meta name="twitter:description" content="本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0   前言  本文將使用 Capistrano Deploy Rails App 至 DigitalOcean VPS上。使用的資料庫及伺服器如下：     MySQL   Nginx   Puma      本文參考kakas的文章 簡化為一鍵安裝版本，若需要請自行察看詳細安裝步驟。   優惠碼 COUPON  (以下兩項不能重複拿，如果第一個沒資格，就用第二個）          免費拿$35鎂 點此(codeanywhere)照步驟做 ，但不保證成功，因為我的帳號已註冊不符合資格無法測試           免費拿$10鎂 點此(DigitalOcean)註冊。這個是推薦連結(你拿$10，我也拿)，請幫助老殘窮      開機器     註冊好並登入後，按 Create Droplet   選 Ubuntu 14.04 x64   選 $10/mo 的機器   地區選新加坡（Singapore）   把你本機的公鑰加到 digital ocean（不一定要做，但建議）            $ cat ~/.ssh/id_rsa.pub 即可查到本機的公鑰           選 1 個 Droplet   設定一個好記的名字   等機器開一下   開完會有機器的IP，先複製起來備用，安裝會用到   完成   安裝步驟     登入伺服器   $ ssh root@xxx.xxx.xxx.xxx # 首次登入會要求驗證加入該server公鑰，請輸入`yes`即可(如果跳出再重連一次）      一鍵安裝   sudo apt-get -y update;sudo apt-get -y upgrade;sudo apt-get -y autoremove;sudo echo &quot;Asia/Taipei&quot; &gt; /etc/timezone; sudo dpkg-reconfigure -f noninteractive tzdata;sudo locale-gen zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password password 1234&#39;;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password_again password 1234&#39;;sudo apt-get -y install mysql-server mysql-common mysql-client libmysqlclient-dev;sudo apt-get -y install build-essential git-core curl libssl-dev libreadline5 libreadline-gplv2-dev zlib1g zlib1g-dev libmysqlclient-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libffi-dev git;sudo \curl -sSL https://get.rvm.io | bash;source /etc/profile.d/rvm.sh;rvm install 2.3.0;sudo apt-get -y install imagemagick;sudo apt-get -y install curl git-core nginx;gem install rails -v &#39;5.0.0&#39; -V --no-ri --no-rdoc;gem install bundler -V --no-ri --no-rdoc;      安裝項目         apt-get 站台/套件更新     設定時區 “Asia/Taipei”     安裝語系 zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8     安裝mysql 預設帳密root/1234     安裝常用套件(git、ssl、curl..等)     安裝rvm     安裝ruby 2.3.0     安裝rails 5.0.0     安裝 bundler     安裝nginx 最新版 (目前1.4.6)         驗證   $ date # Wed Aug  2 10:05:17 CST 2016 檢查時間(區) $ rvm list # =* ruby-2.3.0 [ x86_64 ] $ ruby -v # ruby 2.3.0p0 $ rails -v # Rails 5.0.0 $ nginx -v # nginx version: nginx/1.4.6 (Ubuntu) $ mysql -u root -p # 輸入預設密碼1234，出現`mysql&gt;`就是成功了，可以輸入`exit`跳出      若驗證有部分項目失敗    可參考kakas的文章 進行部分項目的安裝      至此環境安裝結束      接續下篇 DigitalOcean - 使用 Capistrano Deploy Rails App (二)      參考     kakas/CapistranoDeployTest   (Mini Course) Deploy Rails Project to Linux Server - Growth School   Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+  <meta name="twitter:url" content="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-a/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-08-02T14:40:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-a/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[DigitalOcean] 使用 Capistrano Deploy Rails App (一)">
+        
+        
+        <meta itemprop="description"
+            content="  本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0前言本文將使用 Capistrano Deploy Rails App 至 DigitalOcean VPS上。使用的資料庫及伺服器如下：  MySQL  Nginx  Puma  本文參考kakas的文章 簡化為一鍵安裝版本，若需要請自行察看詳細安裝步驟。優惠碼 COUPON(以下兩項不能重複拿，如果第一個沒資格，就用第二個）      免費拿$35鎂 點此(codeanywhere)照步驟做，但不保證成功，因為我的帳號已註冊不符合資格無法測試        免費拿$10鎂 點此(DigitalOcean)註冊。這個是推薦連結(你拿$10，我也拿)，請幫助老殘窮  開機器  註冊好並登入後，按 Create Droplet  選 Ubuntu 14.04 x64  選 $10/mo 的機器  地區選新加坡（Singapore）  把你本機的公鑰加到 digital ocean（不一定要做，但建議）          $ cat ~/.ssh/id_rsa.pub 即可查到本機的公鑰        選 1 個 Droplet  設定一個好記的名字  等機器開一下  開完會有機器的IP，先複製起來備用，安裝會用到  完成安裝步驟  登入伺服器$ ssh root@xxx.xxx.xxx.xxx# 首次登入會要求驗證加入該server公鑰，請輸入`yes`即可(如果跳出再重連一次）  一鍵安裝sudo apt-get -y update;sudo apt-get -y upgrade;sudo apt-get -y autoremove;sudo echo &quot;Asia/Taipei&quot; &gt; /etc/timezone; sudo dpkg-reconfigure -f noninteractive tzdata;sudo locale-gen zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password password 1234&#39;;sudo debconf-set-selections &lt;&lt;&lt; &#39;mysql-server mysql-server/root_password_again password 1234&#39;;sudo apt-get -y install mysql-server mysql-common mysql-client libmysqlclient-dev;sudo apt-get -y install build-essential git-core curl libssl-dev libreadline5 libreadline-gplv2-dev zlib1g zlib1g-dev libmysqlclient-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libffi-dev git;sudo \curl -sSL https://get.rvm.io | bash;source /etc/profile.d/rvm.sh;rvm install 2.3.0;sudo apt-get -y install imagemagick;sudo apt-get -y install curl git-core nginx;gem install rails -v &#39;5.0.0&#39; -V --no-ri --no-rdoc;gem install bundler -V --no-ri --no-rdoc;  安裝項目      apt-get 站台/套件更新    設定時區 “Asia/Taipei”    安裝語系 zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8    安裝mysql 預設帳密root/1234    安裝常用套件(git、ssl、curl..等)    安裝rvm    安裝ruby 2.3.0    安裝rails 5.0.0    安裝 bundler    安裝nginx 最新版 (目前1.4.6)    驗證$ date# Wed Aug  2 10:05:17 CST 2016 檢查時間(區)$ rvm list# =* ruby-2.3.0 [ x86_64 ]$ ruby -v# ruby 2.3.0p0$ rails -v# Rails 5.0.0$ nginx -v# nginx version: nginx/1.4.6 (Ubuntu)$ mysql -u root -p# 輸入預設密碼1234，出現`mysql&gt;`就是成功了，可以輸入`exit`跳出  若驗證有部分項目失敗  可參考kakas的文章 進行部分項目的安裝  至此環境安裝結束  接續下篇 DigitalOcean - 使用 Capistrano Deploy Rails App (二) 參考  kakas/CapistranoDeployTest  (Mini Course) Deploy Rails Project to Linux Server - Growth School  Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean">
+        
+        <meta itemprop="datePublished" content="2016-08-02T14:40:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-a/" class="u-url"
+                        itemprop="url">[DigitalOcean] 使用 Capistrano Deploy Rails App (一)
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-08-02T14:40:00+08:00">2016-08-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#前言">前言</a></li><li><a href="#優惠碼-coupon">優惠碼 COUPON</a></li><li><a href="#開機器">開機器</a></li><li><a href="#安裝步驟">安裝步驟</a></li><li><a href="#參考">參考</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <blockquote>
+  <p>本文使用 Ubuntu 14.04 LTS / Ruby 2.3.0 / Rails 5.0.0</p>
+</blockquote>
+
+<h2 id="前言">前言</h2>
+
+<p>本文將使用 Capistrano Deploy Rails App 至 DigitalOcean VPS上。使用的資料庫及伺服器如下：</p>
+
+<ul>
+  <li>MySQL</li>
+  <li>Nginx</li>
+  <li>Puma</li>
+</ul>
+
+<blockquote>
+  <p>本文參考<a href="https://github.com/kakas/CapistranoDeployTest">kakas的文章</a> 簡化為一鍵安裝版本，若需要請自行察看詳細安裝步驟。</p>
+</blockquote>
+
+<h2 id="優惠碼-coupon">優惠碼 COUPON</h2>
+
+<p>(以下兩項不能重複拿，如果第一個沒資格，就用第二個）</p>
+
+<ol>
+  <li>
+    <p>免費拿$35鎂 <a href="http://www.newcoupons.info/digitalocean-free-25usd-credit/">點此(codeanywhere)照步驟做</a>
+，但不保證成功，因為我的帳號已註冊不符合資格無法測試</p>
+  </li>
+  <li>
+    <p>免費拿$10鎂 <a href="https://m.do.co/c/6c3b0ba300ef">點此(DigitalOcean)註冊</a>。這個是推薦連結(你拿$10，我也拿)，請幫助老殘窮</p>
+  </li>
+</ol>
+
+<h2 id="開機器">開機器</h2>
+
+<ol>
+  <li>註冊好並登入後，按 <code class="language-plaintext highlighter-rouge">Create Droplet</code></li>
+  <li>選 Ubuntu 14.04 x64</li>
+  <li>選 $10/mo 的機器</li>
+  <li>地區選新加坡（Singapore）</li>
+  <li>把你本機的公鑰加到 digital ocean（不一定要做，但建議）
+    <ul>
+      <li>$ cat ~/.ssh/id_rsa.pub 即可查到本機的公鑰</li>
+    </ul>
+  </li>
+  <li>選 1 個 Droplet</li>
+  <li>設定一個好記的名字</li>
+  <li>等機器開一下</li>
+  <li>開完會有機器的IP，先複製起來備用，安裝會用到</li>
+  <li>完成</li>
+</ol>
+
+<h2 id="安裝步驟">安裝步驟</h2>
+
+<ol>
+  <li>登入伺服器</li>
+</ol>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ssh root@xxx.xxx.xxx.xxx
+<span class="c"># 首次登入會要求驗證加入該server公鑰，請輸入`yes`即可(如果跳出再重連一次）</span>
+</code></pre></div></div>
+
+<ol>
+  <li>一鍵安裝</li>
+</ol>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get <span class="nt">-y</span> update<span class="p">;</span><span class="nb">sudo </span>apt-get <span class="nt">-y</span> upgrade<span class="p">;</span><span class="nb">sudo </span>apt-get <span class="nt">-y</span> autoremove<span class="p">;</span><span class="nb">sudo echo</span> <span class="s2">"Asia/Taipei"</span> <span class="o">&gt;</span> /etc/timezone<span class="p">;</span> <span class="nb">sudo </span>dpkg-reconfigure <span class="nt">-f</span> noninteractive tzdata<span class="p">;</span><span class="nb">sudo </span>locale-gen zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8<span class="p">;</span><span class="nb">sudo </span>debconf-set-selections <span class="o">&lt;&lt;&lt;</span> <span class="s1">'mysql-server mysql-server/root_password password 1234'</span><span class="p">;</span><span class="nb">sudo </span>debconf-set-selections <span class="o">&lt;&lt;&lt;</span> <span class="s1">'mysql-server mysql-server/root_password_again password 1234'</span><span class="p">;</span><span class="nb">sudo </span>apt-get <span class="nt">-y</span> <span class="nb">install </span>mysql-server mysql-common mysql-client libmysqlclient-dev<span class="p">;</span><span class="nb">sudo </span>apt-get <span class="nt">-y</span> <span class="nb">install </span>build-essential git-core curl libssl-dev libreadline5 libreadline-gplv2-dev zlib1g zlib1g-dev libmysqlclient-dev libcurl4-openssl-dev libxslt-dev libxml2-dev libffi-dev git<span class="p">;</span><span class="nb">sudo</span> <span class="se">\c</span>url <span class="nt">-sSL</span> https://get.rvm.io | bash<span class="p">;</span><span class="nb">source</span> /etc/profile.d/rvm.sh<span class="p">;</span>rvm <span class="nb">install </span>2.3.0<span class="p">;</span><span class="nb">sudo </span>apt-get <span class="nt">-y</span> <span class="nb">install </span>imagemagick<span class="p">;</span><span class="nb">sudo </span>apt-get <span class="nt">-y</span> <span class="nb">install </span>curl git-core nginx<span class="p">;</span>gem <span class="nb">install </span>rails <span class="nt">-v</span> <span class="s1">'5.0.0'</span> <span class="nt">-V</span> <span class="nt">--no-ri</span> <span class="nt">--no-rdoc</span><span class="p">;</span>gem <span class="nb">install </span>bundler <span class="nt">-V</span> <span class="nt">--no-ri</span> <span class="nt">--no-rdoc</span><span class="p">;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>安裝項目</p>
+
+  <ol>
+    <li>apt-get 站台/套件更新</li>
+    <li>設定時區 “Asia/Taipei”</li>
+    <li>安裝語系 zh_TW zh_TW.UTF-8 zh_CN.UTF-8 en_US.UTF-8</li>
+    <li>安裝mysql 預設帳密root/1234</li>
+    <li>安裝常用套件(git、ssl、curl..等)</li>
+    <li>安裝rvm</li>
+    <li>安裝ruby 2.3.0</li>
+    <li>安裝rails 5.0.0</li>
+    <li>安裝 bundler</li>
+    <li>安裝nginx 最新版 (目前1.4.6)</li>
+  </ol>
+</blockquote>
+
+<ol>
+  <li>驗證</li>
+</ol>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">date</span>
+<span class="c"># Wed Aug  2 10:05:17 CST 2016 檢查時間(區)</span>
+<span class="nv">$ </span>rvm list
+<span class="c"># =* ruby-2.3.0 [ x86_64 ]</span>
+<span class="nv">$ </span>ruby <span class="nt">-v</span>
+<span class="c"># ruby 2.3.0p0</span>
+<span class="nv">$ </span>rails <span class="nt">-v</span>
+<span class="c"># Rails 5.0.0</span>
+<span class="nv">$ </span>nginx <span class="nt">-v</span>
+<span class="c"># nginx version: nginx/1.4.6 (Ubuntu)</span>
+<span class="nv">$ </span>mysql <span class="nt">-u</span> root <span class="nt">-p</span>
+<span class="c"># 輸入預設密碼1234，出現`mysql&gt;`就是成功了，可以輸入`exit`跳出</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>若驗證有部分項目失敗</p>
+
+  <p>可參考<a href="https://github.com/kakas/CapistranoDeployTest">kakas的文章</a> 進行部分項目的安裝</p>
+</blockquote>
+
+<ol>
+  <li>至此環境安裝結束</li>
+</ol>
+
+<blockquote>
+  <p>接續下篇 <a href="776182-digitalocean-using-capistrano-deploy-rails-app-b">DigitalOcean - 使用 Capistrano Deploy Rails App (二)</a></p>
+</blockquote>
+
+<p> </p>
+
+<h2 id="參考">參考</h2>
+
+<ol>
+  <li><a href="https://github.com/kakas/CapistranoDeployTest">kakas/CapistranoDeployTest</a></li>
+  <li><a href="http://courses.growthschool.com/courses/deploy-rails-project-to-linux-server">(Mini Course) Deploy Rails Project to Linux Server - Growth School</a></li>
+  <li><a href="https://www.digitalocean.com/community/tutorials/deploying-a-rails-app-on-ubuntu-14-04-with-capistrano-nginx-and-puma">Deploying a Rails App on Ubuntu 14.04 with Capistrano, Nginx, and Puma - DigitalOcean</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-08-02T14:40:00+08:00">August 2, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BDigitalOcean%5D+%E4%BD%BF%E7%94%A8+Capistrano+Deploy+Rails+App+%28%E4%B8%80%29%20https%3A%2F%2Fblog.anxgang.com%2Fdigitalocean-using-capistrano-deploy-rails-app-a%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fdigitalocean-using-capistrano-deploy-rails-app-a%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fdigitalocean-using-capistrano-deploy-rails-app-a%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/rails-use-vagrant-to-quickly-deploy/" class="pagination--pager" title="[Rails] 使用 Vagrant 快速 Deploy 至 Linode
+">上一篇</a>
+    
+    
+      <a href="/mysql-mac-environment-to-install-mysql/" class="pagination--pager" title="[MySQL] MAC環境MySQL安裝筆記
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/digitalocean-using-capistrano-deploy-rails-app-a/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/digitalocean-using-capistrano-deploy-rails-app-a"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

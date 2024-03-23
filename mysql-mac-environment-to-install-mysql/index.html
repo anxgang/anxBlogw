@@ -1,0 +1,1151 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[MySQL] MAC環境MySQL安裝筆記 - ANxGANG</title>
+<meta name="description" content="本文使用 Mac OS X EI Capitan 10.11.6 / Homebrew 0.9.9   前言  此為MySQL於MAC環境的安裝筆記，本文將使用homebrew安裝MySQL，並大致紀錄如何手動/自動開啟服務  使用homebrew安裝  brew install mysql      安裝完後出現錯誤訊息   Error: The `brew link` step did not complete successfully The formula built, but is not symlinked into /usr/local Could not symlink share/man/man8/mysqld.8 /usr/local/share/man/man8 is not writable.   解決方式  #開啟權限 $ sudo chown -R $(whoami) /usr/local/ #重新link一次 $ brew link mysql   預設root帳號沒密碼，如需要請輸入下列指令  mysql_secure_installation      如出現以下錯誤訊息   Error: Can&#39;t connect to local MySQL server through socket &#39;/tmp/mysql.sock&#39; (2)   表示需要先把服務on起來mysql.server start再執行動作  然後會有以下囉唆的問題：          VALIDATE PASSWORD PLUGIN can be used to test passwords and improve security. It checks the strength of password and allows the users to set only those passwords which are secure enough. Would you like to setup VALIDATE PASSWORD plugin? Press y|Y for Yes, any other key for No: Please set the password for root here. New password: Re-enter new password: 總之就是先問你要不要安裝VALIDATE PASSWORD這個套件（可以幫你有效驗證密碼的複雜度，你設定太簡單會提醒你），不想裝可以Enter跳過就好，然後輸入兩次密碼結束第一個回合(問題)           By default, a MySQL installation has an anonymous user, allowing anyone to log into MySQL without having to have a user account created for them. This is intended only for testing, and to make the installation go a bit smoother. You should remove them before moving into a production environment. Remove anonymous users? (Press y|Y for Yes, any other key for No) : 是否移除匿名使用者?通常選y           Normally, root should only be allowed to connect from ‘localhost’. This ensures that someone cannot guess at the root password from the network. Disallow root login remotely? (Press y|Y for Yes, any other key for No) : 是否關閉root遠端登入？通常選y           By default, MySQL comes with a database named ‘test’ that anyone can access. This is also intended only for testing, and should be removed before moving into a production environment. Remove test database and access to it? (Press y|Y for Yes, any other key for No) : 是否移除測試資料庫？選y即可           Reloading the privilege tables will ensure that all changes made so far will take effect immediately. Reload privilege tables now? (Press y|Y for Yes, any other key for No) : 是否直接重新讀取權限？選y即可      進入sql指令模式  mysql -uroot   Service手動啟動/關閉方式  mysql.server start mysql.server stop mysql.server restart   利用homwbrew services開機自動啟動/關閉  # 沒加上sudo只是手動啟動 $ brew services start mysql $ brew services stop mysql  # 加上sudo可以在開機自動啟動 $ sudo brew services start mysql $ sudo brew services start mysql  # 查看services清單 $ brew services list      若沒有homebrew service指令，可以輸入以下指令安裝   brew tap homebrew/services   查看 mysql 相關設定值  $ mysqladmin variables -u root -p # =&gt; 可以查到socket位置： /tmp/mysql.sock   參考     brew link錯誤訊息解決方式   Starting and Stopping Background Services with Homebrew">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[MySQL] MAC環境MySQL安裝筆記">
+<meta property="og:url" content="https://blog.anxgang.com/mysql-mac-environment-to-install-mysql/">
+
+
+  <meta property="og:description" content="本文使用 Mac OS X EI Capitan 10.11.6 / Homebrew 0.9.9   前言  此為MySQL於MAC環境的安裝筆記，本文將使用homebrew安裝MySQL，並大致紀錄如何手動/自動開啟服務  使用homebrew安裝  brew install mysql      安裝完後出現錯誤訊息   Error: The `brew link` step did not complete successfully The formula built, but is not symlinked into /usr/local Could not symlink share/man/man8/mysqld.8 /usr/local/share/man/man8 is not writable.   解決方式  #開啟權限 $ sudo chown -R $(whoami) /usr/local/ #重新link一次 $ brew link mysql   預設root帳號沒密碼，如需要請輸入下列指令  mysql_secure_installation      如出現以下錯誤訊息   Error: Can&#39;t connect to local MySQL server through socket &#39;/tmp/mysql.sock&#39; (2)   表示需要先把服務on起來mysql.server start再執行動作  然後會有以下囉唆的問題：          VALIDATE PASSWORD PLUGIN can be used to test passwords and improve security. It checks the strength of password and allows the users to set only those passwords which are secure enough. Would you like to setup VALIDATE PASSWORD plugin? Press y|Y for Yes, any other key for No: Please set the password for root here. New password: Re-enter new password: 總之就是先問你要不要安裝VALIDATE PASSWORD這個套件（可以幫你有效驗證密碼的複雜度，你設定太簡單會提醒你），不想裝可以Enter跳過就好，然後輸入兩次密碼結束第一個回合(問題)           By default, a MySQL installation has an anonymous user, allowing anyone to log into MySQL without having to have a user account created for them. This is intended only for testing, and to make the installation go a bit smoother. You should remove them before moving into a production environment. Remove anonymous users? (Press y|Y for Yes, any other key for No) : 是否移除匿名使用者?通常選y           Normally, root should only be allowed to connect from ‘localhost’. This ensures that someone cannot guess at the root password from the network. Disallow root login remotely? (Press y|Y for Yes, any other key for No) : 是否關閉root遠端登入？通常選y           By default, MySQL comes with a database named ‘test’ that anyone can access. This is also intended only for testing, and should be removed before moving into a production environment. Remove test database and access to it? (Press y|Y for Yes, any other key for No) : 是否移除測試資料庫？選y即可           Reloading the privilege tables will ensure that all changes made so far will take effect immediately. Reload privilege tables now? (Press y|Y for Yes, any other key for No) : 是否直接重新讀取權限？選y即可      進入sql指令模式  mysql -uroot   Service手動啟動/關閉方式  mysql.server start mysql.server stop mysql.server restart   利用homwbrew services開機自動啟動/關閉  # 沒加上sudo只是手動啟動 $ brew services start mysql $ brew services stop mysql  # 加上sudo可以在開機自動啟動 $ sudo brew services start mysql $ sudo brew services start mysql  # 查看services清單 $ brew services list      若沒有homebrew service指令，可以輸入以下指令安裝   brew tap homebrew/services   查看 mysql 相關設定值  $ mysqladmin variables -u root -p # =&gt; 可以查到socket位置： /tmp/mysql.sock   參考     brew link錯誤訊息解決方式   Starting and Stopping Background Services with Homebrew">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[MySQL] MAC環境MySQL安裝筆記">
+  <meta name="twitter:description" content="本文使用 Mac OS X EI Capitan 10.11.6 / Homebrew 0.9.9   前言  此為MySQL於MAC環境的安裝筆記，本文將使用homebrew安裝MySQL，並大致紀錄如何手動/自動開啟服務  使用homebrew安裝  brew install mysql      安裝完後出現錯誤訊息   Error: The `brew link` step did not complete successfully The formula built, but is not symlinked into /usr/local Could not symlink share/man/man8/mysqld.8 /usr/local/share/man/man8 is not writable.   解決方式  #開啟權限 $ sudo chown -R $(whoami) /usr/local/ #重新link一次 $ brew link mysql   預設root帳號沒密碼，如需要請輸入下列指令  mysql_secure_installation      如出現以下錯誤訊息   Error: Can&#39;t connect to local MySQL server through socket &#39;/tmp/mysql.sock&#39; (2)   表示需要先把服務on起來mysql.server start再執行動作  然後會有以下囉唆的問題：          VALIDATE PASSWORD PLUGIN can be used to test passwords and improve security. It checks the strength of password and allows the users to set only those passwords which are secure enough. Would you like to setup VALIDATE PASSWORD plugin? Press y|Y for Yes, any other key for No: Please set the password for root here. New password: Re-enter new password: 總之就是先問你要不要安裝VALIDATE PASSWORD這個套件（可以幫你有效驗證密碼的複雜度，你設定太簡單會提醒你），不想裝可以Enter跳過就好，然後輸入兩次密碼結束第一個回合(問題)           By default, a MySQL installation has an anonymous user, allowing anyone to log into MySQL without having to have a user account created for them. This is intended only for testing, and to make the installation go a bit smoother. You should remove them before moving into a production environment. Remove anonymous users? (Press y|Y for Yes, any other key for No) : 是否移除匿名使用者?通常選y           Normally, root should only be allowed to connect from ‘localhost’. This ensures that someone cannot guess at the root password from the network. Disallow root login remotely? (Press y|Y for Yes, any other key for No) : 是否關閉root遠端登入？通常選y           By default, MySQL comes with a database named ‘test’ that anyone can access. This is also intended only for testing, and should be removed before moving into a production environment. Remove test database and access to it? (Press y|Y for Yes, any other key for No) : 是否移除測試資料庫？選y即可           Reloading the privilege tables will ensure that all changes made so far will take effect immediately. Reload privilege tables now? (Press y|Y for Yes, any other key for No) : 是否直接重新讀取權限？選y即可      進入sql指令模式  mysql -uroot   Service手動啟動/關閉方式  mysql.server start mysql.server stop mysql.server restart   利用homwbrew services開機自動啟動/關閉  # 沒加上sudo只是手動啟動 $ brew services start mysql $ brew services stop mysql  # 加上sudo可以在開機自動啟動 $ sudo brew services start mysql $ sudo brew services start mysql  # 查看services清單 $ brew services list      若沒有homebrew service指令，可以輸入以下指令安裝   brew tap homebrew/services   查看 mysql 相關設定值  $ mysqladmin variables -u root -p # =&gt; 可以查到socket位置： /tmp/mysql.sock   參考     brew link錯誤訊息解決方式   Starting and Stopping Background Services with Homebrew">
+  <meta name="twitter:url" content="https://blog.anxgang.com/mysql-mac-environment-to-install-mysql/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-08-03T01:36:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/mysql-mac-environment-to-install-mysql/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[MySQL] MAC環境MySQL安裝筆記">
+        
+        
+        <meta itemprop="description"
+            content="  本文使用 Mac OS X EI Capitan 10.11.6 / Homebrew 0.9.9前言此為MySQL於MAC環境的安裝筆記，本文將使用homebrew安裝MySQL，並大致紀錄如何手動/自動開啟服務使用homebrew安裝brew install mysql  安裝完後出現錯誤訊息Error: The `brew link` step did not complete successfullyThe formula built, but is not symlinked into /usr/localCould not symlink share/man/man8/mysqld.8/usr/local/share/man/man8 is not writable.解決方式#開啟權限$ sudo chown -R $(whoami) /usr/local/#重新link一次$ brew link mysql預設root帳號沒密碼，如需要請輸入下列指令mysql_secure_installation  如出現以下錯誤訊息Error: Can&#39;t connect to local MySQL server through socket &#39;/tmp/mysql.sock&#39; (2)表示需要先把服務on起來mysql.server start再執行動作然後會有以下囉唆的問題：      VALIDATE PASSWORD PLUGIN can be used to test passwordsand improve security. It checks the strength of passwordand allows the users to set only those passwords which aresecure enough. Would you like to setup VALIDATE PASSWORD plugin?Press y|Y for Yes, any other key for No:Please set the password for root here.New password:Re-enter new password:總之就是先問你要不要安裝VALIDATE PASSWORD這個套件（可以幫你有效驗證密碼的複雜度，你設定太簡單會提醒你），不想裝可以Enter跳過就好，然後輸入兩次密碼結束第一個回合(問題)        By default, a MySQL installation has an anonymous user,allowing anyone to log into MySQL without having to havea user account created for them. This is intended only fortesting, and to make the installation go a bit smoother.You should remove them before moving into a productionenvironment.Remove anonymous users? (Press y|Y for Yes, any other key for No) :是否移除匿名使用者?通常選y        Normally, root should only be allowed to connect from‘localhost’. This ensures that someone cannot guess atthe root password from the network.Disallow root login remotely? (Press y|Y for Yes, any other key for No) :是否關閉root遠端登入？通常選y        By default, MySQL comes with a database named ‘test’ thatanyone can access. This is also intended only for testing,and should be removed before moving into a productionenvironment.Remove test database and access to it? (Press y|Y for Yes, any other key for No) :是否移除測試資料庫？選y即可        Reloading the privilege tables will ensure that all changesmade so far will take effect immediately.Reload privilege tables now? (Press y|Y for Yes, any other key for No) :是否直接重新讀取權限？選y即可  進入sql指令模式mysql -urootService手動啟動/關閉方式mysql.server startmysql.server stopmysql.server restart利用homwbrew services開機自動啟動/關閉# 沒加上sudo只是手動啟動$ brew services start mysql$ brew services stop mysql# 加上sudo可以在開機自動啟動$ sudo brew services start mysql$ sudo brew services start mysql# 查看services清單$ brew services list  若沒有homebrew service指令，可以輸入以下指令安裝brew tap homebrew/services查看 mysql 相關設定值$ mysqladmin variables -u root -p# =&gt; 可以查到socket位置： /tmp/mysql.sock參考  brew link錯誤訊息解決方式  Starting and Stopping Background Services with Homebrew">
+        
+        <meta itemprop="datePublished" content="2016-08-03T01:36:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/mysql-mac-environment-to-install-mysql/" class="u-url"
+                        itemprop="url">[MySQL] MAC環境MySQL安裝筆記
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-08-03T01:36:00+08:00">2016-08-03</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#前言">前言</a></li><li><a href="#使用homebrew安裝">使用homebrew安裝</a></li><li><a href="#預設root帳號沒密碼如需要請輸入下列指令">預設root帳號沒密碼，如需要請輸入下列指令</a></li><li><a href="#進入sql指令模式">進入sql指令模式</a></li><li><a href="#service手動啟動關閉方式">Service手動啟動/關閉方式</a></li><li><a href="#利用homwbrew-services開機自動啟動關閉">利用homwbrew services開機自動啟動/關閉</a></li><li><a href="#查看-mysql-相關設定值">查看 mysql 相關設定值</a></li><li><a href="#參考">參考</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <blockquote>
+  <p>本文使用 Mac OS X EI Capitan 10.11.6 / Homebrew 0.9.9</p>
+</blockquote>
+
+<h2 id="前言">前言</h2>
+
+<p>此為MySQL於MAC環境的安裝筆記，本文將使用homebrew安裝MySQL，並大致紀錄如何手動/自動開啟服務</p>
+
+<h2 id="使用homebrew安裝">使用homebrew安裝</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew <span class="nb">install </span>mysql
+</code></pre></div></div>
+<blockquote>
+
+  <p>安裝完後出現錯誤訊息</p>
+</blockquote>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error: The <span class="sb">`</span>brew <span class="nb">link</span><span class="sb">`</span> step did not <span class="nb">complete </span>successfully
+The formula built, but is not symlinked into /usr/local
+Could not symlink share/man/man8/mysqld.8
+/usr/local/share/man/man8 is not writable.
+</code></pre></div></div>
+
+<p>解決方式</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#開啟權限</span>
+<span class="nv">$ </span><span class="nb">sudo chown</span> <span class="nt">-R</span> <span class="si">$(</span><span class="nb">whoami</span><span class="si">)</span> /usr/local/
+<span class="c">#重新link一次</span>
+<span class="nv">$ </span>brew <span class="nb">link </span>mysql
+</code></pre></div></div>
+
+<h2 id="預設root帳號沒密碼如需要請輸入下列指令">預設root帳號沒密碼，如需要請輸入下列指令</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql_secure_installation
+</code></pre></div></div>
+
+<blockquote>
+  <p>如出現以下錯誤訊息</p>
+</blockquote>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error: Can<span class="s1">'t connect to local MySQL server through socket '</span>/tmp/mysql.sock<span class="s1">' (2)
+</span></code></pre></div></div>
+
+<p>表示需要先把服務on起來<code class="language-plaintext highlighter-rouge">mysql.server start</code>再執行動作</p>
+
+<p>然後會有以下囉唆的問題：</p>
+
+<ol>
+  <li>
+    <p>VALIDATE PASSWORD PLUGIN can be used to test passwords
+and improve security. It checks the strength of password
+and allows the users to set only those passwords which are
+secure enough. Would you like to setup VALIDATE PASSWORD plugin?
+Press y|Y for Yes, any other key for No:
+Please set the password for root here.
+New password:
+Re-enter new password:
+總之就是先問你要不要安裝VALIDATE PASSWORD這個套件（可以幫你有效驗證密碼的複雜度，你設定太簡單會提醒你），不想裝可以Enter跳過就好，然後輸入兩次密碼結束第一個回合(問題)</p>
+  </li>
+  <li>
+    <p>By default, a MySQL installation has an anonymous user,
+allowing anyone to log into MySQL without having to have
+a user account created for them. This is intended only for
+testing, and to make the installation go a bit smoother.
+You should remove them before moving into a production
+environment.
+Remove anonymous users? (Press y|Y for Yes, any other key for No) :
+是否移除匿名使用者?通常選y</p>
+  </li>
+  <li>
+    <p>Normally, root should only be allowed to connect from
+‘localhost’. This ensures that someone cannot guess at
+the root password from the network.
+Disallow root login remotely? (Press y|Y for Yes, any other key for No) :
+是否關閉root遠端登入？通常選y</p>
+  </li>
+  <li>
+    <p>By default, MySQL comes with a database named ‘test’ that
+anyone can access. This is also intended only for testing,
+and should be removed before moving into a production
+environment.
+Remove test database and access to it? (Press y|Y for Yes, any other key for No) :
+是否移除測試資料庫？選y即可</p>
+  </li>
+  <li>
+    <p>Reloading the privilege tables will ensure that all changes
+made so far will take effect immediately.
+Reload privilege tables now? (Press y|Y for Yes, any other key for No) :
+是否直接重新讀取權限？選y即可</p>
+  </li>
+</ol>
+
+<h2 id="進入sql指令模式">進入sql指令模式</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql <span class="nt">-uroot</span>
+</code></pre></div></div>
+
+<h2 id="service手動啟動關閉方式">Service手動啟動/關閉方式</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql.server start
+mysql.server stop
+mysql.server restart
+</code></pre></div></div>
+
+<h2 id="利用homwbrew-services開機自動啟動關閉">利用homwbrew services開機自動啟動/關閉</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 沒加上sudo只是手動啟動</span>
+<span class="nv">$ </span>brew services start mysql
+<span class="nv">$ </span>brew services stop mysql
+
+<span class="c"># 加上sudo可以在開機自動啟動</span>
+<span class="nv">$ </span><span class="nb">sudo </span>brew services start mysql
+<span class="nv">$ </span><span class="nb">sudo </span>brew services start mysql
+
+<span class="c"># 查看services清單</span>
+<span class="nv">$ </span>brew services list
+</code></pre></div></div>
+
+<blockquote>
+  <p>若沒有homebrew service指令，可以輸入以下指令安裝</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>brew tap homebrew/services
+</code></pre></div></div>
+
+<h2 id="查看-mysql-相關設定值">查看 mysql 相關設定值</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mysqladmin variables <span class="nt">-u</span> root <span class="nt">-p</span>
+<span class="c"># =&gt; 可以查到socket位置： /tmp/mysql.sock</span>
+</code></pre></div></div>
+
+<h2 id="參考">參考</h2>
+
+<ol>
+  <li><a href="http://stackoverflow.com/questions/12812613/brew-link-mysql-did-not-complete">brew link錯誤訊息解決方式</a></li>
+  <li><a href="https://robots.thoughtbot.com/starting-and-stopping-background-services-with-homebrew">Starting and Stopping Background Services with Homebrew</a></li>
+</ol>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-08-03T01:36:00+08:00">August 3, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BMySQL%5D+MAC%E7%92%B0%E5%A2%83MySQL%E5%AE%89%E8%A3%9D%E7%AD%86%E8%A8%98%20https%3A%2F%2Fblog.anxgang.com%2Fmysql-mac-environment-to-install-mysql%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fmysql-mac-environment-to-install-mysql%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fmysql-mac-environment-to-install-mysql%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/digitalocean-using-capistrano-deploy-rails-app-a/" class="pagination--pager" title="[DigitalOcean] 使用 Capistrano Deploy Rails App (一)
+">上一篇</a>
+    
+    
+      <a href="/digitalocean-using-capistrano-deploy-rails-app-b/" class="pagination--pager" title="[DigitalOcean] 使用 Capistrano Deploy Rails App (二)
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/mysql-mac-environment-to-install-mysql/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/mysql-mac-environment-to-install-mysql"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

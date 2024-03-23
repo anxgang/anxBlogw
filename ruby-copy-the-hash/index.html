@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Ubuntu 如何使用排程 crontab - ANxGANG</title>
-<meta name="description" content="ubuntu 如何使用排程 crontab">
+<!-- begin _includes/seo.html --><title>[Ruby] hash複製 - ANxGANG</title>
+<meta name="description" content="一般變數指定  a = 10 b = a b += 10 #=&gt; a = 10 #=&gt; b = 20   hash複製  #失敗範例 a = { name: &#39;ivan&#39;, age: 18  } b = a b[:age] = 30 #=&gt; a = { name: &#39;ivan&#39;, age: 30  } #=&gt; b = { name: &#39;ivan&#39;, age: 30  }  #成功範例 a = { name: &#39;ivan&#39;, age: 18  } b = a.clone b[:age] = 30 #=&gt; a = { name: &#39;ivan&#39;, age: 18  } #=&gt; b = { name: &#39;ivan&#39;, age: 30  }       Reference        http://stackoverflow.com/questions/4157399/how-do-i-copy-a-hash-in-ruby     http://motion-express.com/blog/ruby-same-object-or-duplicate">
 
 
   <meta name="author" content="anxgang">
@@ -22,27 +22,27 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:site_name" content="ANxGANG">
-<meta property="og:title" content="Ubuntu 如何使用排程 crontab">
-<meta property="og:url" content="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/">
+<meta property="og:title" content="[Ruby] hash複製">
+<meta property="og:url" content="https://blog.anxgang.com/ruby-copy-the-hash/">
 
 
-  <meta property="og:description" content="ubuntu 如何使用排程 crontab">
+  <meta property="og:description" content="一般變數指定  a = 10 b = a b += 10 #=&gt; a = 10 #=&gt; b = 20   hash複製  #失敗範例 a = { name: &#39;ivan&#39;, age: 18  } b = a b[:age] = 30 #=&gt; a = { name: &#39;ivan&#39;, age: 30  } #=&gt; b = { name: &#39;ivan&#39;, age: 30  }  #成功範例 a = { name: &#39;ivan&#39;, age: 18  } b = a.clone b[:age] = 30 #=&gt; a = { name: &#39;ivan&#39;, age: 18  } #=&gt; b = { name: &#39;ivan&#39;, age: 30  }       Reference        http://stackoverflow.com/questions/4157399/how-do-i-copy-a-hash-in-ruby     http://motion-express.com/blog/ruby-same-object-or-duplicate">
 
 
 
-  <meta property="og:image" content="https://blog.anxgang.com/assets/images/logo-ubuntu.jpg">
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
 
 
 
   <meta name="twitter:site" content="@anxgang1">
-  <meta name="twitter:title" content="Ubuntu 如何使用排程 crontab">
-  <meta name="twitter:description" content="ubuntu 如何使用排程 crontab">
-  <meta name="twitter:url" content="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/">
+  <meta name="twitter:title" content="[Ruby] hash複製">
+  <meta name="twitter:description" content="一般變數指定  a = 10 b = a b += 10 #=&gt; a = 10 #=&gt; b = 20   hash複製  #失敗範例 a = { name: &#39;ivan&#39;, age: 18  } b = a b[:age] = 30 #=&gt; a = { name: &#39;ivan&#39;, age: 30  } #=&gt; b = { name: &#39;ivan&#39;, age: 30  }  #成功範例 a = { name: &#39;ivan&#39;, age: 18  } b = a.clone b[:age] = 30 #=&gt; a = { name: &#39;ivan&#39;, age: 18  } #=&gt; b = { name: &#39;ivan&#39;, age: 30  }       Reference        http://stackoverflow.com/questions/4157399/how-do-i-copy-a-hash-in-ruby     http://motion-express.com/blog/ruby-same-object-or-duplicate">
+  <meta name="twitter:url" content="https://blog.anxgang.com/ruby-copy-the-hash/">
 
   
     <meta name="twitter:card" content="summary">
     
-      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/logo-ubuntu.jpg">
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
     
   
 
@@ -50,7 +50,7 @@
 
 
 
-  <meta property="article:published_time" content="2023-01-13T00:00:00+08:00">
+  <meta property="article:published_time" content="2016-12-28T08:14:00+08:00">
 
 
 
@@ -61,7 +61,7 @@
   
 
 
-<link rel="canonical" href="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/">
+<link rel="canonical" href="https://blog.anxgang.com/ruby-copy-the-hash/">
 
 
 
@@ -117,7 +117,7 @@
 <!-- end custom head snippets -->
   </head>
 
-  <body class="layout--single">
+  <body class="layout--post">
     <nav class="skip-links">
   <ul>
     <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
@@ -169,11 +169,19 @@
                 <ul class="dropdown-content">
                   
                   <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
                     <a href="/tags/"> By Tag</a>
                   </li>
                   
                   <li>
                     <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
                   </li>
                   
                 </ul>
@@ -338,21 +346,21 @@
 
     <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
         
-        <meta itemprop="headline" content="Ubuntu 如何使用排程 crontab">
+        <meta itemprop="headline" content="[Ruby] hash複製">
         
         
         <meta itemprop="description"
-            content="ubuntu 如何使用排程 crontab">
+            content="一般變數指定a = 10b = ab += 10#=&gt; a = 10#=&gt; b = 20hash複製#失敗範例a = { name: &#39;ivan&#39;, age: 18  }b = ab[:age] = 30#=&gt; a = { name: &#39;ivan&#39;, age: 30  }#=&gt; b = { name: &#39;ivan&#39;, age: 30  }#成功範例a = { name: &#39;ivan&#39;, age: 18  }b = a.cloneb[:age] = 30#=&gt; a = { name: &#39;ivan&#39;, age: 18  }#=&gt; b = { name: &#39;ivan&#39;, age: 30  }  Reference      http://stackoverflow.com/questions/4157399/how-do-i-copy-a-hash-in-ruby    http://motion-express.com/blog/ruby-same-object-or-duplicate  ">
         
-        <meta itemprop="datePublished" content="2023-01-13T00:00:00+08:00">
+        <meta itemprop="datePublished" content="2016-12-28T08:14:00+08:00">
         
 
         <div class="page__inner-wrap">
             
             <header>
                 <h1 id="page-title" class="page__title p-name" itemprop="headline">
-                    <a href="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/" class="u-url"
-                        itemprop="url">Ubuntu 如何使用排程 crontab
+                    <a href="https://blog.anxgang.com/ruby-copy-the-hash/" class="u-url"
+                        itemprop="url">[Ruby] hash複製
 </a>
                 </h1>
                 
@@ -364,7 +372,7 @@
         <i class="far fa-calendar-alt" aria-hidden="true"></i>
         
          
-        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+        <time datetime="2016-12-28T08:14:00+08:00">2016-12-28</time>
       </span>
     
 
@@ -396,65 +404,45 @@
                                 &nbsp;索引
                             </h4>
                         </header>
-                        <ul class="toc__menu"><li><a href="#目標">目標</a></li><li><a href="#安裝">安裝</a></li><li><a href="#服務">服務</a></li><li><a href="#使用方式">使用方式</a><ul><li><a href="#user">user</a></li><li><a href="#root">root</a></li></ul></li><li><a href="#參考">參考</a></li></ul>
+                        <ul class="toc__menu"><li><a href="#一般變數指定">一般變數指定</a></li><li><a href="#hash複製">hash複製</a></li></ul>
 
                     </nav>
                 </aside>
                 
-                <p>ubuntu 如何使用排程 crontab</p>
+                <h1 id="一般變數指定">一般變數指定</h1>
 
-<h2 id="目標">目標</h2>
-
-<p>介紹 crontab 基本用法</p>
-
-<h2 id="安裝">安裝</h2>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>apt update
-<span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>cron
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+<span class="n">b</span> <span class="o">+=</span> <span class="mi">10</span>
+<span class="c1">#=&gt; a = 10</span>
+<span class="c1">#=&gt; b = 20</span>
 </code></pre></div></div>
 
-<h2 id="服務">服務</h2>
+<h1 id="hash複製">hash複製</h1>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo service cron status
-$ sudo service cron start
-$ sudo service cron restart
-$ sudo service cron stop
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#失敗範例</span>
+<span class="n">a</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">name: </span><span class="s1">'ivan'</span><span class="p">,</span> <span class="ss">age: </span><span class="mi">18</span>  <span class="p">}</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+<span class="n">b</span><span class="p">[</span><span class="ss">:age</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="c1">#=&gt; a = { name: 'ivan', age: 30  }</span>
+<span class="c1">#=&gt; b = { name: 'ivan', age: 30  }</span>
+
+<span class="c1">#成功範例</span>
+<span class="n">a</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">name: </span><span class="s1">'ivan'</span><span class="p">,</span> <span class="ss">age: </span><span class="mi">18</span>  <span class="p">}</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="nf">clone</span>
+<span class="n">b</span><span class="p">[</span><span class="ss">:age</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="c1">#=&gt; a = { name: 'ivan', age: 18  }</span>
+<span class="c1">#=&gt; b = { name: 'ivan', age: 30  }</span>
+
 </code></pre></div></div>
 
-<p class="notice--warning"><strong>提示:</strong> 安裝完服務會自動啟動，文件設定完也不用重啟，所以這幾行其實很少用。</p>
-
-<h2 id="使用方式">使用方式</h2>
-
-<p>以下兩種方式:</p>
-
-<h3 id="user">user</h3>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>crontab <span class="nt">-l</span> <span class="c">#列出</span>
-crontab <span class="nt">-r</span> <span class="c">#刪除</span>
-crontab <span class="nt">-e</span> <span class="c">#編輯</span>
-</code></pre></div></div>
-
-<h3 id="root">root</h3>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vim /etc/crontab
-</code></pre></div></div>
-
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 分 時 日 月 星期 指令</span>
-<span class="mi">0</span> <span class="mi">0</span><span class="p">,</span><span class="mi">12</span> <span class="mi">1</span> <span class="o">*</span> <span class="o">*</span> <span class="sr">/usr/</span><span class="n">bin</span><span class="o">/</span><span class="n">certbot</span> <span class="n">renew</span> <span class="c1"># 每個月1號的0點和12點執行 certbot renew</span>
-</code></pre></div></div>
-
-<div class="notice--warning">
-  
-<p><strong>提示:</strong><br /> 
-個人是習慣直接編輯<code class="language-plaintext highlighter-rouge">/etc/crontab</code>，如不熟悉可至工具網頁 <a href="https://crontab.guru" target="_blank">crontab.guru</a> 試試是否正確</p>
-
-</div>
-
-<h2 id="參考">參考</h2>
-<ol>
-  <li><a href="https://medium.com/@dkxmonster/%E6%8A%80%E8%A1%93%E7%A0%94%E7%A9%B6-ubuntu-crontab-6f780b88ed6b" target="_blank">技術研究 Ubuntu CronTab - DavidKross</a></li>
-  <li><a href="https://crontab.guru" target="_blank">crontab.guru</a></li>
-</ol>
+<blockquote>
+  <p>Reference</p>
+  <ol>
+    <li>http://stackoverflow.com/questions/4157399/how-do-i-copy-a-hash-in-ruby</li>
+    <li>http://motion-express.com/blog/ruby-same-object-or-duplicate</li>
+  </ol>
+</blockquote>
 
                 
             </section>
@@ -462,68 +450,13 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
             <footer class="page__meta">
                 
                 
-  
-
-
-  
-
-  <p class="page__taxonomy">
-    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> 標籤: </strong>
-    <span itemprop="keywords">
-    
-      <a href="/tags/#crontab" class="page__taxonomy-item p-category" rel="tag">crontab</a><span class="sep">, </span>
-    
-      <a href="/tags/#ubuntu" class="page__taxonomy-item p-category" rel="tag">ubuntu</a>
-    
-    </span>
-  </p>
-
-
-
-
-  
-
-
-  
-
-  <p class="page__taxonomy">
-    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> 分類: </strong>
-    <span itemprop="keywords">
-    
-      <a href="/categories/#ubuntu" class="page__taxonomy-item p-category" rel="tag">Ubuntu</a>
-    
-    </span>
-  </p>
 
 
                 
 
-  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2023-01-13T00:00:00+08:00">January 13, 2023</time></p>
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-12-28T08:14:00+08:00">December 28, 2016</time></p>
 
                 
-  <p class="page__history" style="padding-top: 10px">
-  <strong>
-    <i class="fas fa-fw fa-history" aria-hidden="true"></i>
-    <span class="collapse-button" style="cursor: pointer"
-      onclick="hidecurrentpagehistory.style.display=hidecurrentpagehistory.style.display=='none'?'block':'none';">
-      歷史紀錄 ▿
-    </span>
-  </strong>
-  <div id="hidecurrentpagehistory" class="collapse-wrapper" style="display: none">
-    <ul>
-  <li>2023-01-13 初稿</li>
-</ul>
-
-  </div>
-</p>
-
-<style>
-.collapse-wrapper ul, .collapse-wrapper li{
-  margin: 0px;
-}
-</style>
-
-
             </footer>
 
             <section class="page__share">
@@ -531,22 +464,22 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
     <h4 class="page__share-title">分享到</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=Ubuntu+%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E6%8E%92%E7%A8%8B+crontab%20https%3A%2F%2Fblog.anxgang.com%2Fubuntu%2Fhow-to-use-crontab-in-ubuntu-copy%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BRuby%5D+hash%E8%A4%87%E8%A3%BD%20https%3A%2F%2Fblog.anxgang.com%2Fruby-copy-the-hash%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fubuntu%2Fhow-to-use-crontab-in-ubuntu-copy%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fruby-copy-the-hash%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fubuntu%2Fhow-to-use-crontab-in-ubuntu-copy%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fruby-copy-the-hash%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
             
   <nav class="pagination">
     
-      <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" class="pagination--pager" title="Jekyll 使用 mermaid 繪製流程圖
+      <a href="/1237634/" class="pagination--pager" title="[MYSQL] 無法寫入中文問題
 ">上一篇</a>
     
     
-      <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" class="pagination--pager" title="Ubuntu 如何 mount windows 的分享資料夾
+      <a href="/1304926/" class="pagination--pager" title="[Redis] Redis-Commander
 ">下一篇</a>
     
   </nav>
@@ -684,6 +617,58 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
       <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
         <img src="/assets/images/logo-jekyll.jpg" alt="">
       </div>
     
@@ -783,11 +768,190 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
 </div>
 
             
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
         </div>
     </div>
     
     
 </div>
+
 
     </div>
 
@@ -840,7 +1004,7 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2023 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
@@ -861,8 +1025,8 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
     
   <script>
     var disqus_config = function () {
-      this.page.url = "https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/";  /* Replace PAGE_URL with your page's canonical URL variable */
-      this.page.identifier = "/ubuntu/how-to-use-crontab-in-ubuntu copy"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+      this.page.url = "https://blog.anxgang.com/ruby-copy-the-hash/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/ruby-copy-the-hash"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
     };
     (function() { /* DON'T EDIT BELOW THIS LINE */
       var d = document, s = d.createElement('script');

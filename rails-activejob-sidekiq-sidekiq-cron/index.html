@@ -1,0 +1,1160 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Rails] 排程使用 ActiveJob + Sidekiq + Sidekiq-cron - ANxGANG</title>
+<meta name="description" content="前言 Active Job 是rails官方內建的背景執行程序，有adapter可用來連接外部的Sidekiq、resque、delay job等 我個人認為語法滿簡潔的，而且如果以後想改resque或其他也滿好處理 這邊使用sidekiq來執行，並搭配Sidekiq-cron這個plugin來設定排程 並且會安裝Web UI來快速查看執行狀況  說明 sidekiq其實是一個服務，他還搭配了redis這個資料庫  當我們使用sidekiq建立一個排程，其實是建立在redis資料庫中， 如果有安裝sidekiq-corn的話，運作的排程也放在redis  這和我們一般使用whenever建立cron不一樣 whenever建立的cron是放在作業系統(Linux或mac)內建的crontab中，就不用另外啟動其他服務  但使用sidekiq，則一定要確保sidekiq及redis都有運作  前置作業  #####安裝Redis Redis官方網站  安裝 redis 資料庫 $ brew install redis 啟動 redis 資料庫 $ brew services start redis  若需要其他資訊可以輸入 $ brew info redis  #####安裝Sidekiq Sidekiq官方網站  gem &#39;sidekiq&#39; gem &quot;sidekiq-cron&quot;, &quot;~&gt; 0.4.0&quot;   $ bundle install  第一個Job  1. 新增一個 Active Job  $ rails generate job guests_cleanup   可以發現在 /job 中多了一個 guests_cleanup_job.rb 調整一下perform中輸出的文字  class GuestsCleanupJob &lt; ActiveJob::Base   queue_as :default     def perform(*args)     puts &#39;hello Job!!!&#39;   end end   這樣我們就建好一個job了 可以在rails c 中  輸入 GuestsCleanupJob.perform_later 測試，他會把上執行 輸入 GuestsCleanupJob.set(wait_until: Date.tomorrow.noon).perform_later(record) 測試，他會等到明天中午執行 輸入 GuestsCleanupJob.set(wait: 1.week).perform_later(record) 測試，他會等一週後才執行  2. sidekiq 只要加入adapter是sidekiq即可 # [path] application.rb class Application &lt; Rails::Application 	config.active_job.queue_adapter = :sidekiq end   加入此行後，之後的原本執行job的指令(如： GuestsCleanupJob.perform_later )，就會丟給sidekiq去執行 記得sidekiq服務要啟動，需要執行 sidekiq  3. sidekiq web UI 加上即可 # [path] route.rb require &#39;sidekiq/web&#39; mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;  之後就可以在 http://xxxx/sidekiq 中看到所有job執行狀況  4. sidekiq-cron sidekiq-cron官方  sidekiq-corn web UI介面 加入 require &#39;sidekiq/cron/web&#39; 即可 (要在sidekiq/web之後) # [path] route.rb require &#39;sidekiq/web&#39; require &#39;sidekiq/cron/web&#39; mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;   官方提供好幾種設定排程方式，這邊介紹兩種：  (1) 直接新增 Sidekiq::Cron::Job.create( 	name: ‘Hard worker - every 5min’,   cron: ‘*/5 * * * *’,   class: ‘HardWorker’,   active_job: true  )  (2) YML ```yml config/schedule.yml my_first_job:   cron: “*/5 * * * *”   class: “HardWorker”   queue: hard_worker   active_job: true  second_job:   cron: “*/30 * * * *” # 分 時 日 月 週    class: “HardWorker” # 需對應你的Job   queue: hard_worker_long # 優先權設定，詳細請看官網說明   active_job: true # 因為我們使用active_job建立，請設為true   args:     hard: “stuff” ```rb # [path] config/initializers/sidekiq.rb schedule_file = &quot;config/schedule.yml&quot;  if File.exists?(schedule_file) &amp;&amp; Sidekiq.server?   Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file) end   另外如果要跑ActionMail的話，因為預設的queue是mailer 記得要加上sidekiq.yml設定mailers的queue (否則他只會跑default，你的mail就會被一直晾在queue中) ```yml sidekiq.yml — :concurrency: 1 :queues:    default   mailers ```   記得sidekiq要run     Reference        http://rails.ruby.tw/active_job_basics.html     https://github.com/kakas/Kaohsiung_Rails_Sidekiq_demo">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Rails] 排程使用 ActiveJob + Sidekiq + Sidekiq-cron">
+<meta property="og:url" content="https://blog.anxgang.com/rails-activejob-sidekiq-sidekiq-cron/">
+
+
+  <meta property="og:description" content="前言 Active Job 是rails官方內建的背景執行程序，有adapter可用來連接外部的Sidekiq、resque、delay job等 我個人認為語法滿簡潔的，而且如果以後想改resque或其他也滿好處理 這邊使用sidekiq來執行，並搭配Sidekiq-cron這個plugin來設定排程 並且會安裝Web UI來快速查看執行狀況  說明 sidekiq其實是一個服務，他還搭配了redis這個資料庫  當我們使用sidekiq建立一個排程，其實是建立在redis資料庫中， 如果有安裝sidekiq-corn的話，運作的排程也放在redis  這和我們一般使用whenever建立cron不一樣 whenever建立的cron是放在作業系統(Linux或mac)內建的crontab中，就不用另外啟動其他服務  但使用sidekiq，則一定要確保sidekiq及redis都有運作  前置作業  #####安裝Redis Redis官方網站  安裝 redis 資料庫 $ brew install redis 啟動 redis 資料庫 $ brew services start redis  若需要其他資訊可以輸入 $ brew info redis  #####安裝Sidekiq Sidekiq官方網站  gem &#39;sidekiq&#39; gem &quot;sidekiq-cron&quot;, &quot;~&gt; 0.4.0&quot;   $ bundle install  第一個Job  1. 新增一個 Active Job  $ rails generate job guests_cleanup   可以發現在 /job 中多了一個 guests_cleanup_job.rb 調整一下perform中輸出的文字  class GuestsCleanupJob &lt; ActiveJob::Base   queue_as :default     def perform(*args)     puts &#39;hello Job!!!&#39;   end end   這樣我們就建好一個job了 可以在rails c 中  輸入 GuestsCleanupJob.perform_later 測試，他會把上執行 輸入 GuestsCleanupJob.set(wait_until: Date.tomorrow.noon).perform_later(record) 測試，他會等到明天中午執行 輸入 GuestsCleanupJob.set(wait: 1.week).perform_later(record) 測試，他會等一週後才執行  2. sidekiq 只要加入adapter是sidekiq即可 # [path] application.rb class Application &lt; Rails::Application 	config.active_job.queue_adapter = :sidekiq end   加入此行後，之後的原本執行job的指令(如： GuestsCleanupJob.perform_later )，就會丟給sidekiq去執行 記得sidekiq服務要啟動，需要執行 sidekiq  3. sidekiq web UI 加上即可 # [path] route.rb require &#39;sidekiq/web&#39; mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;  之後就可以在 http://xxxx/sidekiq 中看到所有job執行狀況  4. sidekiq-cron sidekiq-cron官方  sidekiq-corn web UI介面 加入 require &#39;sidekiq/cron/web&#39; 即可 (要在sidekiq/web之後) # [path] route.rb require &#39;sidekiq/web&#39; require &#39;sidekiq/cron/web&#39; mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;   官方提供好幾種設定排程方式，這邊介紹兩種：  (1) 直接新增 Sidekiq::Cron::Job.create( 	name: ‘Hard worker - every 5min’,   cron: ‘*/5 * * * *’,   class: ‘HardWorker’,   active_job: true  )  (2) YML ```yml config/schedule.yml my_first_job:   cron: “*/5 * * * *”   class: “HardWorker”   queue: hard_worker   active_job: true  second_job:   cron: “*/30 * * * *” # 分 時 日 月 週    class: “HardWorker” # 需對應你的Job   queue: hard_worker_long # 優先權設定，詳細請看官網說明   active_job: true # 因為我們使用active_job建立，請設為true   args:     hard: “stuff” ```rb # [path] config/initializers/sidekiq.rb schedule_file = &quot;config/schedule.yml&quot;  if File.exists?(schedule_file) &amp;&amp; Sidekiq.server?   Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file) end   另外如果要跑ActionMail的話，因為預設的queue是mailer 記得要加上sidekiq.yml設定mailers的queue (否則他只會跑default，你的mail就會被一直晾在queue中) ```yml sidekiq.yml — :concurrency: 1 :queues:    default   mailers ```   記得sidekiq要run     Reference        http://rails.ruby.tw/active_job_basics.html     https://github.com/kakas/Kaohsiung_Rails_Sidekiq_demo">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Rails] 排程使用 ActiveJob + Sidekiq + Sidekiq-cron">
+  <meta name="twitter:description" content="前言 Active Job 是rails官方內建的背景執行程序，有adapter可用來連接外部的Sidekiq、resque、delay job等 我個人認為語法滿簡潔的，而且如果以後想改resque或其他也滿好處理 這邊使用sidekiq來執行，並搭配Sidekiq-cron這個plugin來設定排程 並且會安裝Web UI來快速查看執行狀況  說明 sidekiq其實是一個服務，他還搭配了redis這個資料庫  當我們使用sidekiq建立一個排程，其實是建立在redis資料庫中， 如果有安裝sidekiq-corn的話，運作的排程也放在redis  這和我們一般使用whenever建立cron不一樣 whenever建立的cron是放在作業系統(Linux或mac)內建的crontab中，就不用另外啟動其他服務  但使用sidekiq，則一定要確保sidekiq及redis都有運作  前置作業  #####安裝Redis Redis官方網站  安裝 redis 資料庫 $ brew install redis 啟動 redis 資料庫 $ brew services start redis  若需要其他資訊可以輸入 $ brew info redis  #####安裝Sidekiq Sidekiq官方網站  gem &#39;sidekiq&#39; gem &quot;sidekiq-cron&quot;, &quot;~&gt; 0.4.0&quot;   $ bundle install  第一個Job  1. 新增一個 Active Job  $ rails generate job guests_cleanup   可以發現在 /job 中多了一個 guests_cleanup_job.rb 調整一下perform中輸出的文字  class GuestsCleanupJob &lt; ActiveJob::Base   queue_as :default     def perform(*args)     puts &#39;hello Job!!!&#39;   end end   這樣我們就建好一個job了 可以在rails c 中  輸入 GuestsCleanupJob.perform_later 測試，他會把上執行 輸入 GuestsCleanupJob.set(wait_until: Date.tomorrow.noon).perform_later(record) 測試，他會等到明天中午執行 輸入 GuestsCleanupJob.set(wait: 1.week).perform_later(record) 測試，他會等一週後才執行  2. sidekiq 只要加入adapter是sidekiq即可 # [path] application.rb class Application &lt; Rails::Application 	config.active_job.queue_adapter = :sidekiq end   加入此行後，之後的原本執行job的指令(如： GuestsCleanupJob.perform_later )，就會丟給sidekiq去執行 記得sidekiq服務要啟動，需要執行 sidekiq  3. sidekiq web UI 加上即可 # [path] route.rb require &#39;sidekiq/web&#39; mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;  之後就可以在 http://xxxx/sidekiq 中看到所有job執行狀況  4. sidekiq-cron sidekiq-cron官方  sidekiq-corn web UI介面 加入 require &#39;sidekiq/cron/web&#39; 即可 (要在sidekiq/web之後) # [path] route.rb require &#39;sidekiq/web&#39; require &#39;sidekiq/cron/web&#39; mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;   官方提供好幾種設定排程方式，這邊介紹兩種：  (1) 直接新增 Sidekiq::Cron::Job.create( 	name: ‘Hard worker - every 5min’,   cron: ‘*/5 * * * *’,   class: ‘HardWorker’,   active_job: true  )  (2) YML ```yml config/schedule.yml my_first_job:   cron: “*/5 * * * *”   class: “HardWorker”   queue: hard_worker   active_job: true  second_job:   cron: “*/30 * * * *” # 分 時 日 月 週    class: “HardWorker” # 需對應你的Job   queue: hard_worker_long # 優先權設定，詳細請看官網說明   active_job: true # 因為我們使用active_job建立，請設為true   args:     hard: “stuff” ```rb # [path] config/initializers/sidekiq.rb schedule_file = &quot;config/schedule.yml&quot;  if File.exists?(schedule_file) &amp;&amp; Sidekiq.server?   Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file) end   另外如果要跑ActionMail的話，因為預設的queue是mailer 記得要加上sidekiq.yml設定mailers的queue (否則他只會跑default，你的mail就會被一直晾在queue中) ```yml sidekiq.yml — :concurrency: 1 :queues:    default   mailers ```   記得sidekiq要run     Reference        http://rails.ruby.tw/active_job_basics.html     https://github.com/kakas/Kaohsiung_Rails_Sidekiq_demo">
+  <meta name="twitter:url" content="https://blog.anxgang.com/rails-activejob-sidekiq-sidekiq-cron/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2016-11-10T03:10:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/rails-activejob-sidekiq-sidekiq-cron/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Rails] 排程使用 ActiveJob + Sidekiq + Sidekiq-cron">
+        
+        
+        <meta itemprop="description"
+            content="前言Active Job 是rails官方內建的背景執行程序，有adapter可用來連接外部的Sidekiq、resque、delay job等我個人認為語法滿簡潔的，而且如果以後想改resque或其他也滿好處理這邊使用sidekiq來執行，並搭配Sidekiq-cron這個plugin來設定排程並且會安裝Web UI來快速查看執行狀況說明sidekiq其實是一個服務，他還搭配了redis這個資料庫當我們使用sidekiq建立一個排程，其實是建立在redis資料庫中，如果有安裝sidekiq-corn的話，運作的排程也放在redis這和我們一般使用whenever建立cron不一樣whenever建立的cron是放在作業系統(Linux或mac)內建的crontab中，就不用另外啟動其他服務但使用sidekiq，則一定要確保sidekiq及redis都有運作前置作業#####安裝RedisRedis官方網站安裝 redis 資料庫 $ brew install redis啟動 redis 資料庫 $ brew services start redis若需要其他資訊可以輸入 $ brew info redis#####安裝SidekiqSidekiq官方網站gem &#39;sidekiq&#39;gem &quot;sidekiq-cron&quot;, &quot;~&gt; 0.4.0&quot;$ bundle install第一個Job1. 新增一個 Active Job$ rails generate job guests_cleanup可以發現在 /job 中多了一個 guests_cleanup_job.rb調整一下perform中輸出的文字class GuestsCleanupJob &lt; ActiveJob::Base  queue_as :default   def perform(*args)    puts &#39;hello Job!!!&#39;  endend這樣我們就建好一個job了可以在rails c 中 輸入 GuestsCleanupJob.perform_later 測試，他會把上執行輸入 GuestsCleanupJob.set(wait_until: Date.tomorrow.noon).perform_later(record) 測試，他會等到明天中午執行輸入 GuestsCleanupJob.set(wait: 1.week).perform_later(record) 測試，他會等一週後才執行2. sidekiq只要加入adapter是sidekiq即可# [path] application.rbclass Application &lt; Rails::Application	config.active_job.queue_adapter = :sidekiqend加入此行後，之後的原本執行job的指令(如： GuestsCleanupJob.perform_later )，就會丟給sidekiq去執行記得sidekiq服務要啟動，需要執行 sidekiq3. sidekiq web UI加上即可# [path] route.rbrequire &#39;sidekiq/web&#39;mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;之後就可以在 http://xxxx/sidekiq 中看到所有job執行狀況4. sidekiq-cronsidekiq-cron官方sidekiq-corn web UI介面加入 require &#39;sidekiq/cron/web&#39; 即可 (要在sidekiq/web之後)# [path] route.rbrequire &#39;sidekiq/web&#39;require &#39;sidekiq/cron/web&#39;mount Sidekiq::Web =&gt; &#39;/sidekiq&#39;官方提供好幾種設定排程方式，這邊介紹兩種：(1) 直接新增Sidekiq::Cron::Job.create(	name: ‘Hard worker - every 5min’,  cron: ‘*/5 * * * *’,  class: ‘HardWorker’,  active_job: true )(2) YML```yml config/schedule.ymlmy_first_job:  cron: “*/5 * * * *”  class: “HardWorker”  queue: hard_worker  active_job: truesecond_job:  cron: “*/30 * * * *” # 分 時 日 月 週   class: “HardWorker” # 需對應你的Job  queue: hard_worker_long # 優先權設定，詳細請看官網說明  active_job: true # 因為我們使用active_job建立，請設為true  args:    hard: “stuff”```rb# [path] config/initializers/sidekiq.rbschedule_file = &quot;config/schedule.yml&quot;if File.exists?(schedule_file) &amp;&amp; Sidekiq.server?  Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file)end另外如果要跑ActionMail的話，因為預設的queue是mailer記得要加上sidekiq.yml設定mailers的queue (否則他只會跑default，你的mail就會被一直晾在queue中)```yml sidekiq.yml—:concurrency: 1:queues:  default  mailers```記得sidekiq要run  Reference      http://rails.ruby.tw/active_job_basics.html    https://github.com/kakas/Kaohsiung_Rails_Sidekiq_demo  ">
+        
+        <meta itemprop="datePublished" content="2016-11-10T03:10:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/rails-activejob-sidekiq-sidekiq-cron/" class="u-url"
+                        itemprop="url">[Rails] 排程使用 ActiveJob + Sidekiq + Sidekiq-cron
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2016-11-10T03:10:00+08:00">2016-11-10</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#前言">前言</a></li><li><a href="#說明">說明</a></li><li><a href="#前置作業">前置作業</a></li><li><a href="#第一個job">第一個Job</a><ul><li><a href="#1-新增一個-active-job">1. 新增一個 Active Job</a></li><li><a href="#2-sidekiq">2. sidekiq</a></li><li><a href="#3-sidekiq-web-ui">3. sidekiq web UI</a></li><li><a href="#4-sidekiq-cron">4. sidekiq-cron</a></li></ul></li></ul></li></ul></li></ul></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="前言">前言</h1>
+<p>Active Job 是rails官方內建的背景執行程序，有adapter可用來連接外部的Sidekiq、resque、delay job等
+我個人認為語法滿簡潔的，而且如果以後想改resque或其他也滿好處理
+這邊使用sidekiq來執行，並搭配Sidekiq-cron這個plugin來設定排程
+並且會安裝Web UI來快速查看執行狀況</p>
+
+<h1 id="說明">說明</h1>
+<p>sidekiq其實是一個服務，他還搭配了redis這個資料庫</p>
+
+<p>當我們使用sidekiq建立一個排程，其實是建立在redis資料庫中，
+如果有安裝sidekiq-corn的話，運作的排程也放在redis</p>
+
+<p>這和我們一般使用whenever建立cron不一樣
+whenever建立的cron是放在作業系統(Linux或mac)內建的crontab中，就不用另外啟動其他服務</p>
+
+<p>但使用sidekiq，則一定要確保sidekiq及redis都有運作</p>
+
+<h1 id="前置作業">前置作業</h1>
+
+<p>#####安裝Redis
+<a href="http://redis.io/">Redis官方網站</a></p>
+
+<p>安裝 redis 資料庫 <code class="language-plaintext highlighter-rouge">$ brew install redis</code>
+啟動 redis 資料庫 <code class="language-plaintext highlighter-rouge">$ brew services start redis</code></p>
+
+<p>若需要其他資訊可以輸入 <code class="language-plaintext highlighter-rouge">$ brew info redis</code></p>
+
+<p>#####安裝Sidekiq
+<a href="https://github.com/mperham/sidekiq">Sidekiq官方網站</a></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem 'sidekiq'
+gem "sidekiq-cron", "~&gt; 0.4.0"
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">$ bundle install</code></p>
+
+<h1 id="第一個job">第一個Job</h1>
+
+<h5 id="1-新增一個-active-job">1. 新增一個 Active Job</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ rails generate job guests_cleanup
+</code></pre></div></div>
+
+<p>可以發現在 /job 中多了一個 guests_cleanup_job.rb
+調整一下perform中輸出的文字</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">GuestsCleanupJob</span> <span class="o">&lt;</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">queue_as</span> <span class="ss">:default</span>
+ 
+  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s1">'hello Job!!!'</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>這樣我們就建好一個job了
+可以在<code class="language-plaintext highlighter-rouge">rails c</code> 中 
+輸入 <code class="language-plaintext highlighter-rouge">GuestsCleanupJob.perform_later</code> 測試，他會把上執行
+輸入 <code class="language-plaintext highlighter-rouge">GuestsCleanupJob.set(wait_until: Date.tomorrow.noon).perform_later(record)</code> 測試，他會等到明天中午執行
+輸入 <code class="language-plaintext highlighter-rouge">GuestsCleanupJob.set(wait: 1.week).perform_later(record)</code> 測試，他會等一週後才執行</p>
+
+<h5 id="2-sidekiq">2. sidekiq</h5>
+<p>只要加入adapter是sidekiq即可</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] application.rb</span>
+<span class="k">class</span> <span class="nc">Application</span> <span class="o">&lt;</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Application</span>
+	<span class="n">config</span><span class="p">.</span><span class="nf">active_job</span><span class="p">.</span><span class="nf">queue_adapter</span> <span class="o">=</span> <span class="ss">:sidekiq</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>加入此行後，之後的原本執行job的指令(如： <code class="language-plaintext highlighter-rouge">GuestsCleanupJob.perform_later</code> )，就會丟給sidekiq去執行
+記得sidekiq服務要啟動，需要執行 <code class="language-plaintext highlighter-rouge">sidekiq</code></p>
+
+<h5 id="3-sidekiq-web-ui">3. sidekiq web UI</h5>
+<p>加上即可</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] route.rb</span>
+<span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+<span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span>
+</code></pre></div></div>
+<p>之後就可以在 http://xxxx/sidekiq 中看到所有job執行狀況</p>
+
+<h5 id="4-sidekiq-cron">4. sidekiq-cron</h5>
+<p><a href="https://github.com/ondrejbartas/sidekiq-cron">sidekiq-cron官方</a></p>
+
+<p>sidekiq-corn web UI介面
+加入 <code class="language-plaintext highlighter-rouge">require 'sidekiq/cron/web'</code> 即可 (要在sidekiq/web之後)</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># [path] route.rb</span>
+<span class="nb">require</span> <span class="s1">'sidekiq/web'</span>
+<span class="nb">require</span> <span class="s1">'sidekiq/cron/web'</span>
+<span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">'/sidekiq'</span>
+</code></pre></div></div>
+
+<p>官方提供好幾種設定排程方式，這邊介紹兩種：</p>
+
+<p>(1) 直接新增
+Sidekiq::Cron::Job.create(
+	name: ‘Hard worker - every 5min’,
+  cron: ‘*/5 * * * *’,
+  class: ‘HardWorker’,
+  active_job: true
+ )</p>
+
+<p>(2) YML
+```yml config/schedule.yml
+my_first_job:
+  cron: “*/5 * * * *”
+  class: “HardWorker”
+  queue: hard_worker
+  active_job: true</p>
+
+<p>second_job:
+  cron: “*/30 * * * *” # 分 時 日 月 週 
+  class: “HardWorker” # 需對應你的Job
+  queue: hard_worker_long # 優先權設定，詳細請看官網說明
+  active_job: true # 因為我們使用active_job建立，請設為true
+  args:
+    hard: “stuff”</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>```rb
+# [path] config/initializers/sidekiq.rb
+schedule_file = "config/schedule.yml"
+
+if File.exists?(schedule_file) &amp;&amp; Sidekiq.server?
+  Sidekiq::Cron::Job.load_from_hash YAML.load_file(schedule_file)
+end
+</code></pre></div></div>
+
+<p>另外如果要跑ActionMail的話，因為預設的queue是mailer
+記得要加上sidekiq.yml設定mailers的queue (否則他只會跑default，你的mail就會被一直晾在queue中)
+```yml sidekiq.yml
+—
+:concurrency: 1
+:queues:</p>
+<ul>
+  <li>default</li>
+  <li>mailers
+```</li>
+</ul>
+
+<p>記得sidekiq要run</p>
+
+<blockquote>
+  <p>Reference</p>
+  <ol>
+    <li>http://rails.ruby.tw/active_job_basics.html</li>
+    <li>https://github.com/kakas/Kaohsiung_Rails_Sidekiq_demo</li>
+  </ol>
+</blockquote>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2016-11-10T03:10:00+08:00">November 10, 2016</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BRails%5D+%E6%8E%92%E7%A8%8B%E4%BD%BF%E7%94%A8+ActiveJob+%2B+Sidekiq+%2B+Sidekiq-cron%20https%3A%2F%2Fblog.anxgang.com%2Frails-activejob-sidekiq-sidekiq-cron%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Frails-activejob-sidekiq-sidekiq-cron%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Frails-activejob-sidekiq-sidekiq-cron%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/1089723/" class="pagination--pager" title="[Crontab] 排程使用方式
+">上一篇</a>
+    
+    
+      <a href="/1104287/" class="pagination--pager" title="[Rails] bundle錯誤 - unf_ext-0.0.7.2
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/rails-activejob-sidekiq-sidekiq-cron/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/rails-activejob-sidekiq-sidekiq-cron"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

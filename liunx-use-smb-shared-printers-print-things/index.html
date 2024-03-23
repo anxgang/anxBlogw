@@ -1,0 +1,1192 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="zh" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Liunx] 透過windows的印表機列印 - ANxGANG</title>
+<meta name="description" content="參考網站 http://www.printmanager.com/cms.php?aid=82&amp;fullpage=1&amp;support=8  兩種方式    透過LPD指令列印   透過smb分享印表機列印   安裝CUPS 方便新增/刪除印表機，有webUI可以操作  https://www.cups.org/  Linux列印通過Windows印表機伺服器 簡介 有許多方法允許Linux客戶端通過印表機進行列印，但是有時候最好和最可行的方法是不清楚的。本文旨在概述從Windows上通過分享印表機從Linux列印時可用的選項。  什麼是CUPS？ CUPS原來是Common Unix列印系統的縮寫，多年來已經正式成為簡單的 CUPS。它是Linux和Unix系統上用於Internet列印協議的列印後台列印平台。它還包括通過線路列印機後台程式（LPD）和伺服器消息塊（SMB通過SAMBA）協議進行列印的支持。運行這個強大的常駐程式為Linux上的各種列印選項打開了大門。     常駐程式是最初為Unix系統命名的計算機，它指的是運行後台程序以提供服務。   可用的方法 有幾種方法允許使用Windows Server共享列印機到您的Linux客戶端。以下是本文中介紹的兩種方法的結論。  通過LPD列印（行式列印機常駐程式） 這通常是最簡單，最典型的選項。  主要優點/缺點：  以用戶登錄和列印的形式提交列印作業 列印作業提交包括文檔標題 簡單的安裝和安裝列印機 缺少嘗試使用SAMBA時可能會發生的常見身份驗證問題  通過Windows列印共享（SMB）列印： 此列印允許直接連接到Windows共享，並與Active Directory最佳集成，但在某些情況下可能難以支持。它使用SAMBA實現與Windows文件和列印共享的連接。  主要優點/缺點：  所有列印作業都將以最初安裝列印機的用戶身份提交，而不是用戶實際列印 稍微複雜的安裝 列印作業提交不包括文檔標題 Windows憑據作為設備URI的一部分以明文形式存儲（本指南的後面部分定義）  獲取和安裝CUPS 通常有幾種方法可用於在Linux系統上獲取和安裝CUPS。以下是每個的結論。  示例： 通過 在Fedora15內置的軟件包集合中加入列印支持來安裝CUPS  下載和安裝RPM： 如果不包括CUPS，並且不能通過內置軟件包輕鬆安裝，則通常可以從您的發行版的支持站點以及可能的其他第三方站點下載並安裝CUPS的RPM文件。定位和下載很重要，考慮兩件事情：  我是否已經下載並安裝了所有必需的軟件包？（常見的前提條件包括：gcc，libjpeg，libjpeg-devel，libpng等等。有關完整的先決條件列表，請參見www.cups.org ） 我正在為我的版本和架構下載正確的軟件包（即0x86或0x64？Linux內核版本？） 下載和編譯源碼： 最後一個選項是下載，編譯和安裝從www.cups.org直接下載的源代碼。此選項需要更高級的Linux和開發知識，超出了本指南的範圍。  CUPS管理員簡介： 現代CUPS管理員使用Web UI，使用起來變得越來越簡單直觀。以下簡要介紹了本指南中登錄並提及我們將要使用的領域。  CUPS Web UI： 通過使用以下網址的互聯網瀏覽器訪問杯子的用戶界面。您可能需要在訪問之前提供root訪問權限，或進行任何敏感的更改。  http://127.0.0.1:631  輸入地址後，應加載一個網頁，方便管理。該部分將專注於僅限於列印機。  該伺服器部分不應該與通過使用Windows伺服器列印任何東西，被混淆，這是用來設定該Linux機器作為列印伺服器。  CUPS設定文件： 您的CUPS設定，設定和驅動程式都位於/ etc / cups目錄中。主設定文件名為cupsd.conf。手動編輯這些文件超出了本指南的範圍，但很高興知道他們在那裡。  通過LPD列印（行式列印機常駐程式） - 第一部分： 第一部分專門介紹如何在Windows中啟用LPD服務。這在操作系統之間略有不同。以下步驟具體適用於各種伺服器操作系統。  設定Windows Server以提供LPD列印（Windows 2000/2003 / XP）：  1.在新增/刪除程式中打開新增/刪除Windows組件。在此位置其他網絡文件和列印服務  2.單擊[詳細信息]按鈕，並在詳細信息中檢查Unix的列印服務，然後單擊確定，然後單擊[下一步]安裝這些組件。  3.之後Windows將安裝此服務。可能會提示您安裝Windows安裝介質。  設定Windows Server以提供LPD列印服務（Windows 2008/2008 R2）：  1.運行伺服器管理器，並在“角色”中找到“列印和文檔服務”角色。  2.在該角色中，單擊新增角色服務。在這裡您可以新增LPD服務。  3.安裝角色後，即可將列印機安裝到工作站上。  設定Windows Server以提供LPD列印服務（Windows Vista / 7）：  1.打開控制面板&gt;程式和功能。在此對話框中，單擊左側的[打開或關閉Windows功能]。     將打開Windows功能對話框。找到列印和文檔服務並啟用名為LPD列印伺服器的項目，然後單擊[確定]   通過LPD列印（行式列印機常駐程式） - 第二部分： 這包括在Linux上實際安裝設備。在安裝列印機之前，您將需要以下信息。  您共享列印機的Windows伺服器的主機名或IP地址，並已安裝了用於Unix的LPD列印伺服器/列印服務。 要安裝的列印機的共享名稱。建議列印機在其共享名稱中不包含任何空格。 使用CUPS Web UI新增LPD列印機：  1.打開CUPS管理站點，然後選擇ADD Printer  接下來，將提示您選擇列印類型。在這裡，您將要選擇LPD / LPR主機或列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。  3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明LPD列印機的各部分。  *設備IRL： 這是一個ü niversal ř esource 我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。  最終字符串輸入到CUPS新增列印機嚮導：  4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。  選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，以訪問適當的PPD（Postscript Printer Description）文件。  6.新增列印機後，應在應用程式中進行選擇。當在Windows中查看隊列時，作業的所有者將在用戶當時登錄到Linux或列印時列出，並與源IP組合。  通過SMB列印（Windows文件和列印共享） 這包括使用簡單的共享在Linux上實際安裝設備。它不需要在Windows Server上安裝用於Unix的 LPD列印服務/列印服務。在安裝列印機之前，您將需要以下信息。  您從中共享列印機的Windows伺服器的主機名或IP地址。 您將要驗證的Windows域名。（工作組不需要） 用於連接和列印到設備的有效的Windows憑據。通常這些將是域憑據，但也可以是列印伺服器上的本地用戶。 Windows中列印機的共享名稱。 通過Windows列印機共享安裝列印機：  1.打開CUPS管理站點，然後選擇新增列印機  接下來，將提示您選擇列印類型。在這裡，您將需要通過SAMBA選擇Windows列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。  3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明了SMB部分的每個部分  *設備IRL： 這是一個  ü niversal  ř esource  我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。  輸入到CUPS新增列印嚮導的最終字符串：  4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。  選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，   以訪問適當的PPD（Postscript Printer Description）文件。  6.新增列印機後，應在應用程式中進行選擇。在Windows中查看隊列時，作業的所有者將以設備URI中指定的用戶身份列出，而不是用戶登錄的用戶名。  通過查看隊列中的兩個作業，可以看到使用LPD（作業1）和SAMBA（作業2）之間的區別。兩人都是以約翰·多伊（John Doe）的身份提交的，但第二個不能被正確地跟踪或記錄。  獲取Linux驅動程式 大多數Linux版本都包含豐富的驅動程式，特別是對於普通列印機，或者已經在市場上長時間使用的列印機。驅動程式以PPD文件的形式出現。以下是關於這些內容的幾個解釋以及在哪裡可以找到驅動程式。  什麼是PPD文件？ PPD文件或* PostScript列印機定義文件只是一個簡單的文本文件，用於調用要為PostScript列印作業啟用哪些功能。最初CUPS只支持可以理解PostScript列印語言的列印機。  今天可以通過增強的過濾器來支持各種各樣的列印機，使得列印作業可以被翻譯成許多其他語言，如PCL和ESCP / 2來命名。     Postcript  是一種語言，通常用於描述頁面上的內容，佈局，大小方向和項目的更多。它通常被分類為頁面描述語言。   列印機製造商： 如果您的列印機製造商提供了與CUPS兼容的產品，那麼這通常是最佳選擇，並為您的列印機提供最可靠的輸出。  CUPS： CUC網站www.cups.org擁有豐富的資源和鏈接，可為各種製造商和型號獲取支持的驅動程式。  其他來源： 有各種開源組，可以幫助創建大量支持CUPS的列印機驅動程式。幫助檢查支持的幾個例子是通過：  Linux基金會 - www.openprinting.org Gutenprint - http://gimp-print.sourceforge.net">
+
+
+  <meta name="author" content="anxgang">
+  
+  <meta property="article:author" content="anxgang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="ANxGANG">
+<meta property="og:title" content="[Liunx] 透過windows的印表機列印">
+<meta property="og:url" content="https://blog.anxgang.com/liunx-use-smb-shared-printers-print-things/">
+
+
+  <meta property="og:description" content="參考網站 http://www.printmanager.com/cms.php?aid=82&amp;fullpage=1&amp;support=8  兩種方式    透過LPD指令列印   透過smb分享印表機列印   安裝CUPS 方便新增/刪除印表機，有webUI可以操作  https://www.cups.org/  Linux列印通過Windows印表機伺服器 簡介 有許多方法允許Linux客戶端通過印表機進行列印，但是有時候最好和最可行的方法是不清楚的。本文旨在概述從Windows上通過分享印表機從Linux列印時可用的選項。  什麼是CUPS？ CUPS原來是Common Unix列印系統的縮寫，多年來已經正式成為簡單的 CUPS。它是Linux和Unix系統上用於Internet列印協議的列印後台列印平台。它還包括通過線路列印機後台程式（LPD）和伺服器消息塊（SMB通過SAMBA）協議進行列印的支持。運行這個強大的常駐程式為Linux上的各種列印選項打開了大門。     常駐程式是最初為Unix系統命名的計算機，它指的是運行後台程序以提供服務。   可用的方法 有幾種方法允許使用Windows Server共享列印機到您的Linux客戶端。以下是本文中介紹的兩種方法的結論。  通過LPD列印（行式列印機常駐程式） 這通常是最簡單，最典型的選項。  主要優點/缺點：  以用戶登錄和列印的形式提交列印作業 列印作業提交包括文檔標題 簡單的安裝和安裝列印機 缺少嘗試使用SAMBA時可能會發生的常見身份驗證問題  通過Windows列印共享（SMB）列印： 此列印允許直接連接到Windows共享，並與Active Directory最佳集成，但在某些情況下可能難以支持。它使用SAMBA實現與Windows文件和列印共享的連接。  主要優點/缺點：  所有列印作業都將以最初安裝列印機的用戶身份提交，而不是用戶實際列印 稍微複雜的安裝 列印作業提交不包括文檔標題 Windows憑據作為設備URI的一部分以明文形式存儲（本指南的後面部分定義）  獲取和安裝CUPS 通常有幾種方法可用於在Linux系統上獲取和安裝CUPS。以下是每個的結論。  示例： 通過 在Fedora15內置的軟件包集合中加入列印支持來安裝CUPS  下載和安裝RPM： 如果不包括CUPS，並且不能通過內置軟件包輕鬆安裝，則通常可以從您的發行版的支持站點以及可能的其他第三方站點下載並安裝CUPS的RPM文件。定位和下載很重要，考慮兩件事情：  我是否已經下載並安裝了所有必需的軟件包？（常見的前提條件包括：gcc，libjpeg，libjpeg-devel，libpng等等。有關完整的先決條件列表，請參見www.cups.org ） 我正在為我的版本和架構下載正確的軟件包（即0x86或0x64？Linux內核版本？） 下載和編譯源碼： 最後一個選項是下載，編譯和安裝從www.cups.org直接下載的源代碼。此選項需要更高級的Linux和開發知識，超出了本指南的範圍。  CUPS管理員簡介： 現代CUPS管理員使用Web UI，使用起來變得越來越簡單直觀。以下簡要介紹了本指南中登錄並提及我們將要使用的領域。  CUPS Web UI： 通過使用以下網址的互聯網瀏覽器訪問杯子的用戶界面。您可能需要在訪問之前提供root訪問權限，或進行任何敏感的更改。  http://127.0.0.1:631  輸入地址後，應加載一個網頁，方便管理。該部分將專注於僅限於列印機。  該伺服器部分不應該與通過使用Windows伺服器列印任何東西，被混淆，這是用來設定該Linux機器作為列印伺服器。  CUPS設定文件： 您的CUPS設定，設定和驅動程式都位於/ etc / cups目錄中。主設定文件名為cupsd.conf。手動編輯這些文件超出了本指南的範圍，但很高興知道他們在那裡。  通過LPD列印（行式列印機常駐程式） - 第一部分： 第一部分專門介紹如何在Windows中啟用LPD服務。這在操作系統之間略有不同。以下步驟具體適用於各種伺服器操作系統。  設定Windows Server以提供LPD列印（Windows 2000/2003 / XP）：  1.在新增/刪除程式中打開新增/刪除Windows組件。在此位置其他網絡文件和列印服務  2.單擊[詳細信息]按鈕，並在詳細信息中檢查Unix的列印服務，然後單擊確定，然後單擊[下一步]安裝這些組件。  3.之後Windows將安裝此服務。可能會提示您安裝Windows安裝介質。  設定Windows Server以提供LPD列印服務（Windows 2008/2008 R2）：  1.運行伺服器管理器，並在“角色”中找到“列印和文檔服務”角色。  2.在該角色中，單擊新增角色服務。在這裡您可以新增LPD服務。  3.安裝角色後，即可將列印機安裝到工作站上。  設定Windows Server以提供LPD列印服務（Windows Vista / 7）：  1.打開控制面板&gt;程式和功能。在此對話框中，單擊左側的[打開或關閉Windows功能]。     將打開Windows功能對話框。找到列印和文檔服務並啟用名為LPD列印伺服器的項目，然後單擊[確定]   通過LPD列印（行式列印機常駐程式） - 第二部分： 這包括在Linux上實際安裝設備。在安裝列印機之前，您將需要以下信息。  您共享列印機的Windows伺服器的主機名或IP地址，並已安裝了用於Unix的LPD列印伺服器/列印服務。 要安裝的列印機的共享名稱。建議列印機在其共享名稱中不包含任何空格。 使用CUPS Web UI新增LPD列印機：  1.打開CUPS管理站點，然後選擇ADD Printer  接下來，將提示您選擇列印類型。在這裡，您將要選擇LPD / LPR主機或列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。  3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明LPD列印機的各部分。  *設備IRL： 這是一個ü niversal ř esource 我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。  最終字符串輸入到CUPS新增列印機嚮導：  4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。  選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，以訪問適當的PPD（Postscript Printer Description）文件。  6.新增列印機後，應在應用程式中進行選擇。當在Windows中查看隊列時，作業的所有者將在用戶當時登錄到Linux或列印時列出，並與源IP組合。  通過SMB列印（Windows文件和列印共享） 這包括使用簡單的共享在Linux上實際安裝設備。它不需要在Windows Server上安裝用於Unix的 LPD列印服務/列印服務。在安裝列印機之前，您將需要以下信息。  您從中共享列印機的Windows伺服器的主機名或IP地址。 您將要驗證的Windows域名。（工作組不需要） 用於連接和列印到設備的有效的Windows憑據。通常這些將是域憑據，但也可以是列印伺服器上的本地用戶。 Windows中列印機的共享名稱。 通過Windows列印機共享安裝列印機：  1.打開CUPS管理站點，然後選擇新增列印機  接下來，將提示您選擇列印類型。在這裡，您將需要通過SAMBA選擇Windows列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。  3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明了SMB部分的每個部分  *設備IRL： 這是一個  ü niversal  ř esource  我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。  輸入到CUPS新增列印嚮導的最終字符串：  4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。  選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，   以訪問適當的PPD（Postscript Printer Description）文件。  6.新增列印機後，應在應用程式中進行選擇。在Windows中查看隊列時，作業的所有者將以設備URI中指定的用戶身份列出，而不是用戶登錄的用戶名。  通過查看隊列中的兩個作業，可以看到使用LPD（作業1）和SAMBA（作業2）之間的區別。兩人都是以約翰·多伊（John Doe）的身份提交的，但第二個不能被正確地跟踪或記錄。  獲取Linux驅動程式 大多數Linux版本都包含豐富的驅動程式，特別是對於普通列印機，或者已經在市場上長時間使用的列印機。驅動程式以PPD文件的形式出現。以下是關於這些內容的幾個解釋以及在哪裡可以找到驅動程式。  什麼是PPD文件？ PPD文件或* PostScript列印機定義文件只是一個簡單的文本文件，用於調用要為PostScript列印作業啟用哪些功能。最初CUPS只支持可以理解PostScript列印語言的列印機。  今天可以通過增強的過濾器來支持各種各樣的列印機，使得列印作業可以被翻譯成許多其他語言，如PCL和ESCP / 2來命名。     Postcript  是一種語言，通常用於描述頁面上的內容，佈局，大小方向和項目的更多。它通常被分類為頁面描述語言。   列印機製造商： 如果您的列印機製造商提供了與CUPS兼容的產品，那麼這通常是最佳選擇，並為您的列印機提供最可靠的輸出。  CUPS： CUC網站www.cups.org擁有豐富的資源和鏈接，可為各種製造商和型號獲取支持的驅動程式。  其他來源： 有各種開源組，可以幫助創建大量支持CUPS的列印機驅動程式。幫助檢查支持的幾個例子是通過：  Linux基金會 - www.openprinting.org Gutenprint - http://gimp-print.sourceforge.net">
+
+
+
+  <meta property="og:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+
+
+
+  <meta name="twitter:site" content="@anxgang1">
+  <meta name="twitter:title" content="[Liunx] 透過windows的印表機列印">
+  <meta name="twitter:description" content="參考網站 http://www.printmanager.com/cms.php?aid=82&amp;fullpage=1&amp;support=8  兩種方式    透過LPD指令列印   透過smb分享印表機列印   安裝CUPS 方便新增/刪除印表機，有webUI可以操作  https://www.cups.org/  Linux列印通過Windows印表機伺服器 簡介 有許多方法允許Linux客戶端通過印表機進行列印，但是有時候最好和最可行的方法是不清楚的。本文旨在概述從Windows上通過分享印表機從Linux列印時可用的選項。  什麼是CUPS？ CUPS原來是Common Unix列印系統的縮寫，多年來已經正式成為簡單的 CUPS。它是Linux和Unix系統上用於Internet列印協議的列印後台列印平台。它還包括通過線路列印機後台程式（LPD）和伺服器消息塊（SMB通過SAMBA）協議進行列印的支持。運行這個強大的常駐程式為Linux上的各種列印選項打開了大門。     常駐程式是最初為Unix系統命名的計算機，它指的是運行後台程序以提供服務。   可用的方法 有幾種方法允許使用Windows Server共享列印機到您的Linux客戶端。以下是本文中介紹的兩種方法的結論。  通過LPD列印（行式列印機常駐程式） 這通常是最簡單，最典型的選項。  主要優點/缺點：  以用戶登錄和列印的形式提交列印作業 列印作業提交包括文檔標題 簡單的安裝和安裝列印機 缺少嘗試使用SAMBA時可能會發生的常見身份驗證問題  通過Windows列印共享（SMB）列印： 此列印允許直接連接到Windows共享，並與Active Directory最佳集成，但在某些情況下可能難以支持。它使用SAMBA實現與Windows文件和列印共享的連接。  主要優點/缺點：  所有列印作業都將以最初安裝列印機的用戶身份提交，而不是用戶實際列印 稍微複雜的安裝 列印作業提交不包括文檔標題 Windows憑據作為設備URI的一部分以明文形式存儲（本指南的後面部分定義）  獲取和安裝CUPS 通常有幾種方法可用於在Linux系統上獲取和安裝CUPS。以下是每個的結論。  示例： 通過 在Fedora15內置的軟件包集合中加入列印支持來安裝CUPS  下載和安裝RPM： 如果不包括CUPS，並且不能通過內置軟件包輕鬆安裝，則通常可以從您的發行版的支持站點以及可能的其他第三方站點下載並安裝CUPS的RPM文件。定位和下載很重要，考慮兩件事情：  我是否已經下載並安裝了所有必需的軟件包？（常見的前提條件包括：gcc，libjpeg，libjpeg-devel，libpng等等。有關完整的先決條件列表，請參見www.cups.org ） 我正在為我的版本和架構下載正確的軟件包（即0x86或0x64？Linux內核版本？） 下載和編譯源碼： 最後一個選項是下載，編譯和安裝從www.cups.org直接下載的源代碼。此選項需要更高級的Linux和開發知識，超出了本指南的範圍。  CUPS管理員簡介： 現代CUPS管理員使用Web UI，使用起來變得越來越簡單直觀。以下簡要介紹了本指南中登錄並提及我們將要使用的領域。  CUPS Web UI： 通過使用以下網址的互聯網瀏覽器訪問杯子的用戶界面。您可能需要在訪問之前提供root訪問權限，或進行任何敏感的更改。  http://127.0.0.1:631  輸入地址後，應加載一個網頁，方便管理。該部分將專注於僅限於列印機。  該伺服器部分不應該與通過使用Windows伺服器列印任何東西，被混淆，這是用來設定該Linux機器作為列印伺服器。  CUPS設定文件： 您的CUPS設定，設定和驅動程式都位於/ etc / cups目錄中。主設定文件名為cupsd.conf。手動編輯這些文件超出了本指南的範圍，但很高興知道他們在那裡。  通過LPD列印（行式列印機常駐程式） - 第一部分： 第一部分專門介紹如何在Windows中啟用LPD服務。這在操作系統之間略有不同。以下步驟具體適用於各種伺服器操作系統。  設定Windows Server以提供LPD列印（Windows 2000/2003 / XP）：  1.在新增/刪除程式中打開新增/刪除Windows組件。在此位置其他網絡文件和列印服務  2.單擊[詳細信息]按鈕，並在詳細信息中檢查Unix的列印服務，然後單擊確定，然後單擊[下一步]安裝這些組件。  3.之後Windows將安裝此服務。可能會提示您安裝Windows安裝介質。  設定Windows Server以提供LPD列印服務（Windows 2008/2008 R2）：  1.運行伺服器管理器，並在“角色”中找到“列印和文檔服務”角色。  2.在該角色中，單擊新增角色服務。在這裡您可以新增LPD服務。  3.安裝角色後，即可將列印機安裝到工作站上。  設定Windows Server以提供LPD列印服務（Windows Vista / 7）：  1.打開控制面板&gt;程式和功能。在此對話框中，單擊左側的[打開或關閉Windows功能]。     將打開Windows功能對話框。找到列印和文檔服務並啟用名為LPD列印伺服器的項目，然後單擊[確定]   通過LPD列印（行式列印機常駐程式） - 第二部分： 這包括在Linux上實際安裝設備。在安裝列印機之前，您將需要以下信息。  您共享列印機的Windows伺服器的主機名或IP地址，並已安裝了用於Unix的LPD列印伺服器/列印服務。 要安裝的列印機的共享名稱。建議列印機在其共享名稱中不包含任何空格。 使用CUPS Web UI新增LPD列印機：  1.打開CUPS管理站點，然後選擇ADD Printer  接下來，將提示您選擇列印類型。在這裡，您將要選擇LPD / LPR主機或列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。  3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明LPD列印機的各部分。  *設備IRL： 這是一個ü niversal ř esource 我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。  最終字符串輸入到CUPS新增列印機嚮導：  4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。  選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，以訪問適當的PPD（Postscript Printer Description）文件。  6.新增列印機後，應在應用程式中進行選擇。當在Windows中查看隊列時，作業的所有者將在用戶當時登錄到Linux或列印時列出，並與源IP組合。  通過SMB列印（Windows文件和列印共享） 這包括使用簡單的共享在Linux上實際安裝設備。它不需要在Windows Server上安裝用於Unix的 LPD列印服務/列印服務。在安裝列印機之前，您將需要以下信息。  您從中共享列印機的Windows伺服器的主機名或IP地址。 您將要驗證的Windows域名。（工作組不需要） 用於連接和列印到設備的有效的Windows憑據。通常這些將是域憑據，但也可以是列印伺服器上的本地用戶。 Windows中列印機的共享名稱。 通過Windows列印機共享安裝列印機：  1.打開CUPS管理站點，然後選擇新增列印機  接下來，將提示您選擇列印類型。在這裡，您將需要通過SAMBA選擇Windows列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。  3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明了SMB部分的每個部分  *設備IRL： 這是一個  ü niversal  ř esource  我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。  輸入到CUPS新增列印嚮導的最終字符串：  4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。  選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，   以訪問適當的PPD（Postscript Printer Description）文件。  6.新增列印機後，應在應用程式中進行選擇。在Windows中查看隊列時，作業的所有者將以設備URI中指定的用戶身份列出，而不是用戶登錄的用戶名。  通過查看隊列中的兩個作業，可以看到使用LPD（作業1）和SAMBA（作業2）之間的區別。兩人都是以約翰·多伊（John Doe）的身份提交的，但第二個不能被正確地跟踪或記錄。  獲取Linux驅動程式 大多數Linux版本都包含豐富的驅動程式，特別是對於普通列印機，或者已經在市場上長時間使用的列印機。驅動程式以PPD文件的形式出現。以下是關於這些內容的幾個解釋以及在哪裡可以找到驅動程式。  什麼是PPD文件？ PPD文件或* PostScript列印機定義文件只是一個簡單的文本文件，用於調用要為PostScript列印作業啟用哪些功能。最初CUPS只支持可以理解PostScript列印語言的列印機。  今天可以通過增強的過濾器來支持各種各樣的列印機，使得列印作業可以被翻譯成許多其他語言，如PCL和ESCP / 2來命名。     Postcript  是一種語言，通常用於描述頁面上的內容，佈局，大小方向和項目的更多。它通常被分類為頁面描述語言。   列印機製造商： 如果您的列印機製造商提供了與CUPS兼容的產品，那麼這通常是最佳選擇，並為您的列印機提供最可靠的輸出。  CUPS： CUC網站www.cups.org擁有豐富的資源和鏈接，可為各種製造商和型號獲取支持的驅動程式。  其他來源： 有各種開源組，可以幫助創建大量支持CUPS的列印機驅動程式。幫助檢查支持的幾個例子是通過：  Linux基金會 - www.openprinting.org Gutenprint - http://gimp-print.sourceforge.net">
+  <meta name="twitter:url" content="https://blog.anxgang.com/liunx-use-smb-shared-printers-print-things/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://blog.anxgang.com/assets/images/site-logo.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2017-08-07T08:12:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://blog.anxgang.com/liunx-use-smb-shared-printers-print-things/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "anxgang",
+      "url": "https://blog.anxgang.com/"
+    
+  }
+</script>
+
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="ANxGANG Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+<link rel="manifest" href="/assets/icons/site.webmanifest">
+<link rel="mask-icon" href="/assets/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+  </head>
+
+  <body class="layout--post">
+    <nav class="skip-links">
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">轉至主導航欄</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">轉至内容</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">轉至頁脚</a></li>
+  </ul>
+</nav>
+
+    
+
+<div class="masthead sticky">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          ANxGANG
+          <span class="site-subtitle"></span>
+        </a>
+        <ul class="visible-links">
+            
+            
+              <li class="dropdown ">
+                <a  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Docs <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/docs/rails-compact-guide/01-getting-started"> Rails Compact Guide</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="dropdown ">
+                <a href="/year-archive/"  class="dropdown-toggle"
+                  data-toggle="dropdown" role="button"
+                  aria-haspopup="true"
+                  aria-expanded="false">Archive <i class="fa fa-caret-down fa-sm" aria-hidden="true"></i>
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-content">
+                  
+                  <li>
+                    <a href="/categories/"> By Category</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/tags/"> By Tag</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/year-archive/"> By Year</a>
+                  </li>
+                  
+                  <li>
+                    <a href="/month-archive/"> By Month</a>
+                  </li>
+                  
+                </ul>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/tool-sites/">Tools</a>
+              </li>
+            
+          
+            
+            
+              <li class="masthead__menu-item">
+                <a href="/about/">About</a>
+              </li>
+            
+          
+        </ul>
+        
+        <button class="search__toggle" type="button">
+          <span
+            class="visually-hidden">切換搜尋</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path
+              d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z"
+              transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">選單</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+    <div class="initial-content">
+      
+
+
+
+
+
+<div id="main" role="main">
+    
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person" class="h-card">
+
+  
+    <div class="author__avatar">
+      <a href="https://blog.anxgang.com/">
+        <img src="/assets/images/bio-photo-5.png" alt="anxgang" itemprop="image" class="u-photo">
+      </a>
+    </div>
+  
+
+  <div class="author__content">
+    <h3 class="author__name p-name" itemprop="name">
+      <a class="u-url" rel="me" href="https://blog.anxgang.com/" itemprop="url">anxgang</a>
+    </h3>
+    
+      <div class="author__bio p-note" itemprop="description">
+        <p>Just a copy paste developer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">追蹤</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name" class="p-locality">Kaohsiung, Taiwan</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer me" itemprop="sameAs"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer me">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+    <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
+        
+        <meta itemprop="headline" content="[Liunx] 透過windows的印表機列印">
+        
+        
+        <meta itemprop="description"
+            content="參考網站http://www.printmanager.com/cms.php?aid=82&amp;fullpage=1&amp;support=8兩種方式  透過LPD指令列印  透過smb分享印表機列印安裝CUPS方便新增/刪除印表機，有webUI可以操作 https://www.cups.org/Linux列印通過Windows印表機伺服器簡介有許多方法允許Linux客戶端通過印表機進行列印，但是有時候最好和最可行的方法是不清楚的。本文旨在概述從Windows上通過分享印表機從Linux列印時可用的選項。什麼是CUPS？CUPS原來是Common Unix列印系統的縮寫，多年來已經正式成為簡單的 CUPS。它是Linux和Unix系統上用於Internet列印協議的列印後台列印平台。它還包括通過線路列印機後台程式（LPD）和伺服器消息塊（SMB通過SAMBA）協議進行列印的支持。運行這個強大的常駐程式為Linux上的各種列印選項打開了大門。  常駐程式是最初為Unix系統命名的計算機，它指的是運行後台程序以提供服務。可用的方法有幾種方法允許使用Windows Server共享列印機到您的Linux客戶端。以下是本文中介紹的兩種方法的結論。通過LPD列印（行式列印機常駐程式）這通常是最簡單，最典型的選項。主要優點/缺點：以用戶登錄和列印的形式提交列印作業列印作業提交包括文檔標題簡單的安裝和安裝列印機缺少嘗試使用SAMBA時可能會發生的常見身份驗證問題通過Windows列印共享（SMB）列印：此列印允許直接連接到Windows共享，並與Active Directory最佳集成，但在某些情況下可能難以支持。它使用SAMBA實現與Windows文件和列印共享的連接。主要優點/缺點：所有列印作業都將以最初安裝列印機的用戶身份提交，而不是用戶實際列印稍微複雜的安裝列印作業提交不包括文檔標題Windows憑據作為設備URI的一部分以明文形式存儲（本指南的後面部分定義）獲取和安裝CUPS通常有幾種方法可用於在Linux系統上獲取和安裝CUPS。以下是每個的結論。示例：通過 在Fedora15內置的軟件包集合中加入列印支持來安裝CUPS下載和安裝RPM：如果不包括CUPS，並且不能通過內置軟件包輕鬆安裝，則通常可以從您的發行版的支持站點以及可能的其他第三方站點下載並安裝CUPS的RPM文件。定位和下載很重要，考慮兩件事情：我是否已經下載並安裝了所有必需的軟件包？（常見的前提條件包括：gcc，libjpeg，libjpeg-devel，libpng等等。有關完整的先決條件列表，請參見www.cups.org ）我正在為我的版本和架構下載正確的軟件包（即0x86或0x64？Linux內核版本？）下載和編譯源碼：最後一個選項是下載，編譯和安裝從www.cups.org直接下載的源代碼。此選項需要更高級的Linux和開發知識，超出了本指南的範圍。CUPS管理員簡介：現代CUPS管理員使用Web UI，使用起來變得越來越簡單直觀。以下簡要介紹了本指南中登錄並提及我們將要使用的領域。CUPS Web UI：通過使用以下網址的互聯網瀏覽器訪問杯子的用戶界面。您可能需要在訪問之前提供root訪問權限，或進行任何敏感的更改。http://127.0.0.1:631輸入地址後，應加載一個網頁，方便管理。該部分將專注於僅限於列印機。該伺服器部分不應該與通過使用Windows伺服器列印任何東西，被混淆，這是用來設定該Linux機器作為列印伺服器。CUPS設定文件：您的CUPS設定，設定和驅動程式都位於/ etc / cups目錄中。主設定文件名為cupsd.conf。手動編輯這些文件超出了本指南的範圍，但很高興知道他們在那裡。通過LPD列印（行式列印機常駐程式） - 第一部分：第一部分專門介紹如何在Windows中啟用LPD服務。這在操作系統之間略有不同。以下步驟具體適用於各種伺服器操作系統。設定Windows Server以提供LPD列印（Windows 2000/2003 / XP）：1.在新增/刪除程式中打開新增/刪除Windows組件。在此位置其他網絡文件和列印服務2.單擊[詳細信息]按鈕，並在詳細信息中檢查Unix的列印服務，然後單擊確定，然後單擊[下一步]安裝這些組件。3.之後Windows將安裝此服務。可能會提示您安裝Windows安裝介質。設定Windows Server以提供LPD列印服務（Windows 2008/2008 R2）：1.運行伺服器管理器，並在“角色”中找到“列印和文檔服務”角色。2.在該角色中，單擊新增角色服務。在這裡您可以新增LPD服務。3.安裝角色後，即可將列印機安裝到工作站上。設定Windows Server以提供LPD列印服務（Windows Vista / 7）：1.打開控制面板&gt;程式和功能。在此對話框中，單擊左側的[打開或關閉Windows功能]。  將打開Windows功能對話框。找到列印和文檔服務並啟用名為LPD列印伺服器的項目，然後單擊[確定]通過LPD列印（行式列印機常駐程式） - 第二部分：這包括在Linux上實際安裝設備。在安裝列印機之前，您將需要以下信息。您共享列印機的Windows伺服器的主機名或IP地址，並已安裝了用於Unix的LPD列印伺服器/列印服務。要安裝的列印機的共享名稱。建議列印機在其共享名稱中不包含任何空格。使用CUPS Web UI新增LPD列印機：1.打開CUPS管理站點，然後選擇ADD Printer接下來，將提示您選擇列印類型。在這裡，您將要選擇LPD / LPR主機或列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明LPD列印機的各部分。*設備IRL：這是一個ü niversal ř esource 我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。最終字符串輸入到CUPS新增列印機嚮導：4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，以訪問適當的PPD（Postscript Printer Description）文件。6.新增列印機後，應在應用程式中進行選擇。當在Windows中查看隊列時，作業的所有者將在用戶當時登錄到Linux或列印時列出，並與源IP組合。通過SMB列印（Windows文件和列印共享）這包括使用簡單的共享在Linux上實際安裝設備。它不需要在Windows Server上安裝用於Unix的 LPD列印服務/列印服務。在安裝列印機之前，您將需要以下信息。您從中共享列印機的Windows伺服器的主機名或IP地址。您將要驗證的Windows域名。（工作組不需要）用於連接和列印到設備的有效的Windows憑據。通常這些將是域憑據，但也可以是列印伺服器上的本地用戶。Windows中列印機的共享名稱。通過Windows列印機共享安裝列印機：1.打開CUPS管理站點，然後選擇新增列印機接下來，將提示您選擇列印類型。在這裡，您將需要通過SAMBA選擇Windows列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明了SMB部分的每個部分*設備IRL：這是一個  ü niversal  ř esource  我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。輸入到CUPS新增列印嚮導的最終字符串：4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，   以訪問適當的PPD（Postscript Printer Description）文件。6.新增列印機後，應在應用程式中進行選擇。在Windows中查看隊列時，作業的所有者將以設備URI中指定的用戶身份列出，而不是用戶登錄的用戶名。通過查看隊列中的兩個作業，可以看到使用LPD（作業1）和SAMBA（作業2）之間的區別。兩人都是以約翰·多伊（John Doe）的身份提交的，但第二個不能被正確地跟踪或記錄。獲取Linux驅動程式大多數Linux版本都包含豐富的驅動程式，特別是對於普通列印機，或者已經在市場上長時間使用的列印機。驅動程式以PPD文件的形式出現。以下是關於這些內容的幾個解釋以及在哪裡可以找到驅動程式。什麼是PPD文件？PPD文件或* PostScript列印機定義文件只是一個簡單的文本文件，用於調用要為PostScript列印作業啟用哪些功能。最初CUPS只支持可以理解PostScript列印語言的列印機。今天可以通過增強的過濾器來支持各種各樣的列印機，使得列印作業可以被翻譯成許多其他語言，如PCL和ESCP / 2來命名。  Postcript  是一種語言，通常用於描述頁面上的內容，佈局，大小方向和項目的更多。它通常被分類為頁面描述語言。列印機製造商：如果您的列印機製造商提供了與CUPS兼容的產品，那麼這通常是最佳選擇，並為您的列印機提供最可靠的輸出。CUPS：CUC網站www.cups.org擁有豐富的資源和鏈接，可為各種製造商和型號獲取支持的驅動程式。其他來源：有各種開源組，可以幫助創建大量支持CUPS的列印機驅動程式。幫助檢查支持的幾個例子是通過：Linux基金會 - www.openprinting.orgGutenprint - http://gimp-print.sourceforge.net">
+        
+        <meta itemprop="datePublished" content="2017-08-07T08:12:00+08:00">
+        
+
+        <div class="page__inner-wrap">
+            
+            <header>
+                <h1 id="page-title" class="page__title p-name" itemprop="headline">
+                    <a href="https://blog.anxgang.com/liunx-use-smb-shared-printers-print-things/" class="u-url"
+                        itemprop="url">[Liunx] 透過windows的印表機列印
+</a>
+                </h1>
+                
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2017-08-07T08:12:00+08:00">2017-08-07</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+            </header>
+            
+
+            <section class="page__content e-content" itemprop="text">
+                
+                <aside class="sidebar__right sticky">
+                    <nav class="toc">
+                        <header>
+                            <h4 class="nav__title"><i class="fas fa-indent"></i><!--'file-alt'-->
+                                &nbsp;索引
+                            </h4>
+                        </header>
+                        <ul class="toc__menu"><li><a href="#參考網站">參考網站</a></li><li><a href="#兩種方式">兩種方式</a></li><li><a href="#安裝cups">安裝CUPS</a></li></ul>
+
+                    </nav>
+                </aside>
+                
+                <h1 id="參考網站">參考網站</h1>
+<p>http://www.printmanager.com/cms.php?aid=82&amp;fullpage=1&amp;support=8</p>
+
+<h1 id="兩種方式">兩種方式</h1>
+<ol>
+  <li>透過LPD指令列印</li>
+  <li>透過smb分享印表機列印</li>
+</ol>
+
+<h1 id="安裝cups">安裝CUPS</h1>
+<p>方便新增/刪除印表機，有webUI可以操作
+ https://www.cups.org/</p>
+
+<p>Linux列印通過Windows印表機伺服器
+簡介
+有許多方法允許Linux客戶端通過印表機進行列印，但是有時候最好和最可行的方法是不清楚的。本文旨在概述從Windows上通過分享印表機從Linux列印時可用的選項。</p>
+
+<p>什麼是CUPS？
+CUPS原來是Common Unix列印系統的縮寫，多年來已經正式成為簡單的 CUPS。它是Linux和Unix系統上用於Internet列印協議的列印後台列印平台。它還包括通過線路列印機後台程式（LPD）和伺服器消息塊（SMB通過SAMBA）協議進行列印的支持。運行這個強大的常駐程式為Linux上的各種列印選項打開了大門。</p>
+
+<ul>
+  <li>常駐程式是最初為Unix系統命名的計算機，它指的是運行後台程序以提供服務。</li>
+</ul>
+
+<p>可用的方法
+有幾種方法允許使用Windows Server共享列印機到您的Linux客戶端。以下是本文中介紹的兩種方法的結論。</p>
+
+<p>通過LPD列印（行式列印機常駐程式）
+這通常是最簡單，最典型的選項。</p>
+
+<p>主要優點/缺點：</p>
+
+<p>以用戶登錄和列印的形式提交列印作業
+列印作業提交包括文檔標題
+簡單的安裝和安裝列印機
+缺少嘗試使用SAMBA時可能會發生的常見身份驗證問題</p>
+
+<p>通過Windows列印共享（SMB）列印：
+此列印允許直接連接到Windows共享，並與Active Directory最佳集成，但在某些情況下可能難以支持。它使用SAMBA實現與Windows文件和列印共享的連接。</p>
+
+<p>主要優點/缺點：</p>
+
+<p>所有列印作業都將以最初安裝列印機的用戶身份提交，而不是用戶實際列印
+稍微複雜的安裝
+列印作業提交不包括文檔標題
+Windows憑據作為設備URI的一部分以明文形式存儲（本指南的後面部分定義）</p>
+
+<p>獲取和安裝CUPS
+通常有幾種方法可用於在Linux系統上獲取和安裝CUPS。以下是每個的結論。</p>
+
+<p>示例：
+通過 在Fedora15內置的軟件包集合中加入列印支持來安裝CUPS</p>
+
+<p>下載和安裝RPM：
+如果不包括CUPS，並且不能通過內置軟件包輕鬆安裝，則通常可以從您的發行版的支持站點以及可能的其他第三方站點下載並安裝CUPS的RPM文件。定位和下載很重要，考慮兩件事情：</p>
+
+<p>我是否已經下載並安裝了所有必需的軟件包？（常見的前提條件包括：gcc，libjpeg，libjpeg-devel，libpng等等。有關完整的先決條件列表，請參見www.cups.org ）
+我正在為我的版本和架構下載正確的軟件包（即0x86或0x64？Linux內核版本？）
+下載和編譯源碼：
+最後一個選項是下載，編譯和安裝從www.cups.org直接下載的源代碼。此選項需要更高級的Linux和開發知識，超出了本指南的範圍。</p>
+
+<p>CUPS管理員簡介：
+現代CUPS管理員使用Web UI，使用起來變得越來越簡單直觀。以下簡要介紹了本指南中登錄並提及我們將要使用的領域。</p>
+
+<p>CUPS Web UI：
+通過使用以下網址的互聯網瀏覽器訪問杯子的用戶界面。您可能需要在訪問之前提供root訪問權限，或進行任何敏感的更改。</p>
+
+<p>http://127.0.0.1:631</p>
+
+<p>輸入地址後，應加載一個網頁，方便管理。該部分將專注於僅限於列印機。</p>
+
+<p>該伺服器部分不應該與通過使用Windows伺服器列印任何東西，被混淆，這是用來設定該Linux機器作為列印伺服器。</p>
+
+<p>CUPS設定文件：
+您的CUPS設定，設定和驅動程式都位於/ etc / cups目錄中。主設定文件名為cupsd.conf。手動編輯這些文件超出了本指南的範圍，但很高興知道他們在那裡。</p>
+
+<p>通過LPD列印（行式列印機常駐程式） - 第一部分：
+第一部分專門介紹如何在Windows中啟用LPD服務。這在操作系統之間略有不同。以下步驟具體適用於各種伺服器操作系統。</p>
+
+<p>設定Windows Server以提供LPD列印（Windows 2000/2003 / XP）：</p>
+
+<p>1.在新增/刪除程式中打開新增/刪除Windows組件。在此位置其他網絡文件和列印服務</p>
+
+<p>2.單擊[詳細信息]按鈕，並在詳細信息中檢查Unix的列印服務，然後單擊確定，然後單擊[下一步]安裝這些組件。</p>
+
+<p>3.之後Windows將安裝此服務。可能會提示您安裝Windows安裝介質。</p>
+
+<p>設定Windows Server以提供LPD列印服務（Windows 2008/2008 R2）：</p>
+
+<p>1.運行伺服器管理器，並在“角色”中找到“列印和文檔服務”角色。</p>
+
+<p>2.在該角色中，單擊新增角色服務。在這裡您可以新增LPD服務。</p>
+
+<p>3.安裝角色後，即可將列印機安裝到工作站上。</p>
+
+<p>設定Windows Server以提供LPD列印服務（Windows Vista / 7）：</p>
+
+<p>1.打開控制面板&gt;程式和功能。在此對話框中，單擊左側的[打開或關閉Windows功能]。</p>
+
+<ol>
+  <li>將打開Windows功能對話框。找到列印和文檔服務並啟用名為LPD列印伺服器的項目，然後單擊[確定]</li>
+</ol>
+
+<p>通過LPD列印（行式列印機常駐程式） - 第二部分：
+這包括在Linux上實際安裝設備。在安裝列印機之前，您將需要以下信息。</p>
+
+<p>您共享列印機的Windows伺服器的主機名或IP地址，並已安裝了用於Unix的LPD列印伺服器/列印服務。
+要安裝的列印機的共享名稱。建議列印機在其共享名稱中不包含任何空格。
+使用CUPS Web UI新增LPD列印機：</p>
+
+<p>1.打開CUPS管理站點，然後選擇ADD Printer</p>
+
+<p>接下來，將提示您選擇列印類型。在這裡，您將要選擇LPD / LPR主機或列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。</p>
+
+<p>3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明LPD列印機的各部分。</p>
+
+<p>*設備IRL：
+這是一個ü niversal ř esource 我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。</p>
+
+<p>最終字符串輸入到CUPS新增列印機嚮導：</p>
+
+<p>4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。</p>
+
+<p>選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，以訪問適當的PPD（Postscript Printer Description）文件。</p>
+
+<p>6.新增列印機後，應在應用程式中進行選擇。當在Windows中查看隊列時，作業的所有者將在用戶當時登錄到Linux或列印時列出，並與源IP組合。</p>
+
+<p>通過SMB列印（Windows文件和列印共享）
+這包括使用簡單的共享在Linux上實際安裝設備。它不需要在Windows Server上安裝用於Unix的 LPD列印服務/列印服務。在安裝列印機之前，您將需要以下信息。</p>
+
+<p>您從中共享列印機的Windows伺服器的主機名或IP地址。
+您將要驗證的Windows域名。（工作組不需要）
+用於連接和列印到設備的有效的Windows憑據。通常這些將是域憑據，但也可以是列印伺服器上的本地用戶。
+Windows中列印機的共享名稱。
+通過Windows列印機共享安裝列印機：</p>
+
+<p>1.打開CUPS管理站點，然後選擇新增列印機</p>
+
+<p>接下來，將提示您選擇列印類型。在這裡，您將需要通過SAMBA選擇Windows列印機。在某些情況下，您可能需要直接輸入設備URI。在這種情況下，請跳到步驟3。</p>
+
+<p>3.現在，您需要輸入正確格式的*設備URI以連接到共享列印機。以下說明了SMB部分的每個部分</p>
+
+<p>*設備IRL：
+這是一個  ü niversal  ř esource  我 dentifier即用於指示協議，設備和使用CUPS當與列印機連接相關聯的其他設定一個字符串。</p>
+
+<p>輸入到CUPS新增列印嚮導的最終字符串：</p>
+
+<p>4.指定設備URI後，您需要為列印機命名。這是最終用戶如何在其列印機列表中看到此設備。</p>
+
+<p>選擇驅動程式將是您的下一步。大多數列印機已經出了一段時間，提供了非常好的驅動程式選擇。如果您的Linux發行版似乎不包含您需要的設備的驅動程式，請查看標有“ 獲取Linux驅動程式”的部分，   以訪問適當的PPD（Postscript Printer Description）文件。</p>
+
+<p>6.新增列印機後，應在應用程式中進行選擇。在Windows中查看隊列時，作業的所有者將以設備URI中指定的用戶身份列出，而不是用戶登錄的用戶名。</p>
+
+<p>通過查看隊列中的兩個作業，可以看到使用LPD（作業1）和SAMBA（作業2）之間的區別。兩人都是以約翰·多伊（John Doe）的身份提交的，但第二個不能被正確地跟踪或記錄。</p>
+
+<p>獲取Linux驅動程式
+大多數Linux版本都包含豐富的驅動程式，特別是對於普通列印機，或者已經在市場上長時間使用的列印機。驅動程式以PPD文件的形式出現。以下是關於這些內容的幾個解釋以及在哪裡可以找到驅動程式。</p>
+
+<p>什麼是PPD文件？
+PPD文件或* PostScript列印機定義文件只是一個簡單的文本文件，用於調用要為PostScript列印作業啟用哪些功能。最初CUPS只支持可以理解PostScript列印語言的列印機。</p>
+
+<p>今天可以通過增強的過濾器來支持各種各樣的列印機，使得列印作業可以被翻譯成許多其他語言，如PCL和ESCP / 2來命名。</p>
+
+<ul>
+  <li>Postcript  是一種語言，通常用於描述頁面上的內容，佈局，大小方向和項目的更多。它通常被分類為頁面描述語言。</li>
+</ul>
+
+<p>列印機製造商：
+如果您的列印機製造商提供了與CUPS兼容的產品，那麼這通常是最佳選擇，並為您的列印機提供最可靠的輸出。</p>
+
+<p>CUPS：
+CUC網站www.cups.org擁有豐富的資源和鏈接，可為各種製造商和型號獲取支持的驅動程式。</p>
+
+<p>其他來源：
+有各種開源組，可以幫助創建大量支持CUPS的列印機驅動程式。幫助檢查支持的幾個例子是通過：</p>
+
+<p>Linux基金會 - www.openprinting.org
+Gutenprint - http://gimp-print.sourceforge.net</p>
+
+                
+            </section>
+
+            <footer class="page__meta">
+                
+                
+
+
+                
+
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2017-08-07T08:12:00+08:00">August 7, 2017</time></p>
+
+                
+            </footer>
+
+            <section class="page__share">
+  
+    <h4 class="page__share-title">分享到</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=anxgang1&text=%5BLiunx%5D+%E9%80%8F%E9%81%8Ewindows%E7%9A%84%E5%8D%B0%E8%A1%A8%E6%A9%9F%E5%88%97%E5%8D%B0%20https%3A%2F%2Fblog.anxgang.com%2Fliunx-use-smb-shared-printers-print-things%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fblog.anxgang.com%2Fliunx-use-smb-shared-printers-print-things%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fblog.anxgang.com%2Fliunx-use-smb-shared-printers-print-things%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="分享到 LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+            
+  <nav class="pagination">
+    
+      <a href="/vue-nuxt-js-element-js-quickly-build-projects/" class="pagination--pager" title="[Vue] Nuxt.js + Element.js 快速建立專案
+">上一篇</a>
+    
+    
+      <a href="/rails-within-10-minutes-using-a-html-template-pdf/" class="pagination--pager" title="[Rails] 10分鐘內使用HTML模板產生PDF
+">下一篇</a>
+    
+  </nav>
+
+        </div>
+
+        
+        <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">留言</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+        
+    </article>
+
+    
+    
+    <div class="page__related">
+        <h2 class="page__related-title">
+            猜您有與趣</h2>
+        <div class="grid__wrapper">
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-linode.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-create-linodes-with-custom-iso/" rel="permalink">如何使用自定義的 iso 建立 Linode
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-04T00:00:00+08:00">2023-02-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">如何使用自定義的 iso 建立 Linode
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-mount-windows-share-folder-in-ubuntu-copy/" rel="permalink">Ubuntu 如何 mount windows 的分享資料夾
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-02-02T00:00:00+08:00">2023-02-02</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何連接 windows 的分享資料夾
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-ubuntu.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/ubuntu/how-to-use-crontab-in-ubuntu/" rel="permalink">Ubuntu 如何使用排程 crontab
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-13T00:00:00+08:00">2023-01-13</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">ubuntu 如何使用排程 crontab
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/drawing-flowcharts-with-mermaid-in-jekyll/" rel="permalink">Jekyll 使用 mermaid 繪製流程圖
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-08T00:00:00+08:00">2023-01-08</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          2 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">mermaid 是使用 JavaScript 開發的圖表工具。
+他受到 Markdown 啟發，使用簡易的文字定義，即可動態建立圖表。
+本文介紹如何將其嵌入 Jekyll 之中。
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/private-repo-with-gh-pages/" rel="permalink">Jekyll 使用 private repo 建立 gh-pages
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2023-01-04T00:00:00+08:00">2023-01-04</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">免費版的 github 建立 gh-pages 必須公開 repository。
+如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/linux-query-uses-the-pid-of-port/" rel="permalink">[Linux] 查詢佔用 port 的 pid
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-18T08:33:00+08:00">2018-10-18</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">查詢佔用 port 的 pid
+
+$ netstat -nlp|grep 8080
+
+
+查詢 pid 佔用哪些 port
+
+$ netstat -pl | grep 6152
+
+</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="permalink">[Postal] 自建大量寄送信件伺服器
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-10-16T09:22:00+08:00">2018-10-16</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Postal
+
+1. 開一台 Ubuntu 16.04 LTS
+2. 執行快速安裝指令
+
+$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+
+
+3. 開新帳號
+
+$ pos...</p>
+  </article>
+</div>
+
+            
+            
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="/assets/images/logo-jekyll.jpg" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/rails-cookie-overflow-problem-handling/" rel="permalink">[Rails] cookie overflow 問題處理
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        
+         
+        <time datetime="2018-09-06T00:57:00+08:00">2018-09-06</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          少於 1 分鐘閱讀
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">錯誤訊息
+ActionDispatch::Cookies::CookieOverflow in UsersController#create
+
+解決方式
+使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來
+
+本文使用 active_record_...</p>
+  </article>
+</div>
+
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';" role="search">
+    <label class="sr-only" for="search">
+      請輸入您要搜尋的關鍵詞...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="請輸入您要搜尋的關鍵詞..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+<script type="module">
+  if (document.querySelector(".language-mermaid")) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs').then(mermaid => {
+      // console.log("module mermaid is loaded")
+      mermaid.default.init({noteMargin: 10}, ".language-mermaid")
+    })
+  }
+</script>
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>追蹤:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://twitter.com/anxgang1" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://github.com/anxgang" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> RSS Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2024 anxgang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "https://blog.anxgang.com/liunx-use-smb-shared-printers-print-things/";  /* Replace PAGE_URL with your page's canonical URL variable */
+      this.page.identifier = "/liunx-use-smb-shared-printers-print-things"; /* Replace PAGE_IDENTIFIER with your page's unique identifier variable */
+    };
+    (function() { /* DON'T EDIT BELOW THIS LINE */
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-anxgang-com.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+  </body>
+</html>

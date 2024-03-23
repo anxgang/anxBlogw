@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2023-10-24T14:05:23+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">如何使用自定義的 iso 建立 Linode</title><link href="https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso/" rel="alternate" type="text/html" title="如何使用自定義的 iso 建立 Linode" /><published>2023-02-04T00:00:00+08:00</published><updated>2023-02-04T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso/"><![CDATA[<p>如何使用自定義的 iso 建立 Linode</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://blog.anxgang.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://blog.anxgang.com/" rel="alternate" type="text/html" /><updated>2024-03-24T00:27:32+08:00</updated><id>https://blog.anxgang.com/feed.xml</id><title type="html">ANxGANG</title><subtitle>A simple Blog</subtitle><author><name>anxgang</name></author><entry><title type="html">如何使用自定義的 iso 建立 Linode</title><link href="https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso/" rel="alternate" type="text/html" title="如何使用自定義的 iso 建立 Linode" /><published>2023-02-04T00:00:00+08:00</published><updated>2023-02-04T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-create-linodes-with-custom-iso/"><![CDATA[<p>如何使用自定義的 iso 建立 Linode</p>
 
 <h2 id="目標">目標</h2>
 
@@ -129,7 +129,7 @@
   <li><a href="https://unix.stackexchange.com/questions/61790/copy-file-from-windows-shared-folder-to-unix" target="_blank">stackexchange.com - Copy file from Windows shared folder to Unix</a></li>
   <li><a href="https://www.cyberciti.biz/tips/how-to-mount-remote-windows-partition-windows-share-under-linux.html" target="_blank">cyberciti.biz - How to mount remote windows partition (windows share) under Linux</a></li>
   <li><a href="https://wiki.ubuntu.com/MountWindowsSharesPermanently" target="_blank">wiki.ubuntu.com - Mount Windows Shares Permanently</a></li>
-</ol>]]></content><author><name>anxgang</name></author><category term="Ubuntu" /><category term="mount" /><category term="ubuntu" /><summary type="html"><![CDATA[ubuntu 如何連接 windows 的分享資料夾]]></summary></entry><entry><title type="html">Ubuntu 如何使用排程 crontab</title><link href="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/" rel="alternate" type="text/html" title="Ubuntu 如何使用排程 crontab" /><published>2023-01-13T00:00:00+08:00</published><updated>2023-01-13T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu%20copy</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu-copy/"><![CDATA[<p>ubuntu 如何使用排程 crontab</p>
+</ol>]]></content><author><name>anxgang</name></author><category term="Ubuntu" /><category term="mount" /><category term="ubuntu" /><summary type="html"><![CDATA[ubuntu 如何連接 windows 的分享資料夾]]></summary></entry><entry><title type="html">Ubuntu 如何使用排程 crontab</title><link href="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu/" rel="alternate" type="text/html" title="Ubuntu 如何使用排程 crontab" /><published>2023-01-13T00:00:00+08:00</published><updated>2023-01-13T00:00:00+08:00</updated><id>https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu</id><content type="html" xml:base="https://blog.anxgang.com/ubuntu/how-to-use-crontab-in-ubuntu/"><![CDATA[<p>ubuntu 如何使用排程 crontab</p>
 
 <h2 id="目標">目標</h2>
 
@@ -137,16 +137,16 @@
 
 <h2 id="安裝">安裝</h2>
 
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>apt update
-<span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>cron
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update
+<span class="nb">sudo </span>apt <span class="nb">install </span>cron
 </code></pre></div></div>
 
 <h2 id="服務">服務</h2>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo service cron status
-$ sudo service cron start
-$ sudo service cron restart
-$ sudo service cron stop
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo service cron status
+sudo service cron start
+sudo service cron restart
+sudo service cron stop
 </code></pre></div></div>
 
 <p class="notice--warning"><strong>提示:</strong> 安裝完服務會自動啟動，文件設定完也不用重啟，所以這幾行其實很少用。</p>
@@ -167,18 +167,19 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vim /etc/crontab
 </code></pre></div></div>
 
-<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 分 時 日 月 星期 指令</span>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 分 時 日 月 星期 指令</span>
 <span class="mi">0</span> <span class="mi">0</span><span class="p">,</span><span class="mi">12</span> <span class="mi">1</span> <span class="o">*</span> <span class="o">*</span> <span class="sr">/usr/</span><span class="n">bin</span><span class="o">/</span><span class="n">certbot</span> <span class="n">renew</span> <span class="c1"># 每個月1號的0點和12點執行 certbot renew</span>
 </code></pre></div></div>
 
 <div class="notice--warning">
   
-<p><strong>提示:</strong><br /> 
+<p><strong>提示:</strong><br />
 個人是習慣直接編輯<code class="language-plaintext highlighter-rouge">/etc/crontab</code>，如不熟悉可至工具網頁 <a href="https://crontab.guru" target="_blank">crontab.guru</a> 試試是否正確</p>
 
 </div>
 
 <h2 id="參考">參考</h2>
+
 <ol>
   <li><a href="https://medium.com/@dkxmonster/%E6%8A%80%E8%A1%93%E7%A0%94%E7%A9%B6-ubuntu-crontab-6f780b88ed6b" target="_blank">技術研究 Ubuntu CronTab - DavidKross</a></li>
   <li><a href="https://crontab.guru" target="_blank">crontab.guru</a></li>
@@ -196,7 +197,7 @@ crontab <span class="nt">-e</span> <span class="c">#編輯</span>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"module"</span><span class="nt">&gt;</span>
   <span class="k">import</span> <span class="nx">mermaid</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs</span><span class="dl">'</span>
-  <span class="nx">mermaid</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span><span class="na">noteMargin</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="dl">"</span><span class="s2">.language-mermaid</span><span class="dl">"</span><span class="p">)</span>
+  <span class="nx">mermaid</span><span class="p">.</span><span class="nf">init</span><span class="p">({</span><span class="na">noteMargin</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="dl">"</span><span class="s2">.language-mermaid</span><span class="dl">"</span><span class="p">)</span>
 <span class="nt">&lt;/script&gt;</span>
 </code></pre></div></div>
 <!---->
@@ -452,7 +453,7 @@ gitGraph
    <span class="na">id-token</span><span class="pi">:</span> <span class="s">write</span>
  <span class="na">concurrency</span><span class="pi">:</span>
    <span class="na">group</span><span class="pi">:</span> <span class="s2">"</span><span class="s">pages"</span>
-   <span class="na">cancel-in-progress</span><span class="pi">:</span> <span class="no">true</span>
+   <span class="na">cancel-in-progress</span><span class="pi">:</span> <span class="kc">true</span>
  <span class="na">jobs</span><span class="pi">:</span>
    <span class="na">deploy</span><span class="pi">:</span>
      <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
@@ -463,7 +464,7 @@ gitGraph
          <span class="na">uses</span><span class="pi">:</span> <span class="s">ruby/setup-ruby@v1</span>
          <span class="na">with</span><span class="pi">:</span>
            <span class="na">ruby-version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.0'</span>
-           <span class="na">bundler-cache</span><span class="pi">:</span> <span class="no">true</span>
+           <span class="na">bundler-cache</span><span class="pi">:</span> <span class="kc">true</span>
            <span class="na">cache-version</span><span class="pi">:</span> <span class="m">0</span> <span class="c1"># Increment this number if you need to re-download cached gems</span>
        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Build with Jekyll</span>
          <span class="na">run</span><span class="pi">:</span> <span class="s">bundle exec jekyll build</span>
@@ -496,4 +497,287 @@ gitGraph
 <ol>
   <li><a href="https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-deploy-to-external-repository-external_repository" target="_blank">deploy-to-external-repository</a></li>
   <li><a href="https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-create-ssh-deploy-key" target="_blank">create-ssh-deploy-key</a></li>
-</ol>]]></content><author><name>anxgang</name></author><category term="Jekyll" /><category term="jekyll" /><category term="github" /><category term="gh-pages" /><summary type="html"><![CDATA[免費版的 github 建立 gh-pages 必須公開 repository。 如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？]]></summary></entry></feed>
+</ol>]]></content><author><name>anxgang</name></author><category term="Jekyll" /><category term="jekyll" /><category term="github" /><category term="gh-pages" /><summary type="html"><![CDATA[免費版的 github 建立 gh-pages 必須公開 repository。 如果想省錢又不想把 markdown 直接公諸於世該怎麼辦？]]></summary></entry><entry><title type="html">[Linux] 查詢佔用 port 的 pid</title><link href="https://blog.anxgang.com/linux-query-uses-the-pid-of-port/" rel="alternate" type="text/html" title="[Linux] 查詢佔用 port 的 pid" /><published>2018-10-18T08:33:00+08:00</published><updated>2018-10-18T08:33:00+08:00</updated><id>https://blog.anxgang.com/linux-query-uses-the-pid-of-port</id><content type="html" xml:base="https://blog.anxgang.com/linux-query-uses-the-pid-of-port/"><![CDATA[<h2 id="查詢佔用-port-的-pid">查詢佔用 port 的 pid</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ netstat -nlp|grep 8080
+</code></pre></div></div>
+
+<h2 id="查詢-pid-佔用哪些-port">查詢 pid 佔用哪些 port</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ netstat -pl | grep 6152
+</code></pre></div></div>]]></content><author><name>anxgang</name></author><summary type="html"><![CDATA[查詢佔用 port 的 pid $ netstat -nlp|grep 8080 查詢 pid 佔用哪些 port $ netstat -pl | grep 6152]]></summary></entry><entry><title type="html">[Postal] 自建大量寄送信件伺服器</title><link href="https://blog.anxgang.com/postal-self-built-a-large-number-of-mail-sent-to-the-server/" rel="alternate" type="text/html" title="[Postal] 自建大量寄送信件伺服器" /><published>2018-10-16T09:22:00+08:00</published><updated>2018-10-16T09:22:00+08:00</updated><id>https://blog.anxgang.com/postal-self-built-a-large-number-of-mail-sent-to-the-server</id><content type="html" xml:base="https://blog.anxgang.com/postal-self-built-a-large-number-of-mail-sent-to-the-server/"><![CDATA[<h1 id="postal">Postal</h1>
+
+<h3 id="1-開一台-ubuntu-1604-lts">1. 開一台 Ubuntu 16.04 LTS</h3>
+<h3 id="2-執行快速安裝指令">2. 執行快速安裝指令</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh	
+</code></pre></div></div>
+
+<h3 id="3-開新帳號">3. 開新帳號</h3>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="n">postal</span> <span class="n">make</span><span class="o">-</span><span class="n">user</span>
+
+<span class="c1"># E-Mail Address      : xxx@gmail.com</span>
+<span class="c1"># First Name          : xxx</span>
+<span class="c1"># Last Name           : xxx</span>
+<span class="c1"># Initial Password:   : **********</span>
+<span class="c1"># User has been created with e-mail address xxx@gmail.com</span>
+</code></pre></div></div>
+
+<h3 id="4-修改mysql密碼">4. 修改mysql密碼</h3>
+<p><code class="language-plaintext highlighter-rouge">mysqladmin -u root password</code></p>
+<h3 id="5-修改rabbitmq密碼">5. 修改RabbitMQ密碼</h3>
+<p><code class="language-plaintext highlighter-rouge">p0stalpassw0rd</code></p>
+
+<blockquote>
+  <p>mysql 的 root 密碼預設是空的，要自己補
+mysql 和 rabitMQ 的 postal帳號的密碼要一樣才行 (不動也沒差，反正會加防火牆)</p>
+</blockquote>
+
+<h3 id="6-把-nginx-設定裡面兩個domain-name都改掉">6. 把 nginx 設定裡面兩個domain name都改掉</h3>
+
+<p>/etc/nginx/sites-enabled/default</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>domain_name postal.yourdomain.com
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nginx -t
+$ service nginx restart
+</code></pre></div></div>
+
+<h3 id="7-安裝-certbot-並啟用ssl">7. 安裝 certbot 並啟用ssl</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo add-apt-repository ppa:certbot/certbot
+$ sudo apt-get update
+$ sudo apt-get install python-certbot-nginx 
+</code></pre></div></div>
+
+<p>啟用certbot</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$sudo certbot --nginx
+# 選 1 不自動轉(原本已經寫好了)
+</code></pre></div></div>
+
+<p>設定自動啟用</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo certbot renew --dry-run
+</code></pre></div></div>
+
+<h3 id="8-dns設定">8. DNS設定</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>;; A Records (IPv4 addresses)
+yourdomain.com.	1	IN	A	123.123.123.123
+postal.yourdomain.com.	1	IN	A	123.123.123.123
+rp.mail.yourdomain.com.	1	IN	A	123.123.123.123
+spf.postal.yourdomain.com.	1	IN	A	123.123.123.123
+www.yourdomain.com.	1	IN	A	123.123.123.123
+;; MX Records
+psrp.yourdomain.com.	1	IN	MX	10	mx.postal.yourdomain.com.
+psrp.mail.yourdomain.com.	1	IN	MX	10	mx.postal.yourdomain.com.
+;; CNAME Records
+psrp.yourdomain.com.	1	IN	CNAME	rp.postal.yourdomain.com.
+psrp.mail.yourdomain.com.	1	IN	CNAME	rp.postal.yourdomain.com.
+;; TXT Records
+yourdomain.com.	1	IN	TXT	"v=spf1 a mx include:spf.postal.yourdomain.com ~all"
+mail.yourdomain.com.	1	IN	TXT	"v=spf1 a mx include:spf.postal.yourdomain.com ~all"
+psrp.yourdomain.com.	1	IN	TXT	"v=spf1 a mx ip4:123.123.123.123 ~all"
+psrp.mail.yourdomain.com.	1	IN	TXT	"v=spf1 a mx ip4:123.123.123.123 ~all"
+postal-bfyfsk._domainkey.yourdomain.com.	1	IN	TXT	"v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDsEfl9HlDLTG9G4LVkVPh/mnCkb+XiJpeaGaVR/+TLHvdLv2EaVY9QlXnJl3CsOz+ift8W0cAQFfSRjHF4LHyGFxe0UfDOhMR67p4/KiCF3uq/bnSMnVXKLXp45YWGz9JT2HIlu497zZ1m7zIXtiSChU2qR39kTqai7CK8VHEOJQIDAQAB;"
+postal-gmqito._domainkey.mail.yourdomain.com.	1	IN	TXT	"v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCiduT7ecGnhzz/qgNQXYFmdIZ2tWyjg34z4GJJZxf6JNewYb9Ag776Ogcanux2s78G0JDYMo1M/HPekq1REEL3wPHU8yYsBG9xLcLSfr1wIMVqrZ7oLKsC3I8HsJOnARu3reQrpBIOq//4wei8mzUyNwhAfPrEvbVzgBhAcOe74wIDAQAB;"
+postal-nofjiu._domainkey.mail.yourdomain.com.	1	IN	TXT	"v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC3ebXd1f8b8yXxWZegbMW/Pn7wppOslFxkDft4tCpY5QMlhiOkvBU4zy3BlpA+m930MDPyqeiIhFBHpLhEelwT50H3I7yMtI+fQb4+PVMwog9czLTN9wYWWomHNGI4bUo1GWPWbnjgPSyjEOM5mKIwk3Fvqgdyo6goNnjEjh4wWQIDAQAB;"
+_dmarc.yourdomain.com.	1	IN	TXT	"v=DMARC1; p=none"
+</code></pre></div></div>
+
+<h3 id="9-smtp-設定轉-port">9. smtp 設定轉 port</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>```
+$ sudo apt-get install ufw
+# 所有port 允許送出，拒絕進入
+$ sudo ufw default deny incoming
+$ sudo ufw default allow outgoing
+# 開啟服務
+$ sudo ufw allow ssh (務必加入，否則無法遠端)
+$ sudo ufw allow http
+$ sudo ufw allow https
+$ sudo ufw allow 587/tcp
+```
+</code></pre></div></div>
+
+<p>設定 port forwarding</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># /etc/ufw/sysctl.conf
+net/ipv4/ip_forward=1 #把註解取消
+</code></pre></div></div>
+
+<p>把以下文字加到 <code class="language-plaintext highlighter-rouge">/etc/ufw/before.rules</code> 最上方</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># /etc/ufw/before.rules 
+*nat
+:PREROUTING ACCEPT [0:0]
+-A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+COMMIT
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo ufw disable 
+$ sudo ufw enable 
+</code></pre></div></div>
+
+<blockquote>
+  <p>參考</p>
+  <ol>
+    <li>https://serverfault.com/questions/238563/can-i-use-ufw-to-setup-a-port-forward</li>
+  </ol>
+</blockquote>]]></content><author><name>anxgang</name></author><summary type="html"><![CDATA[Postal 1. 開一台 Ubuntu 16.04 LTS 2. 執行快速安裝指令 $ curl https://raw.githubusercontent.com/atech/postal/master/script/install/ubuntu1604.sh | sh 3. 開新帳號 $ postal make-user # E-Mail Address : xxx@gmail.com # First Name : xxx # Last Name : xxx # Initial Password: : ********** # User has been created with e-mail address xxx@gmail.com 4. 修改mysql密碼 mysqladmin -u root password 5. 修改RabbitMQ密碼 p0stalpassw0rd mysql 的 root 密碼預設是空的，要自己補 mysql 和 rabitMQ 的 postal帳號的密碼要一樣才行 (不動也沒差，反正會加防火牆) 6. 把 nginx 設定裡面兩個domain name都改掉 /etc/nginx/sites-enabled/default domain_name postal.yourdomain.com $ nginx -t $ service nginx restart 7. 安裝 certbot 並啟用ssl $ sudo apt-get update $ sudo apt-get install software-properties-common $ sudo add-apt-repository ppa:certbot/certbot $ sudo apt-get update $ sudo apt-get install python-certbot-nginx 啟用certbot $sudo certbot --nginx # 選 1 不自動轉(原本已經寫好了) 設定自動啟用 $ sudo certbot renew --dry-run 8. DNS設定 ;; A Records (IPv4 addresses) yourdomain.com. 1 IN A 123.123.123.123 postal.yourdomain.com. 1 IN A 123.123.123.123 rp.mail.yourdomain.com. 1 IN A 123.123.123.123 spf.postal.yourdomain.com. 1 IN A 123.123.123.123 www.yourdomain.com. 1 IN A 123.123.123.123 ;; MX Records psrp.yourdomain.com. 1 IN MX 10 mx.postal.yourdomain.com. psrp.mail.yourdomain.com. 1 IN MX 10 mx.postal.yourdomain.com. ;; CNAME Records psrp.yourdomain.com. 1 IN CNAME rp.postal.yourdomain.com. psrp.mail.yourdomain.com. 1 IN CNAME rp.postal.yourdomain.com. ;; TXT Records yourdomain.com. 1 IN TXT "v=spf1 a mx include:spf.postal.yourdomain.com ~all" mail.yourdomain.com. 1 IN TXT "v=spf1 a mx include:spf.postal.yourdomain.com ~all" psrp.yourdomain.com. 1 IN TXT "v=spf1 a mx ip4:123.123.123.123 ~all" psrp.mail.yourdomain.com. 1 IN TXT "v=spf1 a mx ip4:123.123.123.123 ~all" postal-bfyfsk._domainkey.yourdomain.com. 1 IN TXT "v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDsEfl9HlDLTG9G4LVkVPh/mnCkb+XiJpeaGaVR/+TLHvdLv2EaVY9QlXnJl3CsOz+ift8W0cAQFfSRjHF4LHyGFxe0UfDOhMR67p4/KiCF3uq/bnSMnVXKLXp45YWGz9JT2HIlu497zZ1m7zIXtiSChU2qR39kTqai7CK8VHEOJQIDAQAB;" postal-gmqito._domainkey.mail.yourdomain.com. 1 IN TXT "v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCiduT7ecGnhzz/qgNQXYFmdIZ2tWyjg34z4GJJZxf6JNewYb9Ag776Ogcanux2s78G0JDYMo1M/HPekq1REEL3wPHU8yYsBG9xLcLSfr1wIMVqrZ7oLKsC3I8HsJOnARu3reQrpBIOq//4wei8mzUyNwhAfPrEvbVzgBhAcOe74wIDAQAB;" postal-nofjiu._domainkey.mail.yourdomain.com. 1 IN TXT "v=DKIM1; t=s; h=sha256; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC3ebXd1f8b8yXxWZegbMW/Pn7wppOslFxkDft4tCpY5QMlhiOkvBU4zy3BlpA+m930MDPyqeiIhFBHpLhEelwT50H3I7yMtI+fQb4+PVMwog9czLTN9wYWWomHNGI4bUo1GWPWbnjgPSyjEOM5mKIwk3Fvqgdyo6goNnjEjh4wWQIDAQAB;" _dmarc.yourdomain.com. 1 IN TXT "v=DMARC1; p=none" 9. smtp 設定轉 port ``` $ sudo apt-get install ufw # 所有port 允許送出，拒絕進入 $ sudo ufw default deny incoming $ sudo ufw default allow outgoing # 開啟服務 $ sudo ufw allow ssh (務必加入，否則無法遠端) $ sudo ufw allow http $ sudo ufw allow https $ sudo ufw allow 587/tcp ``` 設定 port forwarding # /etc/ufw/sysctl.conf net/ipv4/ip_forward=1 #把註解取消 把以下文字加到 /etc/ufw/before.rules 最上方 # /etc/ufw/before.rules *nat :PREROUTING ACCEPT [0:0] -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080 COMMIT $ sudo ufw disable $ sudo ufw enable 參考 https://serverfault.com/questions/238563/can-i-use-ufw-to-setup-a-port-forward]]></summary></entry><entry><title type="html">[Rails] cookie overflow 問題處理</title><link href="https://blog.anxgang.com/rails-cookie-overflow-problem-handling/" rel="alternate" type="text/html" title="[Rails] cookie overflow 問題處理" /><published>2018-09-06T00:57:00+08:00</published><updated>2018-09-06T00:57:00+08:00</updated><id>https://blog.anxgang.com/rails-cookie-overflow-problem-handling</id><content type="html" xml:base="https://blog.anxgang.com/rails-cookie-overflow-problem-handling/"><![CDATA[<h2 id="錯誤訊息">錯誤訊息</h2>
+<p>ActionDispatch::Cookies::CookieOverflow in UsersController#create</p>
+
+<h2 id="解決方式">解決方式</h2>
+<p>使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來</p>
+
+<p>本文使用 active_record_store 處理</p>
+
+<h2 id="解決步驟">解決步驟</h2>
+
+<p>安裝 gem</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem 'activerecord-session_store'
+</code></pre></div></div>
+
+<p>產生需要用到的 migration</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rake db:sessions:create
+rake db:migrate
+</code></pre></div></div>
+
+<p>config/initializers/session_store.rb 中，將原有的 :cookie_store 改為 :active_record_store</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Application</span><span class="p">.</span><span class="nf">config</span><span class="p">.</span><span class="nf">session_store</span> <span class="ss">:cookie_store</span><span class="p">,</span> <span class="ss">:key</span> <span class="o">=&gt;</span> <span class="s1">'_my_app_session'</span>
+<span class="n">to</span>
+<span class="no">Application</span><span class="p">.</span><span class="nf">config</span><span class="p">.</span><span class="nf">session_store</span> <span class="ss">:active_record_store</span><span class="p">,</span> <span class="ss">:key</span> <span class="o">=&gt;</span> <span class="s1">'_my_app_session'</span>
+</code></pre></div></div>
+
+<h2 id="加入定時刪除排程">加入定時刪除排程</h2>
+<p>官方建議 prodcution 環境需要建立排程定時清理 db，避免資料一直增長
+<a href="https://github.com/rails/activerecord-session_store/blob/f7463cbd82fe997759fe0622c84f14c7b9af9737/lib/tasks/database.rake">程式參考</a></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rake db:sessions:clear  --&gt; 清空 session
+rake db:sessions:trim   --&gt; 清理 30 天以前的 session
+</code></pre></div></div>
+
+<p>可以在 sidekiq 塞一個 job 執行</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cutoff_period</span> <span class="o">=</span> <span class="p">(</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'SESSION_DAYS_TRIM_THRESHOLD'</span><span class="p">]</span> <span class="o">||</span> <span class="mi">30</span><span class="p">).</span><span class="nf">to_i</span><span class="p">.</span><span class="nf">days</span><span class="p">.</span><span class="nf">ago</span>
+<span class="no">ActiveRecord</span><span class="o">::</span><span class="no">SessionStore</span><span class="o">::</span><span class="no">Session</span><span class="p">.</span>
+      <span class="nf">where</span><span class="p">(</span><span class="s2">"updated_at &lt; ?"</span><span class="p">,</span> <span class="n">cutoff_period</span><span class="p">).</span>
+      <span class="nf">delete_all</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>參考</p>
+  <ol>
+    <li>https://github.com/rails/activerecord-session_store</li>
+    <li>https://stackoverflow.com/questions/9473808/cookie-overflow-in-rails-application</li>
+    <li>http://railscasts.com/episodes/127-rake-in-background</li>
+  </ol>
+</blockquote>]]></content><author><name>anxgang</name></author><summary type="html"><![CDATA[錯誤訊息 ActionDispatch::Cookies::CookieOverflow in UsersController#create 解決方式 使用 active_record_store 或是 mem_record_store 把 cookie 內容另外存起來 本文使用 active_record_store 處理 解決步驟 安裝 gem gem 'activerecord-session_store' 產生需要用到的 migration rake db:sessions:create rake db:migrate config/initializers/session_store.rb 中，將原有的 :cookie_store 改為 :active_record_store Application.config.session_store :cookie_store, :key =&gt; '_my_app_session' to Application.config.session_store :active_record_store, :key =&gt; '_my_app_session' 加入定時刪除排程 官方建議 prodcution 環境需要建立排程定時清理 db，避免資料一直增長 程式參考 rake db:sessions:clear --&gt; 清空 session rake db:sessions:trim --&gt; 清理 30 天以前的 session 可以在 sidekiq 塞一個 job 執行 cutoff_period = (ENV['SESSION_DAYS_TRIM_THRESHOLD'] || 30).to_i.days.ago ActiveRecord::SessionStore::Session. where("updated_at &lt; ?", cutoff_period). delete_all 參考 https://github.com/rails/activerecord-session_store https://stackoverflow.com/questions/9473808/cookie-overflow-in-rails-application http://railscasts.com/episodes/127-rake-in-background]]></summary></entry><entry><title type="html">[Rails] 修改預設的 scaffold 模板</title><link href="https://blog.anxgang.com/rails-modifies-the-default-scaffold-template/" rel="alternate" type="text/html" title="[Rails] 修改預設的 scaffold 模板" /><published>2018-09-03T01:33:00+08:00</published><updated>2018-09-03T01:33:00+08:00</updated><id>https://blog.anxgang.com/rails-modifies-the-default-scaffold-template</id><content type="html" xml:base="https://blog.anxgang.com/rails-modifies-the-default-scaffold-template/"><![CDATA[<h2 id="修改-model">修改 model</h2>
+<p>app/lib/templates/active_record/model/model.rb
+<a href="https://github.com/rails/rails/blob/master/activerecord/lib/rails/generators/active_record/model/templates/model.rb.tt">官方範例</a></p>
+
+<h2 id="修改-view">修改 view</h2>
+<p>app/lib/templates/scaffold/_form.html.erb
+app/lib/templates/scaffold/edit.html.erb
+app/lib/templates/scaffold/index.html.erb
+app/lib/templates/scaffold/new.html.erb
+app/lib/templates/scaffold/show.html.erb
+<a href="https://github.com/rails/rails/tree/b2eb1d1c55a59fee1e6c4cba7030d8ceb524267c/railties/lib/rails/generators/erb/scaffold/templates">官方範例</a>
+<!-- more --></p>
+<h2 id="修改-controller">修改 controller</h2>
+<p>app/lib/scaffold_controller/controller.rb
+<a href="https://github.com/rails/rails/blob/b2eb1d1c55a59fee1e6c4cba7030d8ceb524267c/railties/lib/rails/generators/rails/scaffold_controller/templates/controller.rb.tt">官方範例</a></p>
+
+<h2 id="修改-rspec">修改 rspec</h2>
+<p>app/lib/templates/rspec/scaffold/controller_spec.rb
+<a href="https://github.com/rspec/rspec-rails/blob/master/lib/generators/rspec/scaffold/templates/controller_spec.rb">官方範例</a></p>
+
+<h2 id="寫法">寫法</h2>
+<p><code class="language-plaintext highlighter-rouge">&lt;%% %&gt;</code> 代表可以產生rails語法
+在裡面可以塞 <code class="language-plaintext highlighter-rouge">&lt;% %&gt;</code> 變數 語法</p>
+
+<p>例如：</p>
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%%</span><span class="o">=</span> <span class="n">link_to</span> <span class="s1">'edit'</span><span class="p">,</span> <span class="n">edit_</span><span class="o">&lt;</span><span class="sx">%= singular_table_name </span><span class="cp">%&gt;</span>_path(<span class="cp">&lt;%=</span><span class="sx"> singular_table_name </span><span class="cp">%&gt;</span>) %&gt;
+</code></pre></div></div>
+<p>最後產生的 template 會是</p>
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;%=</span> <span class="n">link_to</span> <span class="s1">'edit'</span><span class="p">,</span> <span class="n">edit_user_path</span><span class="p">(</span><span class="n">user</span><span class="p">)</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h2 id="變數整理">變數整理</h2>
+<p>假設 <code class="language-plaintext highlighter-rouge">rails g scaffold System::ModelName attr1 attr2</code></p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">application_name:       </span><span class="n">my_app</span>
+<span class="ss">attributes_names:       </span><span class="p">[</span><span class="s2">"attr1"</span><span class="p">,</span> <span class="s2">"attr2"</span><span class="p">]</span>
+<span class="ss">class_path:             </span><span class="p">[</span><span class="s2">"system"</span><span class="p">]</span>
+<span class="ss">regular_class_path:     </span><span class="p">[</span><span class="s2">"system"</span><span class="p">]</span>
+
+<span class="ss">singular_name:          </span><span class="n">model_name</span>
+<span class="ss">plural_name:            </span><span class="n">model_names</span>
+<span class="ss">human_name:             </span><span class="no">Model</span> <span class="nb">name</span>
+<span class="ss">plural_file_name:       </span><span class="n">model_names</span>
+<span class="ss">fixture_file_name:      </span><span class="n">model_names</span>
+
+<span class="ss">class_name:             </span><span class="no">System</span><span class="o">::</span><span class="no">ModelName</span>
+<span class="ss">file_path:              </span><span class="nb">system</span><span class="o">/</span><span class="n">model_name</span>
+<span class="ss">i18n_scope:             </span><span class="nb">system</span><span class="p">.</span><span class="nf">model_name</span>
+<span class="ss">model_resource_name:    </span><span class="n">system_model_name</span>
+<span class="ss">singular_route_name:    </span><span class="n">system_model_name</span>
+<span class="ss">singular_table_name:    </span><span class="n">system_model_name</span>
+<span class="ss">plural_route_name:      </span><span class="n">system_model_names</span>
+<span class="ss">plural_table_name:      </span><span class="n">system_model_names</span>
+<span class="ss">table_name:             </span><span class="n">system_model_names</span>
+<span class="ss">redirect_resource_name: </span><span class="vi">@system_model_name</span>
+<span class="ss">route_url:              </span><span class="sr">/system/mo</span><span class="n">del_names</span>
+
+<span class="ss">url_helper_prefix:      </span><span class="n">system_model_name</span>
+<span class="ss">index_helper:           </span><span class="n">system_model_names</span>
+<span class="ss">new_helper:             </span><span class="n">new_system_model_name_url</span>
+<span class="ss">edit_helper:            </span><span class="n">edit_system_model_name_url</span><span class="p">(</span><span class="vi">@system_model_name</span><span class="p">)</span>
+<span class="ss">show_helper:            </span><span class="n">system_model_name_url</span><span class="p">(</span><span class="vi">@system_model_name</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="故障排除">故障排除</h2>
+
+<p>Q1. 調整後產生scaffold，但是模板沒變
+Ans.: 須先執行 <code class="language-plaintext highlighter-rouge">spring stop</code> 再產生scaffold</p>
+
+<blockquote>
+  <p>參考</p>
+  <ol>
+    <li>https://api.rubyonrails.org/classes/Rails/Generators/NamedBase.html#method-i-application_name</li>
+  </ol>
+</blockquote>]]></content><author><name>anxgang</name></author><summary type="html"><![CDATA[修改 model app/lib/templates/active_record/model/model.rb 官方範例 修改 view app/lib/templates/scaffold/_form.html.erb app/lib/templates/scaffold/edit.html.erb app/lib/templates/scaffold/index.html.erb app/lib/templates/scaffold/new.html.erb app/lib/templates/scaffold/show.html.erb 官方範例 修改 controller app/lib/scaffold_controller/controller.rb 官方範例 修改 rspec app/lib/templates/rspec/scaffold/controller_spec.rb 官方範例 寫法 &lt;%% %&gt; 代表可以產生rails語法 在裡面可以塞 &lt;% %&gt; 變數 語法 例如： &lt;%%= link_to 'edit', edit_&lt;%= singular_table_name %&gt;_path(&lt;%= singular_table_name %&gt;) %&gt; 最後產生的 template 會是 &lt;%= link_to 'edit', edit_user_path(user) %&gt; 變數整理 假設 rails g scaffold System::ModelName attr1 attr2 application_name: my_app attributes_names: ["attr1", "attr2"] class_path: ["system"] regular_class_path: ["system"] singular_name: model_name plural_name: model_names human_name: Model name plural_file_name: model_names fixture_file_name: model_names class_name: System::ModelName file_path: system/model_name i18n_scope: system.model_name model_resource_name: system_model_name singular_route_name: system_model_name singular_table_name: system_model_name plural_route_name: system_model_names plural_table_name: system_model_names table_name: system_model_names redirect_resource_name: @system_model_name route_url: /system/model_names url_helper_prefix: system_model_name index_helper: system_model_names new_helper: new_system_model_name_url edit_helper: edit_system_model_name_url(@system_model_name) show_helper: system_model_name_url(@system_model_name) 故障排除 Q1. 調整後產生scaffold，但是模板沒變 Ans.: 須先執行 spring stop 再產生scaffold 參考 https://api.rubyonrails.org/classes/Rails/Generators/NamedBase.html#method-i-application_name]]></summary></entry><entry><title type="html">[Rails] model 中取得 current_user</title><link href="https://blog.anxgang.com/get-current-user-in-rails-model/" rel="alternate" type="text/html" title="[Rails] model 中取得 current_user" /><published>2018-08-30T07:18:00+08:00</published><updated>2018-08-30T07:18:00+08:00</updated><id>https://blog.anxgang.com/get-current-user-in-rails-model</id><content type="html" xml:base="https://blog.anxgang.com/get-current-user-in-rails-model/"><![CDATA[<h2 id="施作方式">施作方式</h2>
+<h5 id="1-設定-usercurrent">1. 設定 User.current</h5>
+
+<p>user.rb</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current</span>
+    <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span><span class="p">[</span><span class="ss">:user</span><span class="p">]</span>
+  <span class="k">end</span>
+  
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="no">Thread</span><span class="p">.</span><span class="nf">current</span><span class="p">[</span><span class="ss">:user</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>application_controller.rb</p>
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">before_action</span> <span class="ss">:set_current_user</span>
+
+  <span class="k">def</span> <span class="nf">set_current_user</span>
+    <span class="no">User</span><span class="p">.</span><span class="nf">current</span> <span class="o">=</span> <span class="n">current_user</span> 
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>參考</p>
+  <ol>
+    <li>https://stackoverflow.com/questions/3742785/rails-3-devise-current-user-is-not-accessible-in-a-model#3742981</li>
+    <li>https://amitrmohanty.wordpress.com/2014/01/20/how-to-get-current_user-in-model-and-observer-rails/</li>
+  </ol>
+</blockquote>]]></content><author><name>anxgang</name></author><summary type="html"><![CDATA[施作方式 1. 設定 User.current user.rb class User &lt; ApplicationRecord def self.current Thread.current[:user] end def self.current=(user) Thread.current[:user] = user end end application_controller.rb class ApplicationController &lt; ActionController::Base before_action :set_current_user def set_current_user User.current = current_user end end 參考 https://stackoverflow.com/questions/3742785/rails-3-devise-current-user-is-not-accessible-in-a-model#3742981 https://amitrmohanty.wordpress.com/2014/01/20/how-to-get-current_user-in-model-and-observer-rails/]]></summary></entry></feed>
