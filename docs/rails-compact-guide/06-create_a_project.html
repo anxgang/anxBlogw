@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>前言 - ANxGANG</title>
-<meta name="description" content="介紹本指南使用方式">
+<!-- begin _includes/seo.html --><title>專案建立 - ANxGANG</title>
+<meta name="description" content="專案建立">
 
 
   <meta name="author" content="anxgang">
@@ -22,11 +22,11 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:site_name" content="ANxGANG">
-<meta property="og:title" content="前言">
-<meta property="og:url" content="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started">
+<meta property="og:title" content="專案建立">
+<meta property="og:url" content="https://blog.anxgang.com/docs/rails-compact-guide/06-create_a_project">
 
 
-  <meta property="og:description" content="介紹本指南使用方式">
+  <meta property="og:description" content="專案建立">
 
 
 
@@ -35,9 +35,9 @@
 
 
   <meta name="twitter:site" content="@anxgang1">
-  <meta name="twitter:title" content="前言">
-  <meta name="twitter:description" content="介紹本指南使用方式">
-  <meta name="twitter:url" content="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started">
+  <meta name="twitter:title" content="專案建立">
+  <meta name="twitter:description" content="專案建立">
+  <meta name="twitter:url" content="https://blog.anxgang.com/docs/rails-compact-guide/06-create_a_project">
 
   
     <meta name="twitter:card" content="summary">
@@ -61,7 +61,7 @@
   
 
 
-<link rel="canonical" href="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started">
+<link rel="canonical" href="https://blog.anxgang.com/docs/rails-compact-guide/06-create_a_project">
 
 
 
@@ -287,7 +287,8 @@
           
             <li>
               
-              <a href="/docs/rails-compact-guide/06-create_a_project" >1.2 專案建立</a>
+              <a href="/docs/rails-compact-guide/06-create_a_project"  class="active"
+                >1.2 專案建立</a>
                           
 
               
@@ -394,11 +395,11 @@
 
     <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
         
-        <meta itemprop="headline" content="前言">
+        <meta itemprop="headline" content="專案建立">
         
         
         <meta itemprop="description"
-            content="介紹本指南使用方式">
+            content="專案建立">
         
         <meta itemprop="datePublished" content="2024-03-24T01:59:10+08:00">
         
@@ -407,8 +408,8 @@
             
             <header>
                 <h1 id="page-title" class="page__title p-name" itemprop="headline">
-                    <a href="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started" class="u-url"
-                        itemprop="url">前言
+                    <a href="https://blog.anxgang.com/docs/rails-compact-guide/06-create_a_project" class="u-url"
+                        itemprop="url">專案建立
 </a>
                 </h1>
                 
@@ -426,35 +427,28 @@
                                 &nbsp;索引
                             </h4>
                         </header>
-                        <ul class="toc__menu"><li><a href="#目標受眾">目標受眾</a></li><li><a href="#準備工作">準備工作</a></li><li><a href="#指南三部分">指南三部分</a></li></ul>
+                        
 
                     </nav>
                 </aside>
                 
-                <p>本指南是 <del>Rails Complete Guide</del> Rails Compact Guide，
-適合三分鐘熱度之人閱讀，每篇保證三分鐘內搞定。</p>
+                <!-- 
+**注意:** 本文尚未完成，請斟酌閱讀！
+{: .notice--danger}
+-->
 
-<h2 id="目標受眾">目標受眾</h2>
+<p>建立專案的步驟大致如下：</p>
 
-<ul>
-  <li>會上網</li>
-  <li>會使用滑鼠鍵盤</li>
-</ul>
+<ol>
+  <li>新增專案</li>
+  <li>開啟專案</li>
+  <li>建立一個 scaffold</li>
+  <li>執行 migrate 建立資料表</li>
+  <li>提交 git</li>
+  <li>啟動專案</li>
+</ol>
 
-<h2 id="準備工作">準備工作</h2>
-
-<ul>
-  <li>一台電腦 windows、mac、linux 皆可</li>
-</ul>
-
-<h2 id="指南三部分">指南三部分</h2>
-
-<ul>
-  <li>第一部分，將基本流程跑一次（環境準備、建立專案、上線)</li>
-  <li>第二部分，各種業務流程基本寫法</li>
-  <li>第三部分，各種元件製作的方式</li>
-</ul>
-
+<p>我們會使用 Rails 的指令來建立，還不會撰寫任何程式碼，即便如此也能寫一個簡單的 CRUD 程式</p>
 
                 
             </section>
@@ -469,6 +463,29 @@
   <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2024-03-24T01:59:10+08:00">March 24, 2024</time></p>
 
                 
+  <p class="page__history" style="padding-top: 10px">
+  <strong>
+    <i class="fas fa-fw fa-history" aria-hidden="true"></i>
+    <span class="collapse-button" style="cursor: pointer"
+      onclick="hidecurrentpagehistory.style.display=hidecurrentpagehistory.style.display=='none'?'block':'none';">
+      歷史紀錄 ▿
+    </span>
+  </strong>
+  <div id="hidecurrentpagehistory" class="collapse-wrapper" style="display: none">
+    <ul>
+  <li>2024-03-24 初稿</li>
+</ul>
+
+  </div>
+</p>
+
+<style>
+.collapse-wrapper ul, .collapse-wrapper li{
+  margin: 0px;
+}
+</style>
+
+
             </footer>
 
             
@@ -476,10 +493,11 @@
             
   <nav class="pagination">
     
-      <a href="#" class="pagination--pager disabled">上一篇</a>
+      <a href="/docs/rails-compact-guide/05-install_rails_on_windows" class="pagination--pager" title="Rails 環境安裝 (on windows)
+">上一篇</a>
     
     
-      <a href="/docs/rails-compact-guide/02-installation" class="pagination--pager" title="環境安裝
+      <a href="/docs/rails-compact-guide/07-create_a_blog_project" class="pagination--pager" title="建立 blog
 ">下一篇</a>
     
   </nav>

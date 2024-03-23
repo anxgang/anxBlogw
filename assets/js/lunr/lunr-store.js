@@ -1,6 +1,6 @@
 var store = [{
         "title": "前言",
-        "excerpt":"  別人都是 Rails Complete Guide，但本篇是 Rails Compact Guide， 適合三分鐘熱度之人閱讀，每篇保證三分鐘內搞定。   目標受眾      會上網   會使用滑鼠鍵盤   準備工作      一台電腦 windows、mac、linux 皆可   指南三部分      第一部分，將基本流程跑一次（環境準備、建立專案、上線)   第二部分，各種業務流程基本寫法   第三部分，各種元件製作的方式   ","categories": [],
+        "excerpt":"本指南是 Rails Complete Guide Rails Compact Guide， 適合三分鐘熱度之人閱讀，每篇保證三分鐘內搞定。   目標受眾      會上網   會使用滑鼠鍵盤   準備工作      一台電腦 windows、mac、linux 皆可   指南三部分      第一部分，將基本流程跑一次（環境準備、建立專案、上線)   第二部分，各種業務流程基本寫法   第三部分，各種元件製作的方式   ","categories": [],
         "tags": [],
         "url": "/docs/rails-compact-guide/01-getting-started",
         "teaser": null
@@ -27,6 +27,18 @@ var store = [{
         "excerpt":"  把 Rails on windows 的環境安裝好。   安裝 子系統 WSL2 Ubuntu  以最高權限開啟 Powershell 並執行    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart   dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart  至 Microsoft Store 安裝 Ubuntu   安裝 Windows Terminal   至 Microsoft Store 安裝 Windows Terminal   安裝 相關套件    sudo apt-get update   sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev software-properties-common libffi-dev  設定 git    # 設定（僅一次即可）   git config --global color.ui true   git config --global user.name \"YOUR NAME\"   git config --global user.email \"YOUR@EMAIL.com\"   ssh-keygen -t rsa -C \"YOUR@EMAIL.com\"  安裝 rvm    gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB   \\curl -sSL https://get.rvm.io | bash  安裝 ruby 及 rails    rvm install ruby --stable   ruby -v    gem install bundler   bundle -v    gem install rails   rails -v  安裝 資料庫    sudo apt install postgresql libpq-dev   sudo -u postgres createuser $USER -s    sudo apt install redis-server   參考     GoRails - Install Ruby On Rails on Windows Guides   官方安裝 WSL2  ","categories": [],
         "tags": [],
         "url": "/docs/rails-compact-guide/05-install_rails_on_windows",
+        "teaser": null
+      },{
+        "title": "專案建立",
+        "excerpt":"  建立專案的步驟大致如下：      新增專案   開啟專案   建立一個 scaffold   執行 migrate 建立資料表   提交 git   啟動專案   我們會使用 Rails 的指令來建立，還不會撰寫任何程式碼，即便如此也能寫一個簡單的 CRUD 程式  ","categories": [],
+        "tags": [],
+        "url": "/docs/rails-compact-guide/06-create_a_project",
+        "teaser": null
+      },{
+        "title": "建立 blog",
+        "excerpt":"  建立一個基本的 rails 專案，這邊以 blog 為例。   新增專案   使用 rails new 指令，建立一個名為 blog 的專案   rails new blog   此時會在目前目錄下，建立一個 blog 的目錄   開啟專案   先進入專案目錄   cd blog   然後使用 vscode 開啟   code .   建立一個 scaffold   我們使用 rails g (generate) 來建立一個 scaffold， 這邊以 post 為例，欄位有 title 和 content   rails g scaffold post title content:text   我們會產生一整組的 route、model、controller、view   執行 migrate 建立資料表   整組的檔案，其中包含建立資料表的 migration，執行他之後才算是正式建立資料表   rails db:migrate   提交 git   每次更動我們都需要用 git 去做 commit (相當於存擋的動作)   git add . git commit -m \"initialize\"   啟動專案   接下來使用 rails s 啟動 server   rails s    如果在 http://localhost:3000 看到 rails 專案就算是安裝完成   然後我們可以去 http://localhost:3000/posts 試試看 scaffold 是否能夠進行 CRUD  ","categories": [],
+        "tags": [],
+        "url": "/docs/rails-compact-guide/07-create_a_blog_project",
         "teaser": null
       },{
         "title": "[Links] The Reference of Rails",

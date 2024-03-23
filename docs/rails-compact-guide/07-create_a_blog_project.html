@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>前言 - ANxGANG</title>
-<meta name="description" content="介紹本指南使用方式">
+<!-- begin _includes/seo.html --><title>建立 blog - ANxGANG</title>
+<meta name="description" content="建立一個基本的 rails 專案">
 
 
   <meta name="author" content="anxgang">
@@ -22,11 +22,11 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:site_name" content="ANxGANG">
-<meta property="og:title" content="前言">
-<meta property="og:url" content="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started">
+<meta property="og:title" content="建立 blog">
+<meta property="og:url" content="https://blog.anxgang.com/docs/rails-compact-guide/07-create_a_blog_project">
 
 
-  <meta property="og:description" content="介紹本指南使用方式">
+  <meta property="og:description" content="建立一個基本的 rails 專案">
 
 
 
@@ -35,9 +35,9 @@
 
 
   <meta name="twitter:site" content="@anxgang1">
-  <meta name="twitter:title" content="前言">
-  <meta name="twitter:description" content="介紹本指南使用方式">
-  <meta name="twitter:url" content="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started">
+  <meta name="twitter:title" content="建立 blog">
+  <meta name="twitter:description" content="建立一個基本的 rails 專案">
+  <meta name="twitter:url" content="https://blog.anxgang.com/docs/rails-compact-guide/07-create_a_blog_project">
 
   
     <meta name="twitter:card" content="summary">
@@ -61,7 +61,7 @@
   
 
 
-<link rel="canonical" href="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started">
+<link rel="canonical" href="https://blog.anxgang.com/docs/rails-compact-guide/07-create_a_blog_project">
 
 
 
@@ -293,7 +293,8 @@
               
               <ul style="padding-left: 1em">
                 
-                <li><a href="/docs/rails-compact-guide/07-create_a_blog_project" >1.2.1 建立 blog</a></li>
+                <li><a href="/docs/rails-compact-guide/07-create_a_blog_project"  class="active"
+                    >1.2.1 建立 blog</a></li>
                 
               </ul>
               
@@ -394,11 +395,11 @@
 
     <article class="page h-entry" itemscope itemtype="https://schema.org/CreativeWork">
         
-        <meta itemprop="headline" content="前言">
+        <meta itemprop="headline" content="建立 blog">
         
         
         <meta itemprop="description"
-            content="介紹本指南使用方式">
+            content="建立一個基本的 rails 專案">
         
         <meta itemprop="datePublished" content="2024-03-24T01:59:10+08:00">
         
@@ -407,8 +408,8 @@
             
             <header>
                 <h1 id="page-title" class="page__title p-name" itemprop="headline">
-                    <a href="https://blog.anxgang.com/docs/rails-compact-guide/01-getting-started" class="u-url"
-                        itemprop="url">前言
+                    <a href="https://blog.anxgang.com/docs/rails-compact-guide/07-create_a_blog_project" class="u-url"
+                        itemprop="url">建立 blog
 </a>
                 </h1>
                 
@@ -426,35 +427,74 @@
                                 &nbsp;索引
                             </h4>
                         </header>
-                        <ul class="toc__menu"><li><a href="#目標受眾">目標受眾</a></li><li><a href="#準備工作">準備工作</a></li><li><a href="#指南三部分">指南三部分</a></li></ul>
+                        <ul class="toc__menu"><li><a href="#新增專案">新增專案</a></li><li><a href="#開啟專案">開啟專案</a></li><li><a href="#建立一個-scaffold">建立一個 scaffold</a></li><li><a href="#執行-migrate-建立資料表">執行 migrate 建立資料表</a></li><li><a href="#提交-git">提交 git</a></li><li><a href="#啟動專案">啟動專案</a></li></ul>
 
                     </nav>
                 </aside>
                 
-                <p>本指南是 <del>Rails Complete Guide</del> Rails Compact Guide，
-適合三分鐘熱度之人閱讀，每篇保證三分鐘內搞定。</p>
+                <!-- 
+**注意:** 本文尚未完成，請斟酌閱讀！
+{: .notice--danger}
+-->
 
-<h2 id="目標受眾">目標受眾</h2>
+<p>建立一個基本的 rails 專案，這邊以 blog 為例。</p>
 
-<ul>
-  <li>會上網</li>
-  <li>會使用滑鼠鍵盤</li>
-</ul>
+<h2 id="新增專案">新增專案</h2>
 
-<h2 id="準備工作">準備工作</h2>
+<p>使用 rails new 指令，建立一個名為 blog 的專案</p>
 
-<ul>
-  <li>一台電腦 windows、mac、linux 皆可</li>
-</ul>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails new blog
+</code></pre></div></div>
 
-<h2 id="指南三部分">指南三部分</h2>
+<p>此時會在目前目錄下，建立一個 blog 的目錄</p>
 
-<ul>
-  <li>第一部分，將基本流程跑一次（環境準備、建立專案、上線)</li>
-  <li>第二部分，各種業務流程基本寫法</li>
-  <li>第三部分，各種元件製作的方式</li>
-</ul>
+<h2 id="開啟專案">開啟專案</h2>
 
+<p>先進入專案目錄</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>blog
+</code></pre></div></div>
+
+<p>然後使用 vscode 開啟</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>code <span class="nb">.</span>
+</code></pre></div></div>
+
+<h2 id="建立一個-scaffold">建立一個 scaffold</h2>
+
+<p>我們使用 rails g (generate) 來建立一個 scaffold，
+這邊以 post 為例，欄位有 title 和 content</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails g scaffold post title content:text
+</code></pre></div></div>
+
+<p>我們會產生一整組的 route、model、controller、view</p>
+
+<h2 id="執行-migrate-建立資料表">執行 migrate 建立資料表</h2>
+
+<p>整組的檔案，其中包含建立資料表的 migration，執行他之後才算是正式建立資料表</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails db:migrate
+</code></pre></div></div>
+
+<h2 id="提交-git">提交 git</h2>
+
+<p>每次更動我們都需要用 git 去做 commit (相當於存擋的動作)</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"initialize"</span>
+</code></pre></div></div>
+
+<h2 id="啟動專案">啟動專案</h2>
+
+<p>接下來使用 rails s 啟動 server</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rails s 
+</code></pre></div></div>
+
+<p>如果在 <a href="http://localhost:3000">http://localhost:3000</a> 看到 rails 專案就算是安裝完成</p>
+
+<p>然後我們可以去 <a href="http://localhost:3000/posts">http://localhost:3000/posts</a> 試試看 scaffold 是否能夠進行 CRUD</p>
 
                 
             </section>
@@ -469,6 +509,29 @@
   <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> 更新時間:</strong> <time class="dt-published" datetime="2024-03-24T01:59:10+08:00">March 24, 2024</time></p>
 
                 
+  <p class="page__history" style="padding-top: 10px">
+  <strong>
+    <i class="fas fa-fw fa-history" aria-hidden="true"></i>
+    <span class="collapse-button" style="cursor: pointer"
+      onclick="hidecurrentpagehistory.style.display=hidecurrentpagehistory.style.display=='none'?'block':'none';">
+      歷史紀錄 ▿
+    </span>
+  </strong>
+  <div id="hidecurrentpagehistory" class="collapse-wrapper" style="display: none">
+    <ul>
+  <li>2024-03-24 初稿</li>
+</ul>
+
+  </div>
+</p>
+
+<style>
+.collapse-wrapper ul, .collapse-wrapper li{
+  margin: 0px;
+}
+</style>
+
+
             </footer>
 
             
@@ -476,11 +539,11 @@
             
   <nav class="pagination">
     
-      <a href="#" class="pagination--pager disabled">上一篇</a>
+      <a href="/docs/rails-compact-guide/06-create_a_project" class="pagination--pager" title="專案建立
+">上一篇</a>
     
     
-      <a href="/docs/rails-compact-guide/02-installation" class="pagination--pager" title="環境安裝
-">下一篇</a>
+      <a href="#" class="pagination--pager disabled">下一篇</a>
     
   </nav>
 
